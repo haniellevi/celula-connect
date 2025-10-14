@@ -1,0 +1,747 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?  @unique
+  name      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  creditBalance      CreditBalance?
+  usageHistory       UsageHistory[]
+  storageObjects     StorageObject[]
+  subscriptionEvents SubscriptionEvent[]
+
+  @@index([email])
+  @@index([name])
+  @@index([createdAt])
+  @@index([isActive])
+}
+
+
+// Workspace features and linkage to projects
+model Feature {
+  id          String     @id @default(cuid())
+  workspaceId String
+  name        String
+  description String?
+  tags        String[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workspaceId])
+}
+
+model CreditBalance {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  clerkUserId       String   @unique
+  creditsRemaining  Int      @default(100)  // Cached from Clerk
+  lastSyncedAt      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id])
+  usageHistory      UsageHistory[]
+
+  @@index([userId])
+  @@index([clerkUserId])
+  @@index([creditsRemaining])
+  @@index([lastSyncedAt])
+}
+
+// Track individual usage events
+model UsageHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  creditBalanceId String
+  operationType   OperationType
+  creditsUsed     Int
+  details         Json?
+  timestamp       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id])
+  creditBalance   CreditBalance @relation(fields: [creditBalanceId], references: [id])
+
+  @@index([userId])
+  @@index([creditBalanceId])
+  @@index([timestamp])
+  @@index([operationType])
+  @@index([userId, timestamp])
+  @@index([operationType, timestamp])
+}
+
+enum OperationType {
+  AI_TEXT_CHAT
+  AI_IMAGE_GENERATION
+}
+
+// Singleton row storing admin-configurable credit settings
+model AdminSettings {
+  id           String   @id @default("singleton")
+  featureCosts Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Subscription plans sourced from Clerk and configured credits
+model Plan {
+  id        String   @id @default(cuid())
+  clerkId   String?  @unique // Clerk plan ID (e.g., cplan_*)
+  clerkName String?
+  name      String
+  credits   Int
+  active    Boolean  @default(true)
+  sortOrder Int      @default(0)
+  // Pricing synced from Clerk (amounts in cents)
+  currency           String?
+  priceMonthlyCents  Int?
+  priceYearlyCents   Int?
+  description        String?  @db.Text
+  features           Json?
+  badge              String?
+  highlight          Boolean  @default(false)
+  ctaType            String?  @default("checkout")
+  ctaLabel           String?
+  ctaUrl             String?
+  billingSource      String   @default("clerk")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active])
+  @@index([sortOrder])
+}
+
+// File/object uploads tracked for admin management
+model StorageObject {
+  id           String   @id @default(cuid())
+  userId       String
+  clerkUserId  String
+  provider     String   @default("vercel_blob")
+  url          String
+  pathname     String
+  name         String
+  contentType  String?
+  size         Int
+  deletedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([clerkUserId])
+  @@index([contentType])
+  @@index([deletedAt])
+  @@index([name])
+}
+
+// Track subscription lifecycle events for revenue analytics
+model SubscriptionEvent {
+  id           String   @id @default(cuid())
+  userId       String?
+  clerkUserId  String
+  planKey      String?
+  status       String
+  eventType    String
+  occurredAt   DateTime @default(now())
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([clerkUserId, occurredAt])
+  @@index([userId, occurredAt])
+}
+
+enum PerfilUsuario {
+  DISCIPULO
+  LIDER_CELULA
+  SUPERVISOR
+  PASTOR
+}
+
+enum StatusAssinatura {
+  TRIAL
+  ATIVA
+  SUSPENSA
+  CANCELADA
+}
+
+model Plano {
+  id              String   @id @default(cuid())
+  nome            String   @unique
+  descricao       String?
+  precoMensal     Decimal  @default(0)
+  precoAnual      Decimal  @default(0)
+  maxUsuarios     Int?
+  maxCelulas      Int?
+  maxLideres      Int?
+  funcionalidades Json?
+  ativo           Boolean  @default(true)
+  trialDias       Int      @default(30)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  igrejas         Igreja[]
+
+  @@index([ativo])
+}
+
+model Igreja {
+  id                String             @id @default(cuid())
+  nome              String
+  pastorPrincipalId String?
+  cep               String?
+  cidade            String
+  estado            String
+  telefone          String?
+  email             String?
+  cnpj              String?
+  enderecoCompleto  String?
+  planoId           String?
+  dataAssinatura    DateTime?
+  dataVencimento    DateTime?
+  statusAssinatura  StatusAssinatura   @default(TRIAL)
+  trialInicio       DateTime?
+  trialFim          DateTime?
+  observacoesAdmin  String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  plano             Plano?             @relation(fields: [planoId], references: [id])
+  usuarios          Usuario[]
+  celulas           Celula[]
+  redes             Rede[]
+  metas             MetaLeitura[]
+  avisos            Aviso[]
+  areasSupervisao   AreaSupervisaoTrilha[]
+
+  @@index([planoId])
+  @@index([statusAssinatura])
+  @@index([dataVencimento])
+}
+
+model Usuario {
+  id                 String         @id @default(cuid())
+  clerkUserId        String         @unique
+  nome               String
+  email              String         @unique
+  telefone           String?
+  perfil             PerfilUsuario  @default(DISCIPULO)
+  igrejaId           String?
+  ativo              Boolean        @default(true)
+  dataPrimeiroAcesso DateTime?
+  ultimoAcesso       DateTime?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  igreja             Igreja?        @relation(fields: [igrejaId], references: [id])
+  membrosCelula      MembroCelula[]
+  celulasLideradas   Celula[]       @relation("CelulaLider")
+  celulasSupervisionadas Celula[]   @relation("CelulaSupervisor")
+  metasAtribuidas    MetaLeituraUsuario[]
+  leituras           LeituraRegistro[]
+  trilhas            UsuarioTrilha[]
+  areasSupervisao    AreaSupervisaoTrilha[] @relation("AreaSupervisor")
+  solicitacoesTrilha SolicitacaoAvancoTrilha[] @relation("SolicitacaoUsuario")
+  solicitacoesComoLider SolicitacaoAvancoTrilha[] @relation("SolicitacaoLider")
+  solicitacoesComoSupervisor SolicitacaoAvancoTrilha[] @relation("SolicitacaoSupervisor")
+  redesSupervisionadas Rede[]
+  avisos             Aviso[] @relation("AvisosUsuario")
+  convitesEnviados   Convite[] @relation("ConviteRemetente")
+  convitesUtilizados Convite[] @relation("ConviteDestinatario")
+
+  @@index([clerkUserId])
+  @@index([email])
+  @@index([igrejaId])
+  @@index([perfil])
+}
+
+model Celula {
+  id              String   @id @default(cuid())
+  nome            String
+  liderId         String
+  endereco        String?
+  diaSemana       String
+  horario         String
+  supervisorId    String?
+  igrejaId        String
+  redeId          String?
+  ativa           Boolean  @default(true)
+  metaMembros     Int      @default(12)
+  dataInauguracao DateTime?
+  proximaReuniao  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  igreja          Igreja   @relation(fields: [igrejaId], references: [id])
+  lider           Usuario  @relation("CelulaLider", fields: [liderId], references: [id])
+  supervisor      Usuario? @relation("CelulaSupervisor", fields: [supervisorId], references: [id])
+  rede            Rede?    @relation(fields: [redeId], references: [id])
+  membros         MembroCelula[]
+  reunioes        ReuniaoCelula[]
+  metas           MetaLeitura[]
+  convites        Convite[]
+  avisos          Aviso[]
+
+  @@index([igrejaId])
+  @@index([liderId])
+  @@index([supervisorId])
+  @@index([redeId])
+  @@index([ativa])
+}
+
+model MembroCelula {
+  id          String      @id @default(cuid())
+  celulaId    String
+  usuarioId   String
+  cargo       CargoCelula @default(MEMBRO)
+  dataEntrada DateTime
+  dataSaida   DateTime?
+  ativo       Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  celula      Celula      @relation(fields: [celulaId], references: [id])
+  usuario     Usuario     @relation(fields: [usuarioId], references: [id])
+
+  @@unique([celulaId, usuarioId])
+  @@index([usuarioId])
+  @@index([ativo])
+}
+
+enum CargoCelula {
+  MEMBRO
+  LIDER
+  AUXILIAR
+}
+
+model ReuniaoCelula {
+  id          String   @id @default(cuid())
+  celulaId    String
+  data        DateTime
+  tema        String?
+  presentes   Int      @default(0)
+  visitantes  Int      @default(0)
+  observacoes String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  celula      Celula   @relation(fields: [celulaId], references: [id])
+
+  @@index([celulaId])
+  @@index([celulaId, data])
+}
+
+model Rede {
+  id           String   @id @default(cuid())
+  nome         String
+  supervisorId String
+  igrejaId     String
+  cor          String   @default("#3B82F6")
+  ativa        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  supervisor   Usuario  @relation(fields: [supervisorId], references: [id])
+  igreja       Igreja   @relation(fields: [igrejaId], references: [id])
+  celulas      Celula[]
+
+  @@index([supervisorId])
+  @@index([igrejaId])
+  @@index([ativa])
+}
+
+enum Testamento {
+  AT
+  NT
+}
+
+model LivroBiblia {
+  id         String   @id @default(cuid())
+  codigo     String   @unique
+  nome       String
+  abreviacao String
+  testamento Testamento
+  ordem      Int      @unique
+  capitulos  Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  capitulosBiblia CapituloBiblia[]
+
+  @@index([codigo])
+  @@index([ordem])
+  @@index([testamento])
+}
+
+model CapituloBiblia {
+  id         String   @id @default(cuid())
+  livroId    String
+  numero     Int
+  titulo     String?
+  texto      String   @db.Text
+  versiculos Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  livro             LivroBiblia     @relation(fields: [livroId], references: [id])
+  versiculosBiblia  VersiculoBiblia[]
+
+  @@unique([livroId, numero])
+  @@index([livroId])
+}
+
+model VersiculoBiblia {
+  id         String   @id @default(cuid())
+  capituloId String
+  numero     Int
+  texto      String   @db.Text
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  capitulo   CapituloBiblia @relation(fields: [capituloId], references: [id])
+
+  @@unique([capituloId, numero])
+  @@index([capituloId])
+}
+
+enum TipoMeta {
+  CAPITULOS
+  LIVROS
+  BIBLIA_COMPLETA
+}
+
+enum UnidadeTempo {
+  DIA
+  SEMANA
+  MES
+  ANO
+}
+
+model MetaLeitura {
+  id         String   @id @default(cuid())
+  titulo     String
+  descricao  String?
+  criadoPor  String
+  igrejaId   String
+  celulaId   String?
+  tipoMeta   TipoMeta
+  valorMeta  Int
+  unidade    UnidadeTempo
+  periodo    String
+  dataInicio DateTime
+  dataFim    DateTime
+  ativa      Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  igreja    Igreja   @relation(fields: [igrejaId], references: [id])
+  celula    Celula?  @relation(fields: [celulaId], references: [id])
+  usuarios  MetaLeituraUsuario[]
+  leituras  LeituraRegistro[]
+
+  @@index([igrejaId])
+  @@index([celulaId])
+  @@index([ativa])
+}
+
+model MetaLeituraUsuario {
+  id                String   @id @default(cuid())
+  metaId            String
+  usuarioId         String
+  atribuidaPor      String
+  ativa             Boolean  @default(true)
+  progressoAtual    Int      @default(0)
+  ultimaAtualizacao DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  meta              MetaLeitura @relation(fields: [metaId], references: [id])
+  usuario           Usuario     @relation(fields: [usuarioId], references: [id])
+  progressoAutomatico ProgressoAutomaticoMeta[]
+
+  @@index([metaId])
+  @@index([usuarioId])
+  @@index([ativa])
+}
+
+model ProgressoAutomaticoMeta {
+  id                 String   @id @default(cuid())
+  metaUsuarioId      String
+  livroCodigo        String
+  capitulo           Int
+  dataLeitura        DateTime
+  tempoLeitura       Int
+  percentualConcluido Float  @default(100.0)
+  contribuiuMeta     Boolean @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  metaUsuario MetaLeituraUsuario @relation(fields: [metaUsuarioId], references: [id])
+
+  @@unique([metaUsuarioId, livroCodigo, capitulo, dataLeitura])
+  @@index([metaUsuarioId])
+  @@index([dataLeitura])
+}
+
+model LeituraRegistro {
+  id           String   @id @default(cuid())
+  usuarioId    String
+  livroCodigo  String
+  capitulo     Int
+  dataLeitura  DateTime
+  tempoLeitura Int?
+  observacoes  String?
+  metaId       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  meta    MetaLeitura? @relation(fields: [metaId], references: [id])
+
+  @@index([usuarioId])
+  @@index([dataLeitura])
+  @@index([livroCodigo, capitulo])
+}
+
+enum TipoTrilha {
+  CURSO
+  EVENTO
+  ATIVIDADE
+  CERTIFICACAO
+}
+
+enum StatusSolicitacao {
+  PENDENTE
+  APROVADA
+  REJEITADA
+}
+
+model TrilhaCrescimento {
+  id          String   @id @default(cuid())
+  ordem       Int      @unique
+  titulo      String
+  descricao   String
+  tipo        TipoTrilha
+  duracaoDias Int      @default(0)
+  requisitos  String?
+  ativa       Boolean  @default(true)
+  conteudo    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  usuariosTrilha UsuarioTrilha[]
+  etapasArea     EtapaAreaSupervisao[]
+  solicitacoes   SolicitacaoAvancoTrilha[]
+
+  @@index([ordem])
+  @@index([ativa])
+}
+
+model UsuarioTrilha {
+  id            String   @id @default(cuid())
+  usuarioId     String
+  trilhaId      String
+  etapaAtual    Int      @default(1)
+  concluido     Boolean  @default(false)
+  dataInicio    DateTime?
+  dataConclusao DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  usuario Usuario           @relation(fields: [usuarioId], references: [id])
+  trilha  TrilhaCrescimento @relation(fields: [trilhaId], references: [id])
+
+  @@unique([usuarioId, trilhaId])
+  @@index([trilhaId])
+}
+
+model AreaSupervisaoTrilha {
+  id           String   @id @default(cuid())
+  nome         String
+  descricao    String?
+  supervisorId String
+  igrejaId     String
+  ativa        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  supervisor   Usuario  @relation("AreaSupervisor", fields: [supervisorId], references: [id])
+  igreja       Igreja   @relation(fields: [igrejaId], references: [id])
+  etapas       EtapaAreaSupervisao[]
+  solicitacoes SolicitacaoAvancoTrilha[] @relation("SolicitacaoArea")
+
+  @@index([supervisorId])
+  @@index([igrejaId])
+  @@index([ativa])
+}
+
+model EtapaAreaSupervisao {
+  id          String   @id @default(cuid())
+  areaId      String
+  trilhaId    String
+  podeAprovar Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  area   AreaSupervisaoTrilha @relation(fields: [areaId], references: [id])
+  trilha TrilhaCrescimento    @relation(fields: [trilhaId], references: [id])
+
+  @@unique([areaId, trilhaId])
+  @@index([trilhaId])
+}
+
+model SolicitacaoAvancoTrilha {
+  id                       String             @id @default(cuid())
+  usuarioId                String
+  trilhaId                 String
+  liderSolicitanteId       String
+  areaSupervisaoId         String
+  motivo                   String?
+  observacoesLider         String?
+  status                   StatusSolicitacao @default(PENDENTE)
+  dataSolicitacao          DateTime
+  dataResposta             DateTime?
+  supervisorResponsavelId  String?
+  observacoesSupervisor    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  usuario              Usuario              @relation("SolicitacaoUsuario", fields: [usuarioId], references: [id])
+  trilha               TrilhaCrescimento    @relation(fields: [trilhaId], references: [id])
+  liderSolicitante     Usuario              @relation("SolicitacaoLider", fields: [liderSolicitanteId], references: [id])
+  area                 AreaSupervisaoTrilha @relation("SolicitacaoArea", fields: [areaSupervisaoId], references: [id])
+  supervisorResponsavel Usuario?            @relation("SolicitacaoSupervisor", fields: [supervisorResponsavelId], references: [id])
+
+  @@index([usuarioId])
+  @@index([trilhaId])
+  @@index([areaSupervisaoId])
+  @@index([status])
+  @@index([supervisorResponsavelId])
+  @@index([dataSolicitacao])
+}
+
+model Devocional {
+  id                  String   @id @default(cuid())
+  titulo              String
+  versiculoReferencia String
+  versiculoTexto      String   @db.Text
+  conteudo            String   @db.Text
+  dataDevocional      DateTime @unique
+  ativo               Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([dataDevocional])
+  @@index([ativo])
+}
+
+enum TipoAviso {
+  GERAL
+  URGENTE
+  INFORMATIVO
+  SISTEMA
+}
+
+enum PrioridadeAviso {
+  BAIXA
+  NORMAL
+  ALTA
+  URGENTE
+}
+
+model Aviso {
+  id          String           @id @default(cuid())
+  titulo      String
+  conteudo    String           @db.Text
+  tipo        TipoAviso
+  prioridade  PrioridadeAviso  @default(NORMAL)
+  igrejaId    String?
+  celulaId    String?
+  usuarioId   String?
+  dataInicio  DateTime
+  dataFim     DateTime?
+  ativo       Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  igreja      Igreja?          @relation(fields: [igrejaId], references: [id])
+  celula      Celula?          @relation(fields: [celulaId], references: [id])
+  usuario     Usuario?         @relation("AvisosUsuario", fields: [usuarioId], references: [id])
+
+  @@index([igrejaId])
+  @@index([celulaId])
+  @@index([usuarioId])
+  @@index([dataInicio])
+  @@index([prioridade])
+  @@index([ativo])
+}
+
+model LandingPageConfig {
+  id        String   @id @default(cuid())
+  secao     String
+  chave     String
+  valor     String   @db.Text
+  tipo      String   @default("text")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([secao, chave])
+  @@index([secao])
+}
+
+model ConfiguracaoSistema {
+  id        String   @id @default(cuid())
+  chave     String   @unique
+  valor     String   @db.Text
+  categoria String
+  descricao String?
+  tipoCampo String   @default("text")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([chave])
+}
+
+model Convite {
+  id             String      @id @default(cuid())
+  convidadoPorId String
+  emailConvidado String
+  nomeConvidado  String
+  celulaId       String
+  cargo          CargoCelula @default(MEMBRO)
+  tokenConvite   String      @unique
+  usado          Boolean     @default(false)
+  dataExpiracao  DateTime
+  usadoPorId     String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  celula       Celula   @relation(fields: [celulaId], references: [id])
+  convidadoPor Usuario  @relation("ConviteRemetente", fields: [convidadoPorId], references: [id])
+  usadoPor     Usuario? @relation("ConviteDestinatario", fields: [usadoPorId], references: [id])
+
+  @@index([tokenConvite])
+  @@index([emailConvidado])
+  @@index([usado])
+}

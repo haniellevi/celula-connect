@@ -1,0 +1,427 @@
+{
+  "generatedAt": "2025-10-11T15:45:00Z",
+  "igrejas": [
+    {
+      "id": "seed-igreja-central",
+      "nome": "Igreja Central Seed",
+      "cidade": "São Paulo",
+      "estado": "SP",
+      "statusAssinatura": "ATIVA",
+      "planoId": "seed-plano-basico"
+    },
+    {
+      "id": "seed-igreja-zona-norte",
+      "nome": "Igreja Zona Norte Seed",
+      "cidade": "Rio de Janeiro",
+      "estado": "RJ",
+      "statusAssinatura": "TRIAL",
+      "planoId": "seed-plano-basico"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": "seed-user-pastor",
+      "clerkUserId": "usr_seed_pastor",
+      "nome": "Paulo Pastor Seed",
+      "perfil": "PASTOR",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-supervisor",
+      "clerkUserId": "usr_seed_supervisor",
+      "nome": "Sara Supervisora Seed",
+      "perfil": "SUPERVISOR",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-supervisor-norte",
+      "clerkUserId": "usr_seed_supervisor_norte",
+      "nome": "Nádia Supervisora Norte Seed",
+      "perfil": "SUPERVISOR",
+      "igrejaId": "seed-igreja-zona-norte"
+    },
+    {
+      "id": "seed-user-lider",
+      "clerkUserId": "usr_seed_lider",
+      "nome": "Lucas Líder Seed",
+      "perfil": "LIDER_CELULA",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-lider-familia",
+      "clerkUserId": "usr_seed_lider_familia",
+      "nome": "Fernanda Líder Família Seed",
+      "perfil": "LIDER_CELULA",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-lider-expansao",
+      "clerkUserId": "usr_seed_lider_expansao",
+      "nome": "Rafael Líder Expansão Seed",
+      "perfil": "LIDER_CELULA",
+      "igrejaId": "seed-igreja-zona-norte"
+    },
+    {
+      "id": "seed-user-discipulo",
+      "clerkUserId": "usr_seed_discipulo",
+      "nome": "Daniela Discípula Seed",
+      "perfil": "DISCIPULO",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-discipulo-juvenil",
+      "clerkUserId": "usr_seed_discipulo_juvenil",
+      "nome": "João Discípulo Juvenil Seed",
+      "perfil": "DISCIPULO",
+      "igrejaId": "seed-igreja-central"
+    },
+    {
+      "id": "seed-user-discipulo-norte",
+      "clerkUserId": "usr_seed_discipulo_norte",
+      "nome": "Camila Discípula Norte Seed",
+      "perfil": "DISCIPULO",
+      "igrejaId": "seed-igreja-zona-norte"
+    }
+  ],
+  "celulas": [
+    {
+      "id": "seed-celula-vida",
+      "nome": "Célula Vida em Cristo",
+      "igrejaId": "seed-igreja-central",
+      "supervisorId": "seed-user-supervisor",
+      "liderId": "seed-user-lider",
+      "redeId": "seed-rede-central",
+      "diaSemana": "Quinta-feira"
+    },
+    {
+      "id": "seed-celula-familia",
+      "nome": "Célula Família em Aliança",
+      "igrejaId": "seed-igreja-central",
+      "supervisorId": "seed-user-supervisor",
+      "liderId": "seed-user-lider-familia",
+      "redeId": "seed-rede-central",
+      "diaSemana": "Terça-feira"
+    },
+    {
+      "id": "seed-celula-expansao",
+      "nome": "Célula Expansão Zona Norte",
+      "igrejaId": "seed-igreja-zona-norte",
+      "supervisorId": "seed-user-supervisor-norte",
+      "liderId": "seed-user-lider-expansao",
+      "redeId": "seed-rede-zona-norte",
+      "diaSemana": "Sábado"
+    }
+  ],
+  "redes": [
+    {
+      "id": "seed-rede-central",
+      "nome": "Rede Central",
+      "igrejaId": "seed-igreja-central",
+      "supervisorId": "seed-user-supervisor"
+    },
+    {
+      "id": "seed-rede-zona-norte",
+      "nome": "Rede Zona Norte",
+      "igrejaId": "seed-igreja-zona-norte",
+      "supervisorId": "seed-user-supervisor-norte"
+    }
+  ],
+  "membros": [
+    {
+      "id": "seed-membro-lider",
+      "celulaId": "seed-celula-vida",
+      "usuarioId": "seed-user-lider",
+      "cargo": "LIDER"
+    },
+    {
+      "id": "seed-membro-discipulo",
+      "celulaId": "seed-celula-vida",
+      "usuarioId": "seed-user-discipulo",
+      "cargo": "MEMBRO"
+    },
+    {
+      "id": "seed-membro-lider-familia",
+      "celulaId": "seed-celula-familia",
+      "usuarioId": "seed-user-lider-familia",
+      "cargo": "LIDER"
+    },
+    {
+      "id": "seed-membro-juvenil",
+      "celulaId": "seed-celula-familia",
+      "usuarioId": "seed-user-discipulo-juvenil",
+      "cargo": "AUXILIAR"
+    },
+    {
+      "id": "seed-membro-lider-expansao",
+      "celulaId": "seed-celula-expansao",
+      "usuarioId": "seed-user-lider-expansao",
+      "cargo": "LIDER"
+    },
+    {
+      "id": "seed-membro-norte",
+      "celulaId": "seed-celula-expansao",
+      "usuarioId": "seed-user-discipulo-norte",
+      "cargo": "MEMBRO"
+    }
+  ],
+  "convites": [
+    {
+      "id": "seed-convite-familia-novo",
+      "celulaId": "seed-celula-familia",
+      "convidadoPorId": "seed-user-lider-familia",
+      "tokenConvite": "seed-token-familia",
+      "usado": false
+    },
+    {
+      "id": "seed-convite-vida-aceito",
+      "celulaId": "seed-celula-vida",
+      "convidadoPorId": "seed-user-lider",
+      "usadoPorId": "seed-user-discipulo",
+      "tokenConvite": "seed-token-vida",
+      "usado": true
+    }
+  ],
+  "reunioes": [
+    {
+      "id": "seed-reuniao-2025-10-03",
+      "celulaId": "seed-celula-vida",
+      "data": "2025-10-03T23:00:00Z",
+      "tema": "O Poder da Oração em Unidade"
+    },
+    {
+      "id": "seed-reuniao-2025-10-18",
+      "celulaId": "seed-celula-familia",
+      "data": "2025-10-18T22:00:00Z",
+      "tema": "Famílias em missão"
+    },
+    {
+      "id": "seed-reuniao-2025-10-24",
+      "celulaId": "seed-celula-expansao",
+      "data": "2025-10-24T21:00:00Z",
+      "tema": "Multiplicação de células na Zona Norte"
+    }
+  ],
+  "devocionais": [
+    {
+      "id": "seed-devocional-2025-10-12",
+      "titulo": "Confiança em Deus",
+      "dataDevocional": "2025-10-12T00:00:00Z"
+    },
+    {
+      "id": "seed-devocional-2025-10-13",
+      "titulo": "Unidade em oração",
+      "dataDevocional": "2025-10-13T00:00:00Z"
+    }
+  ],
+  "avisos": [
+    {
+      "id": "seed-aviso-geral",
+      "igrejaId": "seed-igreja-central",
+      "prioridade": "ALTA",
+      "tipo": "GERAL"
+    },
+    {
+      "id": "seed-aviso-celula",
+      "igrejaId": "seed-igreja-central",
+      "celulaId": "seed-celula-familia",
+      "prioridade": "NORMAL",
+      "tipo": "INFORMATIVO"
+    }
+  ],
+  "trilhas": [
+    {
+      "id": "seed-trilha-fundamentos",
+      "ordem": 1,
+      "titulo": "Fundamentos da Fé",
+      "tipo": "CURSO"
+    },
+    {
+      "id": "seed-trilha-lideranca",
+      "ordem": 2,
+      "titulo": "Formação de Líderes",
+      "tipo": "CERTIFICACAO"
+    }
+  ],
+  "areasSupervisao": [
+    {
+      "id": "seed-area-trilha-central",
+      "igrejaId": "seed-igreja-central",
+      "supervisorId": "seed-user-supervisor"
+    },
+    {
+      "id": "seed-area-trilha-norte",
+      "igrejaId": "seed-igreja-zona-norte",
+      "supervisorId": "seed-user-supervisor-norte"
+    }
+  ],
+  "usuariosTrilha": [
+    {
+      "id": "seed-usuario-trilha-discipulo",
+      "usuarioId": "seed-user-discipulo",
+      "trilhaId": "seed-trilha-fundamentos",
+      "etapaAtual": 2,
+      "concluido": false
+    },
+    {
+      "id": "seed-usuario-trilha-lider",
+      "usuarioId": "seed-user-lider-familia",
+      "trilhaId": "seed-trilha-lideranca",
+      "etapaAtual": 3,
+      "concluido": false
+    }
+  ],
+  "solicitacoesTrilha": [
+    {
+      "id": "seed-solicitacao-discipulo",
+      "usuarioId": "seed-user-discipulo",
+      "trilhaId": "seed-trilha-fundamentos",
+      "status": "PENDENTE"
+    },
+    {
+      "id": "seed-solicitacao-lider",
+      "usuarioId": "seed-user-lider-familia",
+      "trilhaId": "seed-trilha-lideranca",
+      "status": "APROVADA"
+    }
+  ],
+  "landingPageConfig": [
+    {
+      "id": "seed-landing-hero-title",
+      "secao": "hero",
+      "chave": "headline"
+    },
+    {
+      "id": "seed-landing-hero-cta",
+      "secao": "hero",
+      "chave": "cta_label"
+    }
+  ],
+  "configuracoesSistema": [
+    {
+      "id": "seed-config-trial-dias",
+      "chave": "trial_dias",
+      "categoria": "assinaturas"
+    },
+    {
+      "id": "seed-config-suporte-email",
+      "chave": "suporte_email",
+      "categoria": "comunicacao"
+    }
+  ],
+  "livrosBiblia": [
+    {
+      "id": "seed-livro-genesis",
+      "codigo": "GEN",
+      "nome": "Gênesis",
+      "abreviacao": "Gn",
+      "testamento": "AT",
+      "ordem": 1,
+      "capitulos": 50
+    },
+    {
+      "id": "seed-livro-joao",
+      "codigo": "JOA",
+      "nome": "João",
+      "abreviacao": "Jo",
+      "testamento": "NT",
+      "ordem": 43,
+      "capitulos": 21
+    }
+  ],
+  "capitulosBiblia": [
+    {
+      "id": "seed-capitulo-gen-1",
+      "livroId": "seed-livro-genesis",
+      "numero": 1,
+      "titulo": "A Criação",
+      "versiculos": 3
+    },
+    {
+      "id": "seed-capitulo-jo-1",
+      "livroId": "seed-livro-joao",
+      "numero": 1,
+      "titulo": "O Verbo",
+      "versiculos": 3
+    }
+  ],
+  "versiculosBiblia": [
+    {
+      "id": "seed-versiculo-gen-1-1",
+      "capituloId": "seed-capitulo-gen-1",
+      "numero": 1
+    },
+    {
+      "id": "seed-versiculo-gen-1-2",
+      "capituloId": "seed-capitulo-gen-1",
+      "numero": 2
+    },
+    {
+      "id": "seed-versiculo-gen-1-3",
+      "capituloId": "seed-capitulo-gen-1",
+      "numero": 3
+    },
+    {
+      "id": "seed-versiculo-jo-1-1",
+      "capituloId": "seed-capitulo-jo-1",
+      "numero": 1
+    },
+    {
+      "id": "seed-versiculo-jo-1-2",
+      "capituloId": "seed-capitulo-jo-1",
+      "numero": 2
+    },
+    {
+      "id": "seed-versiculo-jo-1-3",
+      "capituloId": "seed-capitulo-jo-1",
+      "numero": 3
+    }
+  ],
+  "metasLeitura": [
+    {
+      "id": "seed-meta-leitura-anual",
+      "igrejaId": "seed-igreja-central",
+      "celulaId": "seed-celula-familia",
+      "titulo": "Meta Anual de Leitura",
+      "tipoMeta": "CAPITULOS",
+      "valorMeta": 52,
+      "unidade": "SEMANA",
+      "periodo": "2025"
+    }
+  ],
+  "metaLeituraUsuarios": [
+    {
+      "id": "seed-meta-usuario-lider",
+      "metaId": "seed-meta-leitura-anual",
+      "usuarioId": "seed-user-lider-familia",
+      "progressoAtual": 3
+    }
+  ],
+  "progressoAutomaticoMetas": [
+    {
+      "id": "seed-progresso-meta-lider-gen",
+      "metaUsuarioId": "seed-meta-usuario-lider",
+      "livroCodigo": "GEN",
+      "capitulo": 1
+    },
+    {
+      "id": "seed-progresso-meta-lider-jo",
+      "metaUsuarioId": "seed-meta-usuario-lider",
+      "livroCodigo": "JOA",
+      "capitulo": 1
+    }
+  ],
+  "leituras": [
+    {
+      "id": "seed-leitura-lider-gen",
+      "usuarioId": "seed-user-lider-familia",
+      "livroCodigo": "GEN",
+      "capitulo": 1
+    },
+    {
+      "id": "seed-leitura-lider-jo",
+      "usuarioId": "seed-user-lider-familia",
+      "livroCodigo": "JOA",
+      "capitulo": 1
+    }
+  ]
+}
