@@ -279,6 +279,18 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 #### DELETE /api/convites/[token]
 - Remove convite emitido por células sob responsabilidade do usuário autenticado.
 
+### Trilha de Crescimento
+
+#### POST /api/trilhas/[trilhaId]/solicitacoes
+- **Perfis autorizados:** Discípulo (para si mesmo), Líder de célula, Supervisor, Pastor.
+- **Body:** `areaSupervisaoId`, `motivo`, `liderSolicitanteId?`, `usuarioId?`, `observacoesLider?`.
+- **Comportamento:** cria solicitação com status `PENDENTE`; líderes/pastores podem omitir `liderSolicitanteId` (usa o próprio usuário).
+
+#### PATCH /api/trilhas/solicitacoes/[id]
+- **Perfis autorizados:** Supervisor, Pastor.
+- **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?`, `observacoesLider?`, `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.
+- **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta` e atribui automaticamente o supervisor responsável (ou o valor enviado).
+
 ### Landing Page Configurável
 
 #### GET /api/public/landing-config
