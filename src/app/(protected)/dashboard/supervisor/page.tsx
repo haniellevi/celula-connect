@@ -7,6 +7,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useCelulas } from '@/hooks/use-celulas'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { useAvisos } from '@/hooks/use-avisos'
+import { useConvites } from '@/hooks/use-convites'
+import { useDomainUser } from '@/hooks/use-domain-user'
 
 function formatDate(date?: string | Date | null) {
   if (!date) return "Sem data definida"
@@ -18,6 +22,8 @@ function formatDate(date?: string | Date | null) {
 export default function DashboardSupervisorPage() {
   const { user } = useUser()
   const { data, isLoading } = useCelulas({ includeMembers: true })
+  const domainUserQuery = useDomainUser(true)
+  const domainUser = domainUserQuery.data?.data
 
   useSetPageMetadata({
     title: "Dashboard Supervisor",
@@ -34,6 +40,20 @@ export default function DashboardSupervisorPage() {
       data?.data.filter((celula) => celula.supervisor?.clerkUserId === user.id) ?? []
     )
   }, [data?.data, user?.id])
+  const avisosQuery = useAvisos({
+    igrejaId: domainUser?.igrejaId ?? undefined,
+    includeCelula: true,
+    includeUsuario: true,
+    take: 5,
+    enabled: Boolean(domainUser),
+  })
+  const convitesQuery = useConvites({
+    includeCelula: true,
+    includeConvidadoPor: true,
+    includeUsadoPor: true,
+    take: 25,
+    enabled: Boolean(domainUser),
+  })
 
   const totalCelulas = celulasSupervisionadas.length
   const totalMembros = celulasSupervisionadas.reduce((acc, celula) => acc + (celula.membros?.length ?? 0), 0)
@@ -43,6 +63,13 @@ export default function DashboardSupervisorPage() {
     const totalPresentes = reunioes.reduce((acc, reuniao) => acc + (reuniao.presentes ?? 0), 0)
     return Math.round(totalPresentes / reunioes.length)
   })()
+  const avisos = avisosQuery.data?.data ?? []
+  const convitesFiltrados = useMemo(() => {
+    if (!celulasSupervisionadas.length) return []
+    const ids = new Set(celulasSupervisionadas.map((celula) => celula.id))
+    return (convitesQuery.data?.data ?? []).filter((convite) => ids.has(convite.celulaId))
+  }, [celulasSupervisionadas, convitesQuery.data?.data])
+  const convitesPendentes = convitesFiltrados.filter((convite) => !convite.usado)
 
   if (isLoading) {
     return (
@@ -71,6 +98,99 @@ export default function DashboardSupervisorPage() {
 
   return (
     <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Alertas das células</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Últimos avisos publicados para a sua rede de supervisão.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {avisosQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            ) : avisos.length ? (
+              <ul className="space-y-3">
+                {avisos.map((aviso) => (
+                  <li key={aviso.id} className="rounded-lg border border-border/40 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{aviso.titulo}</p>
+                      <Badge variant={aviso.prioridade === 'URGENTE' ? 'destructive' : 'outline'}>
+                        {aviso.prioridade}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {aviso.celula?.nome ?? aviso.igreja?.nome ?? 'Comunicação geral'} ·{' '}
+                      {new Date(aviso.dataInicio).toLocaleDateString('pt-BR')}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {aviso.conteudo.slice(0, 160)}
+                      {aviso.conteudo.length > 160 ? '…' : ''}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum aviso crítico enviado recentemente para as células sob sua responsabilidade.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Convites em acompanhamento</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Convites emitidos pelas células supervisionadas e que ainda aguardam retorno.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {convitesQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-2/3" />
+              </div>
+            ) : convitesFiltrados.length ? (
+              <>
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border/40 p-3">
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Em aberto</p>
+                    <p className="text-2xl font-semibold">{convitesPendentes.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Total analisado</p>
+                    <p className="text-2xl font-semibold">{convitesFiltrados.length}</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {convitesPendentes.slice(0, 4).map((convite) => (
+                    <li key={convite.id} className="rounded border border-border/40 p-3">
+                      <p className="text-sm font-medium">{convite.nomeConvidado}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {convite.emailConvidado} · expira {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Líder responsável: {convite.convidadoPor?.nome ?? '—'}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Sem convites pendentes no momento. Incentive os líderes a registrar novos interessados.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>

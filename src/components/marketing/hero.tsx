@@ -26,7 +26,13 @@ const transitionVariants = {
   },
 } as const
 
-export function Hero() {
+interface HeroProps {
+  headline?: string
+  ctaLabel?: string
+  badgeText?: string
+}
+
+export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
   return (
     <>
       {/* Header é renderizado globalmente via PublicLayout */}
@@ -82,7 +88,7 @@ export function Hero() {
                   <Link
                     href="#link"
                     className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                    <span className="text-foreground text-sm">Novo: Template com sistema de créditos</span>
+                    <span className="text-foreground text-sm">{badgeText ?? "Novo: Template com sistema de créditos"}</span>
                     <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                     <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -94,13 +100,13 @@ export function Hero() {
                           <ArrowRight className="m-auto size-3" />
                         </span>
                       </div>
-          </div>
+                    </div>
                   </Link>
 
                   <h1
                     className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                    Crie seu microsaas com I.A. em um dia
-          </h1>
+                    {headline ?? "Crie seu microsaas com I.A. em um dia"}
+                  </h1>
                   <p
                     className="mx-auto mt-8 max-w-2xl text-balance text-lg">
                     Autenticação (Clerk), PostgreSQL + Prisma, pagamentos (Stripe) e sistema de créditos — com UI em Tailwind + Radix. Lance mais rápido com TypeScript do frontend ao backend.
@@ -128,9 +134,9 @@ export function Hero() {
                       size="lg"
                       className="rounded-xl px-5 text-base">
                       <Link href="/sign-up">
-                        <span className="text-nowrap">Criar conta</span>
+                        <span className="text-nowrap">{ctaLabel ?? "Criar conta"}</span>
                       </Link>
-            </Button>
+                    </Button>
                   </div>
                   <Button
                     key={2}

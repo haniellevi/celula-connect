@@ -9,11 +9,16 @@ import { Button } from '@/components/ui/button'
 import { useCelulas } from '@/hooks/use-celulas'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-biblia'
+import { useAvisos } from '@/hooks/use-avisos'
+import { useConvites } from '@/hooks/use-convites'
+import { useDomainUser } from '@/hooks/use-domain-user'
 
 export default function DashboardLiderPage() {
   const { user } = useUser()
   const celulasQuery = useCelulas({ includeMembers: true })
   const bibliaMetasQuery = useBibliaMetas({ includeUsuarios: true, take: 12 })
+  const domainUserQuery = useDomainUser(true)
+  const domainUser = domainUserQuery.data?.data
 
   useSetPageMetadata({
     title: "Dashboard Líder",
@@ -32,6 +37,22 @@ export default function DashboardLiderPage() {
   }, [celulasQuery.data?.data, user?.id])
 
   const celulasParaExibir = celulasLideradas.length ? celulasLideradas : celulasQuery.data?.data ?? []
+  const avisosQuery = useAvisos({
+    igrejaId: domainUser?.igrejaId ?? undefined,
+    celulaId: celulasLideradas.length === 1 ? celulasLideradas[0]?.id : undefined,
+    includeCelula: true,
+    includeUsuario: true,
+    take: 5,
+    enabled: Boolean(domainUser),
+  })
+  const convitesQuery = useConvites({
+    convidadoPorId: domainUser?.id ?? undefined,
+    includeCelula: true,
+    includeConvidadoPor: true,
+    includeUsadoPor: true,
+    take: 10,
+    enabled: Boolean(domainUser),
+  })
 
   const metasPorCelula = useMemo(() => {
     const map = new Map<string, MetaLeituraWithRelations[]>()
@@ -44,6 +65,12 @@ export default function DashboardLiderPage() {
     })
     return map
   }, [bibliaMetasQuery.data?.data])
+  const avisos = avisosQuery.data?.data ?? []
+  const convites = convitesQuery.data?.data ?? []
+  const convitesPendentes = useMemo(
+    () => convites.filter((convite) => !convite.usado),
+    [convites],
+  )
 
   if (celulasQuery.isLoading) {
     return (
@@ -72,6 +99,105 @@ export default function DashboardLiderPage() {
 
   return (
     <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Avisos da liderança</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Mensagens direcionadas para as suas células e equipe imediata.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {avisosQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            ) : avisos.length ? (
+              <ul className="space-y-3">
+                {avisos.map((aviso) => (
+                  <li key={aviso.id} className="rounded-lg border border-border/40 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{aviso.titulo}</p>
+                      <Badge variant={aviso.prioridade === 'URGENTE' ? 'destructive' : 'outline'}>
+                        {aviso.prioridade}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {aviso.celula?.nome ?? aviso.igreja?.nome ?? 'Comunicação geral'} ·{' '}
+                      {new Date(aviso.dataInicio).toLocaleDateString('pt-BR')}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      {aviso.conteudo.slice(0, 160)}
+                      {aviso.conteudo.length > 160 ? '…' : ''}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum aviso pendente. Continue comunicando novidades pela central de avisos.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Convites gerados</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Acompanhe os convites enviados e quantos ainda aguardam resposta.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {convitesQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-2/3" />
+              </div>
+            ) : convites.length ? (
+              <>
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border/40 p-3">
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Total criados</p>
+                    <p className="text-2xl font-semibold">{convites.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Pendentes</p>
+                    <p className="text-2xl font-semibold">{convitesPendentes.length}</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {convitesPendentes.slice(0, 4).map((convite) => (
+                    <li key={convite.id} className="rounded border border-border/40 p-3">
+                      <p className="text-sm font-medium">{convite.nomeConvidado}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {convite.emailConvidado} · expira em{' '}
+                        {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Célula: {convite.celula?.nome ?? '—'}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                {convitesPendentes.length > 4 && (
+                  <p className="text-xs text-muted-foreground">
+                    +{convitesPendentes.length - 4} convites aguardando retorno.
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum convite criado até o momento. Gere convites para novos visitantes a partir do painel administrativo.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {celulasParaExibir.map((celula) => {
         const membrosAtivos = celula.membros?.filter((m) => m.ativo) ?? []
         const visitantesPrevistos = celula.reunioes?.slice(-1)[0]?.visitantes ?? 0

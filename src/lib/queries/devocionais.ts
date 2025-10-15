@@ -43,3 +43,31 @@ export async function getDevocionalPorData(data: Date) {
     },
   })
 }
+
+export async function getDevocionalById(id: string) {
+  return db.devocional.findUnique({
+    where: { id },
+  })
+}
+
+export async function createDevocional(data: Prisma.DevocionalCreateInput) {
+  return db.devocional.create({
+    data,
+  })
+}
+
+export async function updateDevocional(
+  id: string,
+  data: Prisma.DevocionalUncheckedUpdateInput,
+) {
+  return db.devocional.update({
+    where: { id },
+    data,
+  })
+}
+
+export async function deleteDevocional(id: string) {
+  return db.devocional.delete({
+    where: { id },
+  })
+}

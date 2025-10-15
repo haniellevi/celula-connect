@@ -4,12 +4,24 @@ import { getActivePlansSorted } from '@/lib/queries/plans'
 import { FAQ } from "@/components/marketing/faq"
 import { BentoGrid } from "@/components/marketing/bento-grid"
 import { AIStarter } from "@/components/marketing/ai-starter"
+import { listLandingPageConfig } from '@/lib/queries/settings'
 
 export default async function LandingPage() {
-  const plans = await getActivePlansSorted()
+  const [plans, heroConfig] = await Promise.all([
+    getActivePlansSorted(),
+    listLandingPageConfig('hero'),
+  ])
+  const heroSettings = heroConfig.reduce<Record<string, string>>((acc, entry) => {
+    acc[entry.chave] = entry.valor
+    return acc
+  }, {})
+
   return (
     <div className="min-h-screen">
-      <Hero />
+      <Hero
+        headline={heroSettings.headline}
+        ctaLabel={heroSettings.cta_label}
+      />
       <section id="features" className="container mx-auto px-4 mt-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Tudo que você precisa para começar</h2>

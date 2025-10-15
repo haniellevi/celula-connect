@@ -199,6 +199,117 @@ Response:
 Notes:
 - `planCredits` includes Clerk plan IDs (`cplan_*`) configured via `Plan` rows.
 
+### Domain Profile
+
+#### GET /api/domain/me
+
+Retorna o perfil eclesiástico (usuário Prisma) associado ao `clerkUserId` autenticado. Inclui igreja vinculada e células onde o usuário participa.
+
+- **Autenticação:** Obrigatória
+- **Uso típico:** obter `usuarioId`, `igrejaId` e células para filtrar avisos e convites.
+- **Resposta:**
+  ```json
+  {
+    "data": {
+      "id": "seed-user-lider",
+      "igrejaId": "seed-igreja-central",
+      "perfil": "LIDER_CELULA",
+      "membrosCelula": [
+        { "celulaId": "seed-celula-vida", "celula": { "nome": "Célula Vida em Cristo" } }
+      ]
+    }
+  }
+  ```
+
+### Devocionais
+
+#### GET /api/devocionais
+- **Autenticação:** Obrigatória
+- **Query params:** `ativos` (default `true`), `dataInicial`, `dataFinal`, `take`, `skip`
+- **Resposta:** lista ordenada por `dataDevocional`.
+
+#### POST /api/devocionais
+- **Perfis autorizados:** Pastor, Supervisor, Líder
+- **Body:** `titulo`, `versiculoReferencia`, `versiculoTexto`, `conteudo`, `dataDevocional`, `ativo?`
+- **Erros:** `409` se já existir devocional para a mesma data.
+
+#### GET /api/devocionais/[id]
+Retorna um devocional específico (autenticado).
+
+#### PATCH /api/devocionais/[id]
+Atualiza campos individuais. Mesma autorização de criação.
+
+#### DELETE /api/devocionais/[id]
+Remove definitivamente o registro (Pastor/Supervisor/Líder).
+
+### Avisos Dinâmicos
+
+#### GET /api/avisos
+- **Autenticação:** Obrigatória
+- **Query params:** `igrejaId`, `celulaId`, `usuarioId`, `tipo`, `prioridade`, `ativos`, `referencia`, flags `include*`
+- **Resposta:** lista de avisos ordenada por prioridade e data.
+
+#### POST /api/avisos
+- **Perfis autorizados:** Pastor, Supervisor, Líder
+- **Body:** `titulo`, `conteudo`, `tipo`, `prioridade?`, `dataInicio`, `dataFim?`, `igrejaId?`, `celulaId?`, `usuarioId?`, `ativo?`
+
+#### GET/PATCH/DELETE /api/avisos/[id]
+- Recupera, atualiza ou remove um aviso único respeitando as mesmas regras de autorização.
+
+### Convites
+
+#### GET /api/convites
+- **Autenticação:** Obrigatória
+- **Perfis autorizados:** Pastor, Supervisor, Líder
+- **Query params:** `celulaId`, `convidadoPorId`, `usado`, flags `include*`, paginação.
+- **Resposta:** convites ordenados por `usado` e data de expiração.
+
+#### POST /api/convites
+- **Perfis autorizados:** Pastor, Supervisor, Líder
+- **Body:** `celulaId`, `emailConvidado`, `nomeConvidado`, `cargo?`, `dataExpiracao?`
+- **Token:** gerado automaticamente (`12` caracteres) garantindo unicidade.
+
+#### GET /api/convites/[token]
+- **Público autenticado:** Apenas verifica token existente.
+- **Respostas especiais:** `410` para convite expirado ou já utilizado.
+
+#### PATCH /api/convites/[token]
+- Atualiza dados do convite (ex.: marcar como usado). Mesmas permissões do POST.
+
+#### DELETE /api/convites/[token]
+- Remove convite emitido por células sob responsabilidade do usuário autenticado.
+
+### Landing Page Configurável
+
+#### GET /api/public/landing-config
+- **Autenticação:** Não requerida
+- **Query params:** `section` (ex.: `hero`)
+- **Uso:** hidratam conteúdo dinâmico do marketing site.
+
+#### GET /api/admin/landing-config
+- **Perfis autorizados:** Pastor, Supervisor
+- **Uso:** painel administrativo/builder.
+
+#### PUT /api/admin/landing-config
+- **Body:** `section`, `key`, `value`, `type?` — cria ou atualiza par chave/valor.
+
+#### DELETE /api/admin/landing-config
+- **Body:** `section`, `key` — remove entrada específica.
+
+### Configurações de Sistema
+
+#### GET /api/admin/configuracoes
+- **Perfil:** Pastor
+- **Query params:** `categoria`
+- **Resposta:** pares `chave/valor` para parâmetros globais (ex.: `trial_dias`).
+
+#### PUT /api/admin/configuracoes
+- **Body:** `key`, `value`, `categoria`, `descricao?`, `tipoCampo?`
+- **Uso:** atualizar parâmetros utilizados em onboarding, billing, suporte.
+
+#### DELETE /api/admin/configuracoes
+- **Body:** `key` — remove configuração específica.
+
 ### Admin Sync
 
 #### POST /api/admin/users/sync

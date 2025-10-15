@@ -866,8 +866,8 @@ model Convite {
 **Migração:**
 1. Criar modelo Prisma de avisos
 2. API para CRUD e filtragem
-3. Hook customizado `useAvisos()`
-4. Componente de feed com TanStack Query
+3. ✅ Hook customizado `useAvisos()`
+4. ✅ Componente de feed com TanStack Query (dashboards atualizados)
 5. Sistema de notificações (Clerk webhooks)
 
 ---
@@ -884,8 +884,8 @@ model Convite {
 **Migração:**
 1. Criar página pública `/app/(public)/page.tsx`
 2. API para configurações `/api/landing-config`
-3. Hook `useLandingConfig()`
-4. Editor visual para admin
+3. ✅ Hook `useLandingConfig()` e consumo no Hero
+4. ✅ Editor visual para admin (builder protegido)
 5. SSG para performance
 
 ---
@@ -901,7 +901,7 @@ model Convite {
 
 **Migração:**
 1. Modelo Prisma de convites
-2. API para geração e validação
+2. ✅ API para geração e validação + hooks (`useConvites`)
 3. Página pública de processamento
 4. QR code com biblioteca React
 5. Analytics de conversão

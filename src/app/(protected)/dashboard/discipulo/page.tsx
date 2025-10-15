@@ -9,6 +9,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useCelulas } from '@/hooks/use-celulas'
 import { useBibliaLeiturasUsuario, useBibliaMetasUsuario } from '@/hooks/use-biblia'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
+import { useAvisos } from '@/hooks/use-avisos'
+import { useDevocionais } from '@/hooks/use-devocionais'
+import { useDomainUser } from '@/hooks/use-domain-user'
 
 export default function DashboardDiscipuloPage() {
   const { user } = useUser()
@@ -21,6 +24,19 @@ export default function DashboardDiscipuloPage() {
   const leiturasQuery = useBibliaLeiturasUsuario('me', {
     take: 3,
     order: 'desc',
+  })
+  const domainUserQuery = useDomainUser(true)
+  const domainUser = domainUserQuery.data?.data
+  const hoje = useMemo(() => new Date(), [])
+  const fimJanelaDevocional = useMemo(() => {
+    const date = new Date()
+    date.setDate(date.getDate() + 7)
+    return date
+  }, [])
+  const devocionaisQuery = useDevocionais({
+    dataInicial: hoje,
+    dataFinal: fimJanelaDevocional,
+    take: 5,
   })
 
   useSetPageMetadata({
@@ -40,6 +56,23 @@ export default function DashboardDiscipuloPage() {
       ) ?? []
     )
   }, [celulasQuery.data?.data, user?.id])
+  const primaryCelulaId = useMemo(() => {
+    if (minhasCelulas.length) {
+      return minhasCelulas[0]?.id ?? null
+    }
+    const membership = domainUser?.membrosCelula?.[0]
+    return membership?.celulaId ?? null
+  }, [domainUser?.membrosCelula, minhasCelulas])
+  const avisosQuery = useAvisos({
+    igrejaId: domainUser?.igrejaId ?? undefined,
+    celulaId: primaryCelulaId ?? undefined,
+    usuarioId: domainUser?.id ?? undefined,
+    includeIgreja: true,
+    includeCelula: true,
+    includeUsuario: true,
+    take: 5,
+    enabled: Boolean(domainUser),
+  })
 
   if (celulasQuery.isLoading && !celulasQuery.data) {
     return (
@@ -87,9 +120,100 @@ export default function DashboardDiscipuloPage() {
   const celulasParaExibir = minhasCelulas.length ? minhasCelulas : celulasQuery.data.data.slice(0, 2)
   const metasDoUsuario = metasQuery.data?.data ?? []
   const leiturasRecentes = leiturasQuery.data?.data ?? []
+  const devocionais = devocionaisQuery.data?.data ?? []
+  const destaqueDevocional = devocionais[0]
+  const avisos = avisosQuery.data?.data ?? []
 
   return (
     <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Devocional em destaque</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Próximo conteúdo devocional liberado para sua igreja.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {devocionaisQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-16" />
+              </div>
+            ) : destaqueDevocional ? (
+              <>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">
+                    {new Date(destaqueDevocional.dataDevocional).toLocaleDateString('pt-BR', {
+                      dateStyle: 'full',
+                    })}
+                  </p>
+                  <h3 className="text-lg font-semibold">{destaqueDevocional.titulo}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {destaqueDevocional.versiculoReferencia}
+                  </p>
+                </div>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {destaqueDevocional.conteudo.slice(0, 220)}
+                  {destaqueDevocional.conteudo.length > 220 ? '…' : ''}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  “{destaqueDevocional.versiculoTexto}”
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum devocional programado para os próximos dias. Peça à sua liderança para registrar novos conteúdos.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Avisos recentes</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Comunicados priorizados pela liderança da sua célula ou igreja.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {avisosQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            ) : avisos.length ? (
+              <ul className="space-y-3">
+                {avisos.map((aviso) => (
+                  <li key={aviso.id} className="rounded-lg border border-border/40 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold">{aviso.titulo}</p>
+                      <Badge variant={aviso.prioridade === 'URGENTE' ? 'destructive' : 'outline'}>
+                        {aviso.prioridade}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Vigência: {new Date(aviso.dataInicio).toLocaleDateString('pt-BR')}
+                      {aviso.dataFim ? ` até ${new Date(aviso.dataFim).toLocaleDateString('pt-BR')}` : ''}
+                    </p>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      {aviso.conteudo.slice(0, 180)}
+                      {aviso.conteudo.length > 180 ? '…' : ''}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhum aviso direcionado para você no momento.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         {celulasParaExibir.map((celula) => (
           <Card key={celula.id}>

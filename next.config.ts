@@ -7,9 +7,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   reactStrictMode: true,
-  experimental: {
-    typedRoutes: false,
-  },
+  typedRoutes: false,
   env: {
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",

@@ -9,6 +9,7 @@ import { Topbar } from "@/components/app/topbar";
 import { PageHeader } from "@/components/app/page-header";
 import { PageMetadataProvider } from "@/contexts/page-metadata";
 import { useSubscription } from "@/hooks/use-subscription";
+import { useAdminStatus } from "@/hooks/use-admin-status";
 
 export default function ProtectedLayout({
   children,
@@ -22,6 +23,9 @@ export default function ProtectedLayout({
 
   // Use TanStack Query for subscription status
   const { data: subscriptionStatus, isLoading: isLoadingSubscription } = useSubscription();
+  const shouldVerifyAdmin = isLoaded && isSignedIn;
+  const { data: adminStatus, isLoading: isLoadingAdmin } = useAdminStatus(shouldVerifyAdmin);
+  const isAdmin = adminStatus?.isAdmin ?? false;
 
   // hydrate from localStorage
   React.useEffect(() => {
@@ -49,20 +53,29 @@ export default function ProtectedLayout({
 
   // After auth, verify subscription access. Allow billing page even without plan.
   React.useEffect(() => {
-    if (!isLoaded || !isSignedIn || isLoadingSubscription) return;
+    if (!isLoaded || !isSignedIn || isLoadingSubscription || isLoadingAdmin) return;
 
     const isActive = Boolean(subscriptionStatus?.isActive);
     // Allow access to billing and subscribe pages even without active subscription
     const allowedPaths = ['/subscribe', '/billing'];
     const isOnAllowedPath = allowedPaths.some(path => pathname.startsWith(path));
 
-    if (!isActive && !isOnAllowedPath) {
+    if (!isActive && !isAdmin && !isOnAllowedPath) {
       router.replace('/subscribe');
     }
-  }, [isLoaded, isSignedIn, isLoadingSubscription, subscriptionStatus?.isActive, pathname, router]);
+  }, [
+    isLoaded,
+    isSignedIn,
+    isLoadingSubscription,
+    isLoadingAdmin,
+    subscriptionStatus?.isActive,
+    isAdmin,
+    pathname,
+    router,
+  ]);
 
   // Show loading state while checking authentication
-  if (!isLoaded || isLoadingSubscription) {
+  if (!isLoaded || isLoadingSubscription || (shouldVerifyAdmin && isLoadingAdmin)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

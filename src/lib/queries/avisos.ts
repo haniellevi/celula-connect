@@ -5,6 +5,12 @@ import type {
   TipoAviso,
 } from '../../../prisma/generated/client'
 
+type AvisoIncludeRelations = {
+  igreja?: boolean
+  celula?: boolean
+  usuario?: boolean
+}
+
 export interface ListAvisosOptions {
   igrejaId?: string | null
   celulaId?: string | null
@@ -15,11 +21,7 @@ export interface ListAvisosOptions {
   referencia?: Date
   take?: number
   skip?: number
-  include?: {
-    igreja?: boolean
-    celula?: boolean
-    usuario?: boolean
-  }
+  include?: AvisoIncludeRelations
 }
 
 export async function listAvisos({
@@ -69,14 +71,38 @@ export async function listAvisos({
 
 export async function getAvisoById(
   id: string,
-  include: {
-    igreja?: boolean
-    celula?: boolean
-    usuario?: boolean
-  } = {},
+  include: AvisoIncludeRelations = {},
 ) {
   return db.aviso.findUnique({
     where: { id },
     include,
+  })
+}
+
+export async function createAviso(
+  data: Prisma.AvisoUncheckedCreateInput,
+  include: AvisoIncludeRelations = {},
+) {
+  return db.aviso.create({
+    data,
+    include,
+  })
+}
+
+export async function updateAviso(
+  id: string,
+  data: Prisma.AvisoUncheckedUpdateInput,
+  include: AvisoIncludeRelations = {},
+) {
+  return db.aviso.update({
+    where: { id },
+    data,
+    include,
+  })
+}
+
+export async function deleteAviso(id: string) {
+  return db.aviso.delete({
+    where: { id },
   })
 }

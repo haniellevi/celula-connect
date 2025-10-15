@@ -14,6 +14,15 @@ export async function getDomainUserByClerkId(clerkUserId: string) {
     where: { clerkUserId },
     include: {
       igreja: true,
+      membrosCelula: {
+        include: {
+          celula: {
+            include: {
+              igreja: true,
+            },
+          },
+        },
+      },
     },
   })
 }

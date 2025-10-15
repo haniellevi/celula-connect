@@ -25,11 +25,11 @@
 ## 📈 VISÃO GERAL DO PROGRESSO
 
 ```
-██████████████████░░░░░░░░ 45% Completo (2/8 fases + Fase 3 em andamento)
+███████████████████░░░░░░ 50% Completo (2/8 fases + Fase 3 em andamento)
 
 Fase 1: ████████████████████ 100% ✅ CONCLUÍDA
 Fase 2: ████████████████████ 100% ✅ CONCLUÍDA
-Fase 3: ████████████░░░░░░░░  60% 🚧 EM ANDAMENTO
+Fase 3: ██████████████░░░░░░  75% 🚧 EM ANDAMENTO
 Fase 4: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
 Fase 5: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
 Fase 6: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
@@ -45,6 +45,8 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 **Sprint 4 – Dia 1**: Consolidar módulos de comunicação (avisos/devocionais) e iniciar preparação das rotas públicas/admin relacionadas às configurações dinâmicas.
 
 ### ✅ Últimas Tarefas Concluídas
+- **Data**: 12 de outubro de 2025 (manhã) — Integração do Sprint 4 (comunicação e configurações dinâmicas) na camada cliente.  
+  **Resultado**: hooks `useAvisos`, `useDevocionais`, `useConvites`, `useLandingConfig` e `useDomainUser` publicados; dashboards (discípulo, líder, supervisor, pastor) passaram a consumir avisos/devocionais/convites; landing page carrega headline/CTA direto de `LandingPageConfig`; novo builder protegido em `/dashboard/pastor/landing-config` com formulários validados para hero + parâmetros de sistema; documentação REST (`docs/api.md`) atualizada.
 - **Data**: 11 de outubro de 2025 (noite) — Finalização do Sprint 3 e adequação das rotas tipadas do App Router.  
   **Resultado**: Queries/seed do sistema bíblico atualizadas, rotas `/api/biblia/*` e helpers de `TanStack Query` alinhados aos novos modelos; introdução de `adaptRouteWithParams` para compatibilizar com o `RouteValidator` e execução bem sucedida de `npm run typecheck` e `npm run lint`.
 - **Data**: 11 de outubro de 2025 (18:10) — Conclusão da modelagem avançada da Fase 3 (trilhas, comunicação, convites e configurações) com seeds e fixtures sincronizadas.  
@@ -404,7 +406,7 @@ Tempo Gasto: ~4.2 horas
 1. [x] Sprint 1: Criar modelos core (Usuários, Igrejas, Planos) — validar contra seeds `seed-user-*`, `seed-igreja-central`, `seed-plano-basico`
 2. [x] Sprint 2: Criar modelos de células e trilha — reutilizar fixtures `seed-celula-vida`, `seed-membro-*`
 3. [x] Sprint 3: Criar modelos do sistema bíblico (ampliar versículos + metas avançadas)
-4. [ ] Sprint 4: Criar modelos de comunicação (finalizar métricas/configurações avançadas e preparar rotas correspondentes)
+4. [x] Sprint 4: Criar modelos de comunicação (avisos/devocionais), convites e configurações avançadas + integrar rotas correspondente no front/admin
 
 ---
 
