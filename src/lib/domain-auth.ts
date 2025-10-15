@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { PerfilUsuario } from '../../prisma/generated/client'
 import { db } from '@/lib/db'
+import { getConfiguracaoSistema } from '@/lib/queries/settings'
 
 export type DomainUser = Awaited<ReturnType<typeof getDomainUserByClerkId>>
 
@@ -57,4 +58,9 @@ export function hasRole(user: DomainUser | null, allowed: PerfilUsuario[]) {
 
 export function unauthorizedResponse() {
   return NextResponse.json({ error: 'Acesso não permitido para este recurso' }, { status: 403 })
+}
+
+export async function assertDomainMutationsEnabled() {
+  const flag = await getConfiguracaoSistema('ENABLE_DOMAIN_MUTATIONS')
+  return flag?.valor !== 'false'
 }

@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { deleteCelula, getCelulaById, updateCelula } from '@/lib/queries/celulas'
-import { requireDomainUser, unauthorizedResponse } from '@/lib/domain-auth'
+import {
+  requireDomainUser,
+  unauthorizedResponse,
+  assertDomainMutationsEnabled,
+} from '@/lib/domain-auth'
 import { Prisma, PerfilUsuario } from '../../../../../prisma/generated/client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
@@ -44,6 +48,16 @@ async function handlePut(request: Request, params: { id: string }) {
 
   if (!canManageCelula(user.id, user.perfil, celula)) {
     return unauthorizedResponse()
+  }
+
+  const mutationsEnabled = await assertDomainMutationsEnabled()
+  if (!mutationsEnabled) {
+    return NextResponse.json(
+      {
+        error: 'Mutação de domínio temporariamente desabilitada. Contate o administrador para habilitar.',
+      },
+      { status: 423 },
+    )
   }
 
   const body = await request.json().catch(() => null)
