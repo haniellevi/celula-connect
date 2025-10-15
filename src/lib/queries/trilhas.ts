@@ -155,6 +155,7 @@ export async function listAreasSupervisao({
 export interface ListSolicitacoesTrilhaOptions {
   areaSupervisaoId?: string
   usuarioId?: string
+  liderSolicitanteId?: string
   supervisorResponsavelId?: string
   status?: StatusSolicitacao
   take?: number
@@ -171,6 +172,7 @@ export interface ListSolicitacoesTrilhaOptions {
 export async function listSolicitacoesTrilha({
   areaSupervisaoId,
   usuarioId,
+  liderSolicitanteId,
   supervisorResponsavelId,
   status,
   take,
@@ -181,6 +183,7 @@ export async function listSolicitacoesTrilha({
 
   if (areaSupervisaoId) where.areaSupervisaoId = areaSupervisaoId
   if (usuarioId) where.usuarioId = usuarioId
+  if (liderSolicitanteId) where.liderSolicitanteId = liderSolicitanteId
   if (supervisorResponsavelId) where.supervisorResponsavelId = supervisorResponsavelId
   if (status) where.status = status
 

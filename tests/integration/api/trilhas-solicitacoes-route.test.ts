@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { POST as createSolicitacaoRoute } from '@/app/api/trilhas/[trilhaId]/solicitacoes/route'
 import { PATCH as updateSolicitacaoRoute } from '@/app/api/trilhas/solicitacoes/[id]/route'
+import { GET as listSolicitacoesRoute } from '@/app/api/trilhas/solicitacoes/route'
 import { PerfilUsuario, StatusSolicitacao } from '../../../prisma/generated/client'
 import {
   createSolicitacaoTrilha,
   updateSolicitacaoTrilha,
   getSolicitacaoTrilhaById,
+  listSolicitacoesTrilha,
 } from '@/lib/queries/trilhas'
 
 jest.mock('@/lib/domain-auth', () => ({
@@ -18,12 +20,16 @@ jest.mock('@/lib/queries/trilhas', () => ({
   createSolicitacaoTrilha: jest.fn(),
   updateSolicitacaoTrilha: jest.fn(),
   getSolicitacaoTrilhaById: jest.fn(),
+  listSolicitacoesTrilha: jest.fn(),
 }))
 
 const { requireDomainUser, unauthorizedResponse, hasRole } = require('@/lib/domain-auth') as {
   requireDomainUser: jest.Mock
   unauthorizedResponse: jest.Mock
   hasRole: jest.Mock
+}
+const { listSolicitacoesTrilha: listSolicitacoesTrilhaMock } = require('@/lib/queries/trilhas') as {
+  listSolicitacoesTrilha: jest.Mock
 }
 
 describe('/api/trilhas/[trilhaId]/solicitacoes', () => {
@@ -115,6 +121,7 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     hasRole.mockReset()
     ;(updateSolicitacaoTrilha as jest.Mock).mockReset()
     ;(getSolicitacaoTrilhaById as jest.Mock).mockReset()
+    listSolicitacoesTrilhaMock.mockReset()
 
     unauthorizedResponse.mockImplementation(() =>
       NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
@@ -185,5 +192,57 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     expect(response.status).toBe(403)
     expect(unauthorizedResponse).toHaveBeenCalled()
     expect(updateSolicitacaoTrilha).not.toHaveBeenCalled()
+  })
+})
+
+describe('/api/trilhas/solicitacoes (GET)', () => {
+  beforeEach(() => {
+    requireDomainUser.mockReset()
+    unauthorizedResponse.mockReset()
+    hasRole.mockReset()
+    listSolicitacoesTrilhaMock.mockReset()
+
+    unauthorizedResponse.mockImplementation(() =>
+      NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
+    )
+  })
+
+  it('retorna solicitações do líder autenticado', async () => {
+    requireDomainUser.mockResolvedValue({
+      user: { id: 'seed-user-lider', perfil: PerfilUsuario.LIDER_CELULA },
+      response: null,
+    })
+    hasRole.mockReturnValue(true)
+    listSolicitacoesTrilhaMock.mockResolvedValue([
+      { id: 'sol-1', status: StatusSolicitacao.PENDENTE },
+    ])
+
+    const response = await listSolicitacoesRoute(new Request('http://localhost/api/trilhas/solicitacoes'))
+
+    expect(listSolicitacoesTrilhaMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        liderSolicitanteId: 'seed-user-lider',
+        include: expect.objectContaining({ usuario: true, trilha: true }),
+      }),
+    )
+    expect(response.status).toBe(200)
+    const payload = await response.json()
+    expect(payload.data).toEqual([
+      { id: 'sol-1', status: StatusSolicitacao.PENDENTE },
+    ])
+  })
+
+  it('nega acesso quando perfil não autorizado', async () => {
+    requireDomainUser.mockResolvedValue({
+      user: { id: 'seed-user-lider', perfil: PerfilUsuario.LIDER_CELULA },
+      response: null,
+    })
+    hasRole.mockReturnValue(false)
+
+    const response = await listSolicitacoesRoute(new Request('http://localhost/api/trilhas/solicitacoes'))
+
+    expect(response.status).toBe(403)
+    expect(unauthorizedResponse).toHaveBeenCalled()
+    expect(listSolicitacoesTrilhaMock).not.toHaveBeenCalled()
   })
 })

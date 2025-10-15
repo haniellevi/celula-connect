@@ -286,6 +286,11 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 - **Body:** `areaSupervisaoId`, `motivo`, `liderSolicitanteId?`, `usuarioId?`, `observacoesLider?`.
 - **Comportamento:** cria solicitação com status `PENDENTE`; líderes/pastores podem omitir `liderSolicitanteId` (usa o próprio usuário).
 
+#### GET /api/trilhas/solicitacoes
+- **Perfis autorizados:** Discípulo, Líder, Supervisor, Pastor (com filtros automáticos conforme o perfil).
+- **Query params:** `scope=mine|lider|pendentes|all`, `status`, `take`, `skip`, `areaSupervisaoId`, `include*`.
+- **Retorno:** lista com `usuario`, `trilha`, `area`, `liderSolicitante` e metadados (`count`, `hasMore`).
+
 #### PATCH /api/trilhas/solicitacoes/[id]
 - **Perfis autorizados:** Supervisor, Pastor.
 - **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?`, `observacoesLider?`, `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.

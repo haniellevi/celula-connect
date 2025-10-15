@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { useCelulas } from '@/hooks/use-celulas'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-biblia'
+import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 import { useAvisos } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
@@ -17,6 +18,7 @@ export default function DashboardLiderPage() {
   const { user } = useUser()
   const celulasQuery = useCelulas({ includeMembers: true })
   const bibliaMetasQuery = useBibliaMetas({ includeUsuarios: true, take: 12 })
+  const solicitacoesQuery = useTrilhaSolicitacoes({ scope: 'lider', take: 5 })
   const domainUserQuery = useDomainUser(true)
   const domainUser = domainUserQuery.data?.data
 
@@ -71,6 +73,7 @@ export default function DashboardLiderPage() {
     () => convites.filter((convite) => !convite.usado),
     [convites],
   )
+  const solicitacoes = solicitacoesQuery.data?.data ?? []
 
   if (celulasQuery.isLoading) {
     return (
@@ -192,6 +195,59 @@ export default function DashboardLiderPage() {
             ) : (
               <p className="text-sm text-muted-foreground">
                 Nenhum convite criado até o momento. Gere convites para novos visitantes a partir do painel administrativo.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Minhas solicitações de trilha</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Últimas solicitações enviadas para avanço na trilha de crescimento.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {solicitacoesQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            ) : solicitacoes.length ? (
+              <ul className="space-y-2">
+                {solicitacoes.map((item) => (
+                  <li key={item.id} className="rounded border border-border/40 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-medium">{item.trilha?.titulo ?? 'Trilha'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Área: {item.area?.nome ?? 'N/D'}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          item.status === 'APROVADA'
+                            ? 'default'
+                            : item.status === 'REJEITADA'
+                              ? 'secondary'
+                              : 'outline'
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </div>
+                    {item.observacoesSupervisor ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Supervisor: {item.observacoesSupervisor}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma solicitação registrada recentemente. Inicie uma nova etapa no módulo de trilhas quando estiver pronto.
               </p>
             )}
           </CardContent>

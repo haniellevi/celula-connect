@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAvisos } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
+import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 
 function formatDate(date?: string | Date | null) {
   if (!date) return "Sem data definida"
@@ -24,6 +25,7 @@ export default function DashboardSupervisorPage() {
   const { data, isLoading } = useCelulas({ includeMembers: true })
   const domainUserQuery = useDomainUser(true)
   const domainUser = domainUserQuery.data?.data
+  const solicitacoesPendentesQuery = useTrilhaSolicitacoes({ scope: 'pendentes', take: 5 })
 
   useSetPageMetadata({
     title: "Dashboard Supervisor",
@@ -70,6 +72,7 @@ export default function DashboardSupervisorPage() {
     return (convitesQuery.data?.data ?? []).filter((convite) => ids.has(convite.celulaId))
   }, [celulasSupervisionadas, convitesQuery.data?.data])
   const convitesPendentes = convitesFiltrados.filter((convite) => !convite.usado)
+  const solicitacoesPendentes = solicitacoesPendentesQuery.data?.data ?? []
 
   if (isLoading) {
     return (
@@ -185,6 +188,49 @@ export default function DashboardSupervisorPage() {
             ) : (
               <p className="text-sm text-muted-foreground">
                 Sem convites pendentes no momento. Incentive os líderes a registrar novos interessados.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Solicitações de trilha pendentes</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Aprovações aguardando análise nas áreas que você supervisiona.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {solicitacoesPendentesQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-2/3" />
+                <Skeleton className="h-6 w-4/5" />
+              </div>
+            ) : solicitacoesPendentes.length ? (
+              <ul className="space-y-2">
+                {solicitacoesPendentes.map((item) => (
+                  <li key={item.id} className="rounded border border-border/40 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-sm font-semibold">
+                          {item.usuario?.nome ?? 'Discípulo'} → {item.trilha?.titulo ?? 'Trilha'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Área: {item.area?.nome ?? 'N/D'} · {new Date(item.dataSolicitacao).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{item.status}</Badge>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Motivo: {item.motivo ?? '—'}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma solicitação pendente para aprovação. Ao receber novas requisições, elas aparecerão aqui.
               </p>
             )}
           </CardContent>
