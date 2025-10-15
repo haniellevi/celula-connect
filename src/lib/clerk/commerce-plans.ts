@@ -30,8 +30,13 @@ function parseAmountValue(value: unknown): number | null {
   return null
 }
 
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const toUnknownArray = (value: unknown): unknown[] | null => (Array.isArray(value) ? value : null)
+
 function parseMoney(
-  raw: any,
+  raw: unknown,
   fallbackCurrency: string | null,
   fallbackCurrencySymbol: string | null,
   fallbackFormatted?: string | null,
@@ -57,8 +62,9 @@ function parseMoney(
       formatted: fallbackFormatted ?? null,
     }
   }
+  if (!isPlainObject(raw)) return null
   const amount = parseAmountValue(raw.amount ?? raw.value)
-  if (amount == null && !fallbackFormatted && !raw.amount_formatted) return null
+  if (amount == null && !fallbackFormatted && typeof raw.amount_formatted !== 'string') return null
   const currency = parseCurrency(raw.currency) ?? fallbackCurrency
   const currencySymbol = parseCurrencySymbol(raw.currency_symbol) ?? fallbackCurrencySymbol
   const formatted = typeof raw.amount_formatted === 'string'
@@ -97,80 +103,86 @@ function safeNumber(value: unknown): number | null {
   return null
 }
 
-function normalizePlan(raw: any): ClerkPlanNormalized | null {
-  const id = safeString(raw?.id || raw?.plan_id || raw?.key || raw?.slug)
+function normalizePlan(raw: unknown): ClerkPlanNormalized | null {
+  if (!isPlainObject(raw)) return null
+
+  const id = safeString(raw.id ?? raw.plan_id ?? raw.key ?? raw.slug)
   if (!id) return null
 
-  const baseCurrency = parseCurrency(raw?.currency)
-    ?? parseCurrency(raw?.fee?.currency)
-    ?? parseCurrency(raw?.annual_fee?.currency)
+  const baseCurrency = parseCurrency(raw.currency)
+    ?? (isPlainObject(raw.fee) ? parseCurrency(raw.fee.currency) : null)
+    ?? (isPlainObject(raw.annual_fee) ? parseCurrency(raw.annual_fee.currency) : null)
     ?? null
-  const baseSymbol = parseCurrencySymbol(raw?.currency_symbol)
-    ?? parseCurrencySymbol(raw?.fee?.currency_symbol)
-    ?? parseCurrencySymbol(raw?.annual_fee?.currency_symbol)
+  const baseSymbol = parseCurrencySymbol(raw.currency_symbol)
+    ?? (isPlainObject(raw.fee) ? parseCurrencySymbol(raw.fee.currency_symbol) : null)
+    ?? (isPlainObject(raw.annual_fee) ? parseCurrencySymbol(raw.annual_fee.currency_symbol) : null)
     ?? null
 
   const monthlyPrice = parseMoney(
-    raw?.amount,
+    raw.amount,
     baseCurrency,
     baseSymbol,
-    typeof raw?.amount_formatted === 'string' ? raw.amount_formatted : null,
+    typeof raw.amount_formatted === 'string' ? raw.amount_formatted : null,
   )
   const annualMonthlyPrice = parseMoney(
-    raw?.annual_monthly_amount,
+    raw.annual_monthly_amount,
     monthlyPrice?.currency ?? baseCurrency,
     monthlyPrice?.currencySymbol ?? baseSymbol,
-    typeof raw?.annual_monthly_amount_formatted === 'string'
+    typeof raw.annual_monthly_amount_formatted === 'string'
       ? raw.annual_monthly_amount_formatted
       : null,
   )
   const annualPrice = parseMoney(
-    raw?.annual_amount,
+    raw.annual_amount,
     monthlyPrice?.currency ?? baseCurrency,
     monthlyPrice?.currencySymbol ?? baseSymbol,
-    typeof raw?.annual_amount_formatted === 'string'
+    typeof raw.annual_amount_formatted === 'string'
       ? raw.annual_amount_formatted
       : null,
   )
 
-  const setupFee = parseMoney(raw?.fee, baseCurrency, baseSymbol)
-  const annualMonthlySetupFee = parseMoney(raw?.annual_monthly_fee, baseCurrency, baseSymbol)
-  const annualSetupFee = parseMoney(raw?.annual_fee, baseCurrency, baseSymbol)
+  const setupFee = parseMoney(raw.fee, baseCurrency, baseSymbol)
+  const annualMonthlySetupFee = parseMoney(raw.annual_monthly_fee, baseCurrency, baseSymbol)
+  const annualSetupFee = parseMoney(raw.annual_fee, baseCurrency, baseSymbol)
 
   const currency = monthlyPrice?.currency ?? annualPrice?.currency ?? baseCurrency
   const currencySymbol = monthlyPrice?.currencySymbol ?? annualPrice?.currencySymbol ?? baseSymbol
 
-  const features: ClerkPlanFeature[] = Array.isArray(raw?.features)
-    ? raw.features.map((feature: any) => ({
-      id: safeString(feature?.id),
-      name: safeString(feature?.name),
-      description: safeString(feature?.description),
-      slug: safeString(feature?.slug),
-      avatarUrl: safeString(feature?.avatar_url),
-    }))
+  const features: ClerkPlanFeature[] = Array.isArray(raw.features)
+    ? raw.features
+        .filter(isPlainObject)
+        .map((feature) => ({
+          id: safeString(feature.id),
+          name: safeString(feature.name),
+          description: safeString(feature.description),
+          slug: safeString(feature.slug),
+          avatarUrl: safeString(feature.avatar_url),
+        }))
     : []
+
+  const payerTypeRaw = raw.payer_type
 
   return {
     id,
-    name: safeString(raw?.name),
-    description: safeString(raw?.description),
-    slug: safeString(raw?.slug),
-    productId: safeString(raw?.product_id),
+    name: safeString(raw.name),
+    description: safeString(raw.description),
+    slug: safeString(raw.slug),
+    productId: safeString(raw.product_id),
     currency,
     currencySymbol,
-    period: safeString(raw?.period),
-    interval: safeNumber(raw?.interval),
-    isDefault: safeBoolean(raw?.is_default),
-    isRecurring: safeBoolean(raw?.is_recurring),
-    publiclyVisible: safeBoolean(raw?.publicly_visible),
-    hasBaseFee: safeBoolean(raw?.has_base_fee),
-    payerType: Array.isArray(raw?.payer_type)
-      ? raw.payer_type.filter((value: any) => typeof value === 'string' && value.trim().length > 0)
+    period: safeString(raw.period),
+    interval: safeNumber(raw.interval),
+    isDefault: safeBoolean(raw.is_default),
+    isRecurring: safeBoolean(raw.is_recurring),
+    publiclyVisible: safeBoolean(raw.publicly_visible),
+    hasBaseFee: safeBoolean(raw.has_base_fee),
+    payerType: Array.isArray(payerTypeRaw)
+      ? payerTypeRaw.filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
       : [],
-    forPayerType: safeString(raw?.for_payer_type),
-    avatarUrl: safeString(raw?.avatar_url),
-    freeTrialEnabled: safeBoolean(raw?.free_trial_enabled),
-    freeTrialDays: safeNumber(raw?.free_trial_days),
+    forPayerType: safeString(raw.for_payer_type),
+    avatarUrl: safeString(raw.avatar_url),
+    freeTrialEnabled: safeBoolean(raw.free_trial_enabled),
+    freeTrialDays: safeNumber(raw.free_trial_days),
     prices: {
       ...(monthlyPrice ? { month: monthlyPrice } : {}),
       ...(annualPrice ? { year: annualPrice } : {}),
@@ -205,34 +217,37 @@ export async function fetchCommercePlans(): Promise<ClerkPlanNormalized[]> {
         errors.push({ url, status: response.status, message: text?.slice(0, 500) })
         continue
       }
-      let payload: any = null
+      let payload: unknown = null
       try {
         payload = text ? JSON.parse(text) : null
       } catch {
         payload = null
       }
-      const collection = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.plans)
-          ? payload.plans
-          : Array.isArray(payload?.data)
-            ? payload.data
-            : Array.isArray(payload?.items)
-              ? payload.items
-              : Array.isArray(payload?.products)
-                ? payload.products
-                : []
+      const payloadRecord = isPlainObject(payload) ? payload : null
+      const collection =
+        toUnknownArray(payload) ??
+        (payloadRecord && toUnknownArray(payloadRecord.plans)) ??
+        (payloadRecord && toUnknownArray(payloadRecord.data)) ??
+        (payloadRecord && toUnknownArray(payloadRecord.items)) ??
+        (payloadRecord && toUnknownArray(payloadRecord.products)) ??
+        []
 
       const normalized = collection
-        .map((item: any) => normalizePlan(item))
-        .filter((plan: ClerkPlanNormalized | null): plan is ClerkPlanNormalized => Boolean(plan))
+        .map((item) => normalizePlan(item))
+        .filter((plan): plan is ClerkPlanNormalized => plan !== null)
 
       if (normalized.length > 0) {
         return normalized
       }
       errors.push({ url, message: 'No plans found in response' })
-    } catch (error: any) {
-      errors.push({ url, message: String(error?.message || error) })
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : isPlainObject(error) && typeof error.message === 'string'
+            ? error.message
+            : String(error)
+      errors.push({ url, message })
     }
   }
 

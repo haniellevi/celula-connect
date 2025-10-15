@@ -72,12 +72,18 @@ export default function DashboardLiderPage() {
     return map
   }, [bibliaMetasQuery.data?.data])
   const avisos = avisosQuery.data?.data ?? []
-  const convites = convitesQuery.data?.data ?? []
+  const convites = useMemo(
+    () => convitesQuery.data?.data ?? [],
+    [convitesQuery.data?.data],
+  )
   const convitesPendentes = useMemo(
     () => convites.filter((convite) => !convite.usado),
     [convites],
   )
-  const solicitacoes = solicitacoesQuery.data?.data ?? []
+  const solicitacoes = useMemo(
+    () => solicitacoesQuery.data?.data ?? [],
+    [solicitacoesQuery.data?.data],
+  )
   const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
   const summaryStats = summaryQuery.data?.data.stats ?? {}
   const totalCelulasSummary = summaryStats.totalCelulas ?? celulasParaExibir.length
@@ -130,6 +136,53 @@ export default function DashboardLiderPage() {
           </CardContent>
         </Card>
       )}
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Células sob cuidado</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{totalCelulasSummary}</p>
+            <p className="text-xs text-muted-foreground">
+              Soma das células onde você atua como líder ou auxiliar.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Membros ativos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{membrosAtivosSummary}</p>
+            <p className="text-xs text-muted-foreground">
+              Participantes marcados como ativos nas células acompanhadas.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Convites pendentes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{convitesPendentesSummary}</p>
+            <p className="text-xs text-muted-foreground">
+              Convites enviados aguardando confirmação dos convidados.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Solicitações de trilha</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-semibold">{solicitacoesPendentesSummary}</p>
+            <p className="text-xs text-muted-foreground">
+              Avanços na trilha de crescimento aguardando validação.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

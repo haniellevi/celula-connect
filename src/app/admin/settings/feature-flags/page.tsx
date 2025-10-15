@@ -26,7 +26,10 @@ export default function FeatureFlagsSettingsPage() {
   const updateFlag = useUpdateFeatureFlag()
   const { toast } = useToast()
 
-  const flags = flagsQuery.data?.data ?? {}
+  const flags = useMemo(
+    () => flagsQuery.data?.data ?? {},
+    [flagsQuery.data?.data],
+  )
   const isLoading = flagsQuery.isLoading
 
   const items = useMemo(() => {

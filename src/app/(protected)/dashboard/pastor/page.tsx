@@ -114,7 +114,10 @@ export default function DashboardPastorPage() {
   const devocionais = devocionaisQuery.data?.data ?? []
   const destaqueDevocional = devocionais[0]
   const avisos = avisosQuery.data?.data ?? []
-  const convites = convitesQuery.data?.data ?? []
+  const convites = useMemo(
+    () => convitesQuery.data?.data ?? [],
+    [convitesQuery.data?.data],
+  )
   const convitesPendentes = useMemo(
     () => convites.filter((convite) => !convite.usado),
     [convites],

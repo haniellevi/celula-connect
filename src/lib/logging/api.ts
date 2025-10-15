@@ -63,7 +63,7 @@ function serializeError(error: unknown) {
   }
 }
 
-export function withApiLogging<T extends (...args: any[]) => Promise<Response> | Response>(
+export function withApiLogging<T extends (...args: unknown[]) => Promise<Response> | Response>(
   handler: T,
   options: LoggingOptions = {},
 ): T {

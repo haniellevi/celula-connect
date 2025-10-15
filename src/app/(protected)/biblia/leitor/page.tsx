@@ -57,7 +57,10 @@ export default function BibliaLeitorPage() {
     }
   }, [livros, selectedLivroId])
 
-  const capitulos = capitulosQuery.data?.data ?? []
+  const capitulos = useMemo(
+    () => capitulosQuery.data?.data ?? [],
+    [capitulosQuery.data?.data],
+  )
 
   useEffect(() => {
     if (!selectedCapituloId && capitulos.length) {
