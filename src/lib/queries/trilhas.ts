@@ -199,6 +199,74 @@ export async function listSolicitacoesTrilha({
   })
 }
 
+export async function getSolicitacaoTrilhaById(
+  id: string,
+  include: {
+    usuario?: boolean
+    trilha?: boolean
+    liderSolicitante?: boolean
+    area?: boolean
+    supervisorResponsavel?: boolean
+  } = {},
+) {
+  return db.solicitacaoAvancoTrilha.findUnique({
+    where: { id },
+    include: {
+      usuario: include.usuario ?? true,
+      trilha: include.trilha ?? true,
+      liderSolicitante: include.liderSolicitante ?? true,
+      area: include.area ?? false,
+      supervisorResponsavel: include.supervisorResponsavel ?? false,
+    },
+  })
+}
+
+export async function createSolicitacaoTrilha(
+  data: Prisma.SolicitacaoAvancoTrilhaUncheckedCreateInput,
+  include: {
+    usuario?: boolean
+    trilha?: boolean
+    liderSolicitante?: boolean
+    area?: boolean
+    supervisorResponsavel?: boolean
+  } = {},
+) {
+  return db.solicitacaoAvancoTrilha.create({
+    data,
+    include: {
+      usuario: include.usuario ?? true,
+      trilha: include.trilha ?? true,
+      liderSolicitante: include.liderSolicitante ?? true,
+      area: include.area ?? false,
+      supervisorResponsavel: include.supervisorResponsavel ?? false,
+    },
+  })
+}
+
+export async function updateSolicitacaoTrilha(
+  id: string,
+  data: Prisma.SolicitacaoAvancoTrilhaUncheckedUpdateInput,
+  include: {
+    usuario?: boolean
+    trilha?: boolean
+    liderSolicitante?: boolean
+    area?: boolean
+    supervisorResponsavel?: boolean
+  } = {},
+) {
+  return db.solicitacaoAvancoTrilha.update({
+    where: { id },
+    data,
+    include: {
+      usuario: include.usuario ?? true,
+      trilha: include.trilha ?? true,
+      liderSolicitante: include.liderSolicitante ?? true,
+      area: include.area ?? false,
+      supervisorResponsavel: include.supervisorResponsavel ?? false,
+    },
+  })
+}
+
 export interface ListUsuarioTrilhasOptions {
   usuarioId?: string
   concluido?: boolean
