@@ -16,6 +16,7 @@ import { useAvisos } from '@/hooks/use-avisos'
 import { useDevocionais } from '@/hooks/use-devocionais'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 
 export default function DashboardPastorPage() {
   const igrejasQuery = useIgrejas({ includeCelulas: true, includePlano: true })
@@ -69,6 +70,8 @@ export default function DashboardPastorPage() {
     avisosQuery.isLoading ||
     convitesQuery.isLoading ||
     domainUserQuery.isLoading
+  const featureFlags = useDomainFeatureFlags()
+  const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
   const totalIgrejas = igrejasQuery.data?.data.length ?? 0
   const totalCelulas = celulasQuery.data?.data.length ?? 0
@@ -140,6 +143,19 @@ export default function DashboardPastorPage() {
 
   return (
     <div className="space-y-6">
+      {domainMutationsEnabled ? null : (
+        <Card className="border-destructive/60 bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="text-destructive text-base">Mutação de domínio desabilitada</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-destructive/80">
+              As rotas de atualização de igrejas, células e usuários estão bloqueadas. Reative a flag em Admin → Configurações → Feature Flags quando for seguro liberar mutações.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader>
