@@ -299,7 +299,7 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 ### Feature Flags (Admin)
 
 #### GET /api/admin/feature-flags
-- **Perfis autorizados:** Pastor.
+- **Perfis autorizados:** Discípulo, Líder, Supervisor, Pastor (leitura). Para atualização (`scope` omitido), somente Pastor.
 - **Resposta:** objeto com pares `chave: boolean` representando flags (`feature_flag` em `ConfiguracaoSistema`).
 
 #### PUT /api/admin/feature-flags

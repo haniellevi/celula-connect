@@ -15,22 +15,35 @@ const upsertSchema = z.object({
 })
 
 const ADMIN_ROLES: PerfilUsuario[] = [PerfilUsuario.PASTOR]
+const PUBLIC_ROLES: PerfilUsuario[] = [
+  PerfilUsuario.DISCIPULO,
+  PerfilUsuario.LIDER_CELULA,
+  PerfilUsuario.SUPERVISOR,
+  PerfilUsuario.PASTOR,
+]
 
-async function ensurePastor() {
+async function ensureAccess({ allowPublic = false } = {}) {
   const auth = await requireDomainUser()
   if (!auth.user) {
     return { response: auth.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  if (!hasRole(auth.user, ADMIN_ROLES)) {
+  if (allowPublic) {
+    if (!hasRole(auth.user, PUBLIC_ROLES)) {
+      return { response: unauthorizedResponse() }
+    }
+  } else if (!hasRole(auth.user, ADMIN_ROLES)) {
     return { response: unauthorizedResponse() }
   }
 
   return { user: auth.user }
 }
 
-async function handleGet() {
-  const result = await ensurePastor()
+async function handleGet(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const scope = searchParams.get('scope')
+
+  const result = await ensureAccess({ allowPublic: scope === 'public' })
   if ('response' in result) return result.response
 
   const flags = await listConfiguracoesSistema('feature_flag')
@@ -42,7 +55,7 @@ async function handleGet() {
 }
 
 async function handlePut(request: Request) {
-  const result = await ensurePastor()
+  const result = await ensureAccess()
   if ('response' in result) return result.response
 
   const body = await request.json().catch(() => null)
