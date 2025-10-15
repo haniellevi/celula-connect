@@ -45,6 +45,8 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 Preparar kickoff da **Fase 4 – Migração de Backend**, validando backlog de APIs restantes (trilha/aprovação, webhooks Clerk, endpoints públicos) e definindo responsáveis.
 
 ### ✅ Últimas Tarefas Concluídas
+- **Data**: 13 de outubro de 2025 (manhã) — Relatórios avançados de metas bíblicas concluídos.  
+  **Resultado**: endpoint `/api/biblia/metas/summary` agrega totais, distribuição e histórico; hook `useBibliaMetasSummary` publicado e painel de metas exibe insights (progresso médio, destaques, histórico de leituras). Documentação de API atualizada.
 - **Data**: 12 de outubro de 2025 (tarde) — Pipeline de migração implementado e Fase 3 encerrada.  
   **Resultado**: `scripts/migrate-data.ts` executa importação idempotente a partir do export legado (`OLD_DB_EXPORT`), cobrindo usuários, igrejas, células, trilhas, comunicação, metas bíblicas e configurações. Documentação e planos atualizados com progresso final.
 - **Data**: 12 de outubro de 2025 (manhã) — Integração do Sprint 4 (comunicação e configurações dinâmicas) na camada cliente.  

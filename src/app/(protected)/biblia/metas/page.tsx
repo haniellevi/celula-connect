@@ -9,6 +9,7 @@ import {
   useCreateMetaLeitura,
   useUpdateMetaLeitura,
   useDeleteMetaLeitura,
+  useBibliaMetasSummary,
   type CreateMetaLeituraInput,
   type MetaLeituraWithRelations,
 } from '@/hooks/use-biblia'
@@ -60,6 +61,7 @@ export default function BibliaMetasPage() {
   const metasQuery = useBibliaMetas({ includeUsuarios: true, includeLeituras: true, take: 100 })
   const igrejasQuery = useIgrejas({ includeCelulas: true, take: 100 })
   const celulasQuery = useCelulas({ take: 200 })
+  const metasSummaryQuery = useBibliaMetasSummary({ rangeDays: 30 })
   const createMeta = useCreateMetaLeitura()
   const updateMeta = useUpdateMetaLeitura()
   const deleteMeta = useDeleteMetaLeitura()
@@ -107,18 +109,56 @@ export default function BibliaMetasPage() {
   }, [editingMeta, reset])
 
   const resumo = useMemo(() => {
+    const summaryTotals = metasSummaryQuery.data?.data?.totals
+    if (summaryTotals) {
+      return {
+        totalMetas: summaryTotals.totalMetas,
+        metasAtivas: summaryTotals.metasAtivas,
+        participantes: summaryTotals.participantes,
+        participantesAtivos: summaryTotals.participantesAtivos,
+        leituras: summaryTotals.leiturasRegistradas,
+        leiturasPeriodo: summaryTotals.leiturasPeriodo,
+        progressoMedio: summaryTotals.progressoMedio,
+        tempoLeituraPeriodo: summaryTotals.tempoLeituraPeriodo,
+      }
+    }
+
     const metas = metasQuery.data?.data ?? []
     const metasAtivas = metas.filter((meta) => meta.ativa)
     const participantes = metas.reduce((acc, meta) => acc + (meta.usuarios?.length ?? 0), 0)
+    const participantesAtivos = metas.reduce((acc, meta) => {
+      if (!meta.usuarios) return acc
+      return acc + meta.usuarios.filter((usuario) => usuario.ativa).length
+    }, 0)
     const leituras = metas.reduce((acc, meta) => acc + (meta.leituras?.length ?? 0), 0)
 
     return {
       totalMetas: metas.length,
       metasAtivas: metasAtivas.length,
       participantes,
+      participantesAtivos,
       leituras,
+      leiturasPeriodo: 0,
+      progressoMedio: 0,
+      tempoLeituraPeriodo: 0,
     }
-  }, [metasQuery.data?.data])
+  }, [metasQuery.data?.data, metasSummaryQuery.data?.data])
+
+  const breakdown = metasSummaryQuery.data?.data?.breakdown ?? {
+    metasPorTipo: {},
+    metasPorUnidade: {},
+  }
+  const history = metasSummaryQuery.data?.data?.history?.leiturasPorDia ?? []
+  const highlights = metasSummaryQuery.data?.data?.highlights ?? {
+    metasEmDestaque: [],
+    metasEmRisco: [],
+  }
+  const rangeDays = metasSummaryQuery.data?.data?.filters?.rangeDays ?? 30
+  const formatInteger = useMemo(() => new Intl.NumberFormat('pt-BR'), [])
+  const formatDecimal = useMemo(
+    () => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }),
+    [],
+  )
 
   const celulasDisponiveis = useMemo(() => {
     const todasCelulas = celulasQuery.data?.data ?? []
@@ -341,38 +381,192 @@ export default function BibliaMetasPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
             <CardTitle>Metas cadastradas</CardTitle>
-            <Badge variant="outline">{resumo.totalMetas}</Badge>
+            <Badge variant="outline">{formatInteger.format(resumo.totalMetas)}</Badge>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              {resumo.metasAtivas} metas ativas atualmente acompanhando células e igrejas.
+              {formatInteger.format(resumo.metasAtivas)} metas ativas em acompanhamento nas igrejas e células vinculadas.
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
-            <CardTitle>Participantes</CardTitle>
-            <Badge variant="outline">{resumo.participantes}</Badge>
+            <CardTitle>Participantes ativos</CardTitle>
+            <Badge variant="outline">
+              {formatInteger.format(resumo.participantesAtivos)}/
+              {formatInteger.format(resumo.participantes)}
+            </Badge>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Soma de discípulos, líderes e auxiliares vinculados às metas vigentes.
+              Discípulos, líderes e auxiliares atualmente engajados com metas de leitura.
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
             <CardTitle>Leituras registradas</CardTitle>
-            <Badge variant="outline">{resumo.leituras}</Badge>
+            <Badge variant="outline">{formatInteger.format(resumo.leituras)}</Badge>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Entradas sincronizadas com o progresso automático desde o seed inicial.
+              {formatInteger.format(resumo.leiturasPeriodo)} leituras nos últimos {rangeDays} dias ·{' '}
+              {formatInteger.format(resumo.tempoLeituraPeriodo)} minutos dedicados.
             </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
+            <CardTitle>Progresso médio</CardTitle>
+            <Badge variant="outline">{formatDecimal.format(resumo.progressoMedio)}%</Badge>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Média do progresso atual considerando o total de participantes registrados.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Distribuição das metas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {metasSummaryQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground mb-1">Por tipo</p>
+                  <ul className="space-y-1">
+                    {Object.entries(breakdown.metasPorTipo).length ? (
+                      Object.entries(breakdown.metasPorTipo).map(([tipo, total]) => (
+                        <li key={tipo} className="flex items-center justify-between text-sm">
+                          <span>{tipo.toLowerCase()}</span>
+                          <Badge variant="outline">{formatInteger.format(total)}</Badge>
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhum tipo registrado.</p>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground mb-1">Por unidade</p>
+                  <ul className="space-y-1">
+                    {Object.entries(breakdown.metasPorUnidade).length ? (
+                      Object.entries(breakdown.metasPorUnidade).map(([unidade, total]) => (
+                        <li key={unidade} className="flex items-center justify-between text-sm">
+                          <span>{unidade.toLowerCase()}</span>
+                          <Badge variant="outline">{formatInteger.format(total)}</Badge>
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhuma unidade registrada.</p>
+                    )}
+                  </ul>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Histórico de leituras</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Tendência dos últimos {rangeDays} dias com base nas leituras sincronizadas.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {metasSummaryQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-5/6" />
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+            ) : history.some((item) => item.leituras > 0) ? (
+              <ScrollArea className="h-56 pr-2">
+                <ul className="space-y-2 text-sm">
+                  {history
+                    .filter((item) => item.leituras > 0)
+                    .map((entry) => (
+                      <li key={entry.date} className="flex items-center justify-between rounded border border-border/40 px-3 py-2">
+                        <span>{new Date(entry.date).toLocaleDateString('pt-BR')}</span>
+                        <span className="font-semibold">
+                          {formatInteger.format(entry.leituras)} leituras ·{' '}
+                          {formatInteger.format(entry.tempoTotal)} min
+                        </span>
+                      </li>
+                    ))}
+                </ul>
+              </ScrollArea>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Nenhuma leitura registrada no período selecionado.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Metas em destaque</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {metasSummaryQuery.isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-5 w-2/3" />
+              </div>
+            ) : (
+              <>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground mb-1">Maior progresso</p>
+                  <ul className="space-y-2">
+                    {highlights.metasEmDestaque.length ? (
+                      highlights.metasEmDestaque.map((meta) => (
+                        <li key={meta.id} className="rounded border border-border/40 p-3">
+                          <p className="text-sm font-semibold">{meta.titulo}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatInteger.format(meta.participantesAtivos)} participantes ativos ·{' '}
+                            {formatDecimal.format(meta.progressoMedio)}% concluído
+                          </p>
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Sem destaques no momento.</p>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground mb-1">Atenção</p>
+                  <ul className="space-y-2">
+                    {highlights.metasEmRisco.length ? (
+                      highlights.metasEmRisco.map((meta) => (
+                        <li key={meta.id} className="rounded border border-border/40 p-3">
+                          <p className="text-sm font-semibold">{meta.titulo}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDecimal.format(meta.progressoMedio)}% concluído ·{' '}
+                            {formatInteger.format(meta.diasRestantes)} dias restantes
+                          </p>
+                        </li>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Nenhuma meta em risco detectada.</p>
+                    )}
+                  </ul>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

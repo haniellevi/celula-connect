@@ -3,6 +3,7 @@
 import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
+import type { MetasLeituraSummary } from '@/lib/queries/biblia'
 import type { Prisma, Testamento, TipoMeta, UnidadeTempo } from '../../prisma/generated/client'
 
 type PaginatedResponse<T> = {
@@ -162,6 +163,38 @@ export function useBibliaMetas(options: UseBibliaMetasOptions = {}) {
 
       const query = params.toString() ? `?${params.toString()}` : ''
       return api.get<PaginatedResponse<MetaLeituraWithRelations>>(`/api/biblia/metas${query}`)
+    },
+  })
+}
+
+export interface UseBibliaMetasSummaryOptions {
+  igrejaId?: string
+  celulaId?: string | null
+  rangeDays?: number
+  enabled?: boolean
+}
+
+type MetasLeituraSummaryResponse = {
+  data: MetasLeituraSummary
+}
+
+export function useBibliaMetasSummary(options: UseBibliaMetasSummaryOptions = {}) {
+  const queryKey = useMemo(
+    () => ['biblia', 'metas', 'summary', options] as const,
+    [options],
+  )
+
+  return useQuery({
+    queryKey,
+    enabled: options.enabled ?? true,
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (options.igrejaId) params.set('igrejaId', options.igrejaId)
+      if (options.celulaId !== undefined) params.set('celulaId', options.celulaId ?? 'null')
+      if (typeof options.rangeDays === 'number') params.set('rangeDays', String(options.rangeDays))
+
+      const query = params.toString() ? `?${params.toString()}` : ''
+      return api.get<MetasLeituraSummaryResponse>(`/api/biblia/metas/summary${query}`)
     },
   })
 }

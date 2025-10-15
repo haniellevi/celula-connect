@@ -830,6 +830,26 @@ export function UserCreditForm({ userId }: { userId: string }) {
 6. **Invalidate caches** properly after mutations
 
 
+## Bíblia
+
+### GET /api/biblia/metas/summary
+
+Aggregated insights for Bible reading goals, combining totals, distribution and recent engagement metrics.
+
+- **Query Params**
+  - `igrejaId` (optional): Scope summary to a specific church; defaults to the authenticated user's church.
+  - `celulaId` (optional): Filter by a single cell (`null` string supports church-wide metas).
+  - `rangeDays` (optional): Days of activity to analyze (7–120). Defaults to 30.
+- **Response**
+  - `filters`: Echoes applied filters and resolved range.
+  - `totals`: Counts for metas, active metas, participants (total/active), total readings, readings within the range, total reading minutes and average progress (%).
+  - `breakdown`: Grouping by `tipoMeta` and `unidade`.
+  - `highlights`: Top metas by progress and metas considered at risk (progress < 50%).
+  - `history.leiturasPorDia`: Daily reading totals within the range (date, count, minutes).
+  - `generatedAt`: ISO timestamp of the aggregation.
+- **Permissions:** Requires authenticated domain user; respects church scope based on logged-in user.
+
+
 ## Testing
 
 ### API Testing Example
