@@ -830,6 +830,45 @@ export function UserCreditForm({ userId }: { userId: string }) {
 6. **Invalidate caches** properly after mutations
 
 
+## Usuários
+
+### GET /api/usuarios
+
+Lista usuários do domínio com filtros por perfil/igreja e suporte completo a paginação.
+
+- **Query Params**
+  - `perfil`: Enum simples ou múltiplo (separado por vírgula) com valores de `PerfilUsuario`.
+  - `igrejaId`: Limita a listagem a uma igreja específica.
+  - `includeInactive`: Quando `true`, inclui usuários inativos; padrão é apenas ativos.
+  - `search`: Busca parcial por nome, e-mail ou telefone (`ILIKE`).
+  - `includeIgreja`: Inclui a relação `igreja` na resposta.
+  - Paginação: `page` (>=1) e `pageSize` (1–100) ou, para compatibilidade, `take`/`skip`.
+  - Ordenação: `orderBy` (`nome`, `createdAt`, `ultimoAcesso`, `perfil`) e `orderDirection` (`asc` | `desc`).
+- **Resposta**
+  - `data`: lista de usuários (respeitando includes).
+  - `meta`: `{ count, totalCount, page, pageSize, pageCount, hasMore, orderBy, orderDirection }`.
+- **Auth:** Requer usuário autenticado via Clerk; escopo definido pela igreja associada ao token.
+
+
+## Células
+
+### GET /api/celulas
+
+Retorna células com filtros hierárquicos e ordenação configurável.
+
+- **Query Params**
+  - `igrejaId`, `liderId`, `supervisorId`, `redeId`: Filtram por relacionamentos diretos.
+  - `ativa`: `true`/`false` para status operacional.
+  - `search`: Busca parcial por nome da célula.
+  - `includeMembers`: Inclui membros com dados de usuário.
+  - Paginação: `page`/`pageSize` (ou `take`/`skip`).
+  - Ordenação: `orderBy` (`nome`, `createdAt`, `proximaReuniao`, `metaMembros`) + `orderDirection`.
+- **Resposta**
+  - `data`: células com as relações solicitadas.
+  - `meta`: `{ count, totalCount, page, pageSize, pageCount, hasMore, orderBy, orderDirection }`.
+- **Auth:** Clerk obrigatório; respeita o escopo da igreja do usuário autenticado.
+
+
 ## Bíblia
 
 ### GET /api/biblia/metas/summary

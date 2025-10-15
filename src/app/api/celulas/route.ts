@@ -2,14 +2,50 @@ import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
-import { createCelula, getCelulaById, listCelulas } from '@/lib/queries/celulas'
+import {
+  countCelulas,
+  createCelula,
+  getCelulaById,
+  listCelulas,
+  type CelulaOrderField,
+} from '@/lib/queries/celulas'
 import type { Prisma } from '../../../../prisma/generated/client'
+
+const celulaOrderableFields = ['nome', 'createdAt', 'proximaReuniao', 'metaMembros'] as const
 
 const listQuerySchema = z.object({
   igrejaId: z.string().optional(),
   liderId: z.string().optional(),
   supervisorId: z.string().optional(),
+  redeId: z.string().optional(),
+  ativa: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (value === undefined) return undefined
+      if (value === 'true') return true
+      if (value === 'false') return false
+      return undefined
+    }),
   search: z.string().optional(),
+  page: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined
+      const parsed = Number(value)
+      if (Number.isNaN(parsed)) return undefined
+      return Math.max(1, Math.floor(parsed))
+    }),
+  pageSize: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined
+      const parsed = Number(value)
+      if (Number.isNaN(parsed)) return undefined
+      return Math.min(100, Math.max(1, Math.floor(parsed)))
+    }),
   take: z
     .string()
     .optional()
@@ -22,6 +58,26 @@ const listQuerySchema = z.object({
     .string()
     .optional()
     .transform((value) => value === 'true'),
+  orderBy: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined
+      const normalized = value.trim().toLowerCase()
+      const match = celulaOrderableFields.find((field) => field.toLowerCase() === normalized)
+      return match as CelulaOrderField | undefined
+    }),
+  orderDirection: z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (!value) return undefined
+      const normalized = value.trim().toLowerCase()
+      if (normalized === 'asc' || normalized === 'desc') {
+        return normalized as 'asc' | 'desc'
+      }
+      return undefined
+    }),
 })
 
 const createCelulaSchema = z.object({
@@ -50,28 +106,72 @@ async function handleGet(request: Request) {
     return NextResponse.json({ error: 'Invalid query parameters', details: parseResult.error.flatten() }, { status: 400 })
   }
 
-  const { igrejaId, liderId, supervisorId, search, take, skip, includeMembers } = parseResult.data
-
-  const celulas = await listCelulas({
+  const {
     igrejaId,
     liderId,
     supervisorId,
+    redeId,
+    ativa,
     search,
+    page,
+    pageSize,
     take,
     skip,
-    include: {
-      igreja: true,
-      lider: true,
-      supervisor: true,
-      membros: includeMembers ? { include: { usuario: true } } : undefined,
-    },
-  })
+    includeMembers,
+    orderBy,
+    orderDirection,
+  } = parseResult.data
+
+  const resolvedTake = take ?? pageSize ?? 20
+  const resolvedSkip = skip ?? ((page ?? 1) - 1) * resolvedTake
+  const resolvedPage =
+    page ?? (resolvedTake > 0 ? Math.floor(resolvedSkip / resolvedTake) + 1 : 1)
+
+  const [celulas, totalCount] = await Promise.all([
+    listCelulas({
+      igrejaId,
+      liderId,
+      supervisorId,
+      redeId,
+      ativa,
+      search,
+      take: resolvedTake,
+      skip: resolvedSkip,
+      orderBy,
+      orderDirection,
+      include: {
+        igreja: true,
+        lider: true,
+        supervisor: true,
+        membros: includeMembers ? { include: { usuario: true } } : undefined,
+      },
+    }),
+    countCelulas({
+      igrejaId,
+      liderId,
+      supervisorId,
+      redeId,
+      ativa,
+      search,
+    }),
+  ])
+
+  const resolvedPageSize = resolvedTake
+  const pageCount =
+    resolvedPageSize > 0 ? Math.max(1, Math.ceil(totalCount / resolvedPageSize)) : 1
+  const hasMore = resolvedSkip + celulas.length < totalCount
 
   return NextResponse.json({
     data: celulas,
     meta: {
       count: celulas.length,
-      hasMore: typeof take === 'number' ? celulas.length === take : false,
+      totalCount,
+      page: resolvedPage,
+      pageSize: resolvedPageSize,
+      pageCount,
+      hasMore,
+      orderBy: orderBy ?? null,
+      orderDirection: orderDirection ?? 'asc',
     },
   })
 }

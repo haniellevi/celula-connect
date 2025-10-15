@@ -2,6 +2,15 @@ import { db } from '@/lib/db'
 import { PerfilUsuario } from '../../../prisma/generated/client'
 import type { Prisma } from '../../../prisma/generated/client'
 
+export type UsuarioOrderField = 'nome' | 'createdAt' | 'ultimoAcesso' | 'perfil'
+
+type UsuarioFilterOptions = {
+  perfil?: PerfilUsuario | PerfilUsuario[]
+  igrejaId?: string
+  includeInactive?: boolean
+  search?: string
+}
+
 export interface ListUsuariosOptions {
   perfil?: PerfilUsuario | PerfilUsuario[]
   igrejaId?: string
@@ -10,27 +19,23 @@ export interface ListUsuariosOptions {
   take?: number
   skip?: number
   include?: Prisma.UsuarioInclude
+  orderBy?: UsuarioOrderField
+  orderDirection?: Prisma.SortOrder
 }
 
-export async function listUsuarios({
+type CountUsuariosOptions = UsuarioFilterOptions
+
+function buildUsuarioWhere({
   perfil,
   igrejaId,
   includeInactive = false,
   search,
-  take,
-  skip,
-  include,
-}: ListUsuariosOptions = {}) {
+}: UsuarioFilterOptions = {}): Prisma.UsuarioWhereInput {
   const where: Prisma.UsuarioWhereInput = {}
 
   if (perfil) {
-    if (Array.isArray(perfil)) {
-      where.perfil = { in: perfil }
-    } else {
-      where.perfil = perfil
-    }
+    where.perfil = Array.isArray(perfil) ? { in: perfil } : perfil
   }
-
   if (igrejaId) where.igrejaId = igrejaId
   if (!includeInactive) where.ativo = true
 
@@ -42,13 +47,44 @@ export async function listUsuarios({
     ]
   }
 
+  return where
+}
+
+export async function listUsuarios({
+  perfil,
+  igrejaId,
+  includeInactive = false,
+  search,
+  take,
+  skip,
+  include,
+  orderBy,
+  orderDirection,
+}: ListUsuariosOptions = {}) {
+  const where = buildUsuarioWhere({ perfil, igrejaId, includeInactive, search })
+
+  const direction: Prisma.SortOrder = orderDirection ?? 'asc'
+  const orderByClause: Prisma.UsuarioOrderByWithRelationInput[] = orderBy
+    ? [{ [orderBy]: direction } as Prisma.UsuarioOrderByWithRelationInput]
+    : [{ igrejaId: 'asc' }, { nome: 'asc' }]
+
   return db.usuario.findMany({
     where,
-    orderBy: [{ igrejaId: 'asc' }, { nome: 'asc' }],
+    orderBy: orderByClause,
     include,
     take,
     skip,
   })
+}
+
+export async function countUsuarios({
+  perfil,
+  igrejaId,
+  includeInactive = false,
+  search,
+}: CountUsuariosOptions = {}) {
+  const where = buildUsuarioWhere({ perfil, igrejaId, includeInactive, search })
+  return db.usuario.count({ where })
 }
 
 export async function getUsuarioById(
