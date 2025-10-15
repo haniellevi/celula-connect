@@ -55,11 +55,7 @@ describe('PUT /api/celulas/[id]', () => {
     )
 
     expect(getCelulaById).toHaveBeenCalledWith('seed-celula-vida')
-    expect(updateCelula).toHaveBeenCalledWith(
-      'seed-celula-vida',
-      { nome: 'Célula Vida Renovada' },
-      expect.any(Object),
-    )
+    expect(updateCelula).toHaveBeenCalledWith('seed-celula-vida', { nome: 'Célula Vida Renovada' })
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload).toEqual({
