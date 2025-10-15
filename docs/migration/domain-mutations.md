@@ -17,3 +17,4 @@ Quando a flag estiver desligada (`false`), esses endpoints retornam `423 Locked`
 1. Antes de iniciar QA ou migração de dados sensível, desligue a flag para impedir alterações enquanto o pipeline roda.
 2. Após concluir a importação/validação, reative a flag para que mutações voltem a funcionar normalmente.
 3. Sempre registre a mudança no acompanhamento (`PLAN/ACOMPANHAMENTO_MIGRACAO.md`) para rastreabilidade.
+4. O front exibe alertas em Admin Settings, SideBar, TopBar e dashboards (Pastor/Líder/Supervisor) informando quando a flag estiver desligada; use-os como feedback rápido durante QA.
