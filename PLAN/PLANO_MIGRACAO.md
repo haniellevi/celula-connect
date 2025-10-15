@@ -1184,27 +1184,36 @@ export async function POST(request: NextRequest) {
 
 #### 4.3 Priorização de APIs
 
-**Críticas (Dias 1-2):**
-1. Auth e usuários
-2. Igrejas e planos
-3. Células CRUD
+> **Contexto atual**: durante a Fase 3 já migramos o núcleo administrativo (`/api/igrejas`, `/api/celulas`, `/api/usuarios`, `/api/devocionais`, `/api/convites`, `/api/avisos`, `/api/public/landing-config`, `/api/admin/landing-config`, `/api/admin/configuracoes`). A Fase 4 foca no restante do domínio e nos fluxos avançados (trilhas/aprovação, webhooks, créditos).
 
-**Importantes (Dias 3-4):**
-4. Trilha com aprovação (PRIORIDADE)
-5. Metas de leitura
-6. Avisos dinâmicos
+**Sprint 1 (Dias 1-2):**
+1. **Trilha de Crescimento**
+   - `POST /api/trilhas/[id]/solicitacoes` (abrir avanço)
+   - `PATCH /api/trilhas/solicitacoes/[id]` (aprovar/rejeitar)
+   - Queries `src/lib/queries/trilhas.ts` (listar pendências, histórico)
+   - Testes de integração cobrindo pastores/supervisores
+2. **Webhooks Clerk / Billing**
+   - Revisar `src/app/api/webhooks/clerk/route.ts`
+   - Implementar dedução de créditos e sincronização de planos migrados
+   - Cobertura com fixtures de eventos (`tests/integration/api/webhooks-clerk-route.test.ts`)
+3. **Domínio de Configuração Dinâmica**
+   - `GET /api/admin/feature-flags` (mapear toggles como `ENABLE_DOMAIN_MUTATIONS`)
+   - Documentar toggle no checklist de QA
 
-**Secundárias (Dias 5-6):**
-7. Bíblia (livros, capítulos)
-8. Convites
-9. Landing page config
-10. Admin
+**Sprint 2 (Dias 3-4):**
+1. Metas de leitura avançadas (relatórios agregados, histórico de progresso)
+2. API de dashboards (endpoint consolidado `/api/dashboard/[perfil]`)
+3. Otimização de filtros (paginadores e ordenação em `/api/usuarios`, `/api/celulas`)
 
-**Entregáveis:**
-- ✅ 15+ API routes funcionais
-- ✅ Validação com Zod
-- ✅ Autenticação com Clerk
-- ✅ Testes de integração
+**Sprint 3 (Dias 5-6):**
+1. Public endpoints (convites, landing preview, biblia)
+2. Integridade do sistema bíblico (carga incremental de livros/capítulos)
+3. Observabilidade (logs estruturados, métricas)
+
+**Entregáveis da Fase 4:**
+- ✅ Cobrir 100% das rotas planejadas com validação Zod e autenticação Clerk.
+- ✅ Testes de integração para os fluxos críticos (trilhas, webhooks, dashboards).
+- ✅ Documentação atualizada (`docs/api.md`, `PLAN/ACOMPANHAMENTO_MIGRACAO.md`).
 
 ---
 

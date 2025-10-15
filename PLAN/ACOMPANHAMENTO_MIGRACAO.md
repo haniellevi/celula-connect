@@ -405,8 +405,8 @@ Tempo Gasto: ~4.2 horas
 - ✅ Queries de comparação e função `getSeedStats()` atualizadas para cobrir os novos módulos (`trilhas`, `avisos`, `convites`, `configurações`).
 
 #### Hand-off imediato
-1. [ ] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, webhooks Clerk)
-2. [ ] Publicar checklist de QA para execução do pipeline de migração antes de cada ambiente
+1. [x] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, webhooks Clerk) — ver `PLAN/PLANO_MIGRACAO.md`, seção **Fase 4 / Priorização de APIs**
+2. [x] Publicar checklist de QA para execução do pipeline de migração antes de cada ambiente — ver `docs/testing/migration-pipeline-checklist.md`
 3. [ ] Alinhar comunicação com o time de produto sobre o encerramento da Fase 3 e próximos marcos
 
 ---

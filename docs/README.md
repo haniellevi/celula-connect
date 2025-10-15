@@ -30,6 +30,10 @@ If you're new to this project, start here:
 ### Best Practices
 - **[Development Guidelines](./development-guidelines.md)** - Code standards, testing, and workflow practices
 
+### Testing & QA
+- **[Migration Pipeline Checklist](./testing/migration-pipeline-checklist.md)** - Passo a passo para validar a importação de dados legados
+- **[Admin QA Guide](./testing/admin-qa-guide.md)** - Roteiro de verificação para o painel administrativo
+
 ## Technology Stack
 
 This SaaS template is built with modern technologies:
