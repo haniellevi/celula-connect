@@ -11,6 +11,8 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import { CreditStatus } from "@/components/credits/credit-status";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose, SheetFooter } from "@/components/ui/sheet";
 import { navigationItems } from "@/components/app/sidebar";
+import { AlertTriangle } from "lucide-react";
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 
 type TopbarProps = {
   onToggleSidebar: () => void;
@@ -18,6 +20,8 @@ type TopbarProps = {
 };
 
 export function Topbar({ onToggleSidebar }: TopbarProps) {
+  const { data } = useDomainFeatureFlags()
+  const domainMutationsDisabled = data?.data?.ENABLE_DOMAIN_MUTATIONS === false
   return (
     <header
       className={cn(
@@ -135,6 +139,14 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           </SignedOut>
         </div>
       </div>
+      {domainMutationsDisabled && (
+        <div className="border-t border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            <p>Mutação de domínio desabilitada. Atualizações administrativas estão temporariamente bloqueadas.</p>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

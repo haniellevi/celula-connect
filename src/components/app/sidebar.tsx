@@ -23,6 +23,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AlertTriangle } from "lucide-react";
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 
 type SidebarProps = {
   collapsed: boolean;
@@ -42,6 +44,8 @@ export const navigationItems = [
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const featureFlags = useDomainFeatureFlags();
+  const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false;
 
   return (
     <aside
@@ -72,6 +76,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </Button>
         </div>
       </div>
+      {!domainMutationsEnabled && (
+        <div className="mx-3 mb-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-4 w-4" />
+            <p>Mutação de domínio desabilitada. Atualizações administrativas estão bloqueadas.</p>
+          </div>
+        </div>
+      )}
       
       <ScrollArea className="flex-1 min-h-0">
         <nav className="flex flex-col gap-1 p-2" aria-label="Navegação principal">

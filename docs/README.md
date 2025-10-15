@@ -33,6 +33,7 @@ If you're new to this project, start here:
 ### Testing & QA
 - **[Migration Pipeline Checklist](./testing/migration-pipeline-checklist.md)** - Passo a passo para validar a importação de dados legados
 - **[Admin QA Guide](./testing/admin-qa-guide.md)** - Roteiro de verificação para o painel administrativo
+- **[Controle de Mutação de Domínio](./migration/domain-mutations.md)** - Como habilitar/desabilitar `ENABLE_DOMAIN_MUTATIONS` e seus impactos
 
 ## Technology Stack
 
