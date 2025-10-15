@@ -15,3 +15,4 @@ export function useDomainUser(enabled: boolean = true) {
     queryFn: () => api.get('/api/domain/me'),
     staleTime: 2 * 60_000,
   })
+}
