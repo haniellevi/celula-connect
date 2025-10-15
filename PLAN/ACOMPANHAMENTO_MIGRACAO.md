@@ -51,6 +51,8 @@ Preparar kickoff da **Fase 4 – Migração de Backend**, validando backlog de A
   **Resultado**: `/api/usuarios` e `/api/celulas` com `page`/`pageSize`, ordenação configurável, metadados avançados e novos filtros (`redeId`, `ativa`, `orderBy`). Hooks `useUsuarios`/`useCelulas` atualizados para os parâmetros extras e documentação revisada.
 - **Data**: 13 de outubro de 2025 (noite) — Endpoints públicos para convites, landing preview e Bíblia publicados.  
   **Resultado**: `/api/public/convites/[token]`, `/api/public/landing-preview` e `/api/public/biblia/*` disponibilizam validação de convites, snapshot da landing e recursos bíblicos sem autenticação. Documentação sincronizada.
+- **Data**: 13 de outubro de 2025 (noite) — Observabilidade base reforçada.  
+  **Resultado**: `withApiLogging` agora inclui `x-request-id`, amostragem configurável de sucessos (`API_LOG_SUCCESS`, `API_LOG_SUCCESS_SAMPLE_RATE`) e documentação dedicada (`docs/observability.md`), preparando o terreno para métricas do Sprint 3.
 - **Data**: 12 de outubro de 2025 (tarde) — Pipeline de migração implementado e Fase 3 encerrada.  
   **Resultado**: `scripts/migrate-data.ts` executa importação idempotente a partir do export legado (`OLD_DB_EXPORT`), cobrindo usuários, igrejas, células, trilhas, comunicação, metas bíblicas e configurações. Documentação e planos atualizados com progresso final.
 - **Data**: 12 de outubro de 2025 (manhã) — Integração do Sprint 4 (comunicação e configurações dinâmicas) na camada cliente.  

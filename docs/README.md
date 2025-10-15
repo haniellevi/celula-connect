@@ -29,6 +29,7 @@ If you're new to this project, start here:
 
 ### Best Practices
 - **[Development Guidelines](./development-guidelines.md)** - Code standards, testing, and workflow practices
+- **[Observability](./observability.md)** - Logging toggles, request tracing, and telemetry roadmap
 
 ### Testing & QA
 - **[Migration Pipeline Checklist](./testing/migration-pipeline-checklist.md)** - Passo a passo para validar a importação de dados legados

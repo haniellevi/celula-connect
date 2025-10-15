@@ -22,6 +22,12 @@ const LEVEL = normalizeLevel(process.env.API_LOG_LEVEL)
 const parsedMinStatus = Number.parseInt(process.env.API_LOG_MIN_STATUS || '', 10)
 const MIN_STATUS = Number.isFinite(parsedMinStatus) ? parsedMinStatus : 400
 
+const SUCCESS_LOG_ALWAYS =
+  ENABLED && String(process.env.API_LOG_SUCCESS || '').toLowerCase() === 'true'
+const parsedSuccessSample = Number.parseFloat(process.env.API_LOG_SUCCESS_SAMPLE_RATE || '')
+const SUCCESS_SAMPLE_RATE =
+  ENABLED && Number.isFinite(parsedSuccessSample) ? Math.min(Math.max(parsedSuccessSample, 0), 1) : 0
+
 function shouldLogLevel(level: LogLevel) {
   return ENABLED && LEVELS[level] >= LEVELS[LEVEL]
 }
@@ -72,6 +78,18 @@ export function isApiLoggingEnabled() {
 
 export function getApiLogMinimumStatus() {
   return MIN_STATUS
+}
+
+export function isSuccessLogAlwaysEnabled() {
+  return SUCCESS_LOG_ALWAYS
+}
+
+export function getSuccessLogSampleRate() {
+  return SUCCESS_SAMPLE_RATE
+}
+
+export function isSuccessLoggingEnabled() {
+  return SUCCESS_LOG_ALWAYS || SUCCESS_SAMPLE_RATE > 0
 }
 
 export type { LogLevel }

@@ -1208,7 +1208,7 @@ export async function POST(request: NextRequest) {
 **Sprint 3 (Dias 5-6):**
 1. Public endpoints (convites, landing preview, biblia)
 2. Integridade do sistema bíblico (carga incremental de livros/capítulos)
-3. Observabilidade (logs estruturados, métricas)
+3. Observabilidade (logs estruturados, métricas, tracing opcional)
 
 **Entregáveis da Fase 4:**
 - ✅ Cobrir 100% das rotas planejadas com validação Zod e autenticação Clerk.

@@ -1,5 +1,15 @@
 import type { NextRequest } from 'next/server'
-import { getApiLogMinimumStatus, isApiLoggingEnabled, logDebug, logError, logWarn } from '@/lib/logger'
+import {
+  getApiLogMinimumStatus,
+  getSuccessLogSampleRate,
+  isApiLoggingEnabled,
+  isSuccessLogAlwaysEnabled,
+  isSuccessLoggingEnabled,
+  logDebug,
+  logError,
+  logInfo,
+  logWarn,
+} from '@/lib/logger'
 
 type RouteParams = Record<string, string | string[]>
 
@@ -82,10 +92,16 @@ export function withApiLogging<T extends (...args: unknown[]) => Promise<Respons
 
     const route = options.route || resolvePath(request)
     const method = options.method || request?.method || 'UNKNOWN'
-    const requestId =
+    const incomingRequestId =
+      request?.headers?.get('x-request-id') ??
+      request?.headers?.get('x-amzn-trace-id') ??
+      request?.headers?.get('cf-ray') ??
+      request?.headers?.get('fly-request-id')
+    const generatedRequestId =
       typeof globalThis.crypto?.randomUUID === 'function'
         ? globalThis.crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`
+    const requestId = incomingRequestId || generatedRequestId
     const startedAt = Date.now()
 
     try {
@@ -96,9 +112,25 @@ export function withApiLogging<T extends (...args: unknown[]) => Promise<Respons
 
       const status = response.status
       const durationMs = Date.now() - startedAt
+      const shouldLogSuccess =
+        status < getApiLogMinimumStatus() &&
+        isSuccessLoggingEnabled() &&
+        (isSuccessLogAlwaysEnabled() || Math.random() < getSuccessLogSampleRate())
+
       if (shouldLogStatus(status)) {
         const level = status >= 500 ? logError : logWarn
         level('API response emitted non-success status', {
+          status,
+          method,
+          route,
+          durationMs,
+          requestId,
+          feature: options.feature,
+          params: normalizeParams(resolvedParams),
+          query: resolveSearchParams(request),
+        })
+      } else if (shouldLogSuccess) {
+        logInfo('API response', {
           status,
           method,
           route,
@@ -117,6 +149,14 @@ export function withApiLogging<T extends (...args: unknown[]) => Promise<Respons
           requestId,
           feature: options.feature,
         })
+      }
+
+      try {
+        if (response.headers && !response.headers.has('x-request-id')) {
+          response.headers.set('x-request-id', requestId)
+        }
+      } catch {
+        // ignore header mutation failures (immutable response bodies)
       }
 
       return response as ReturnType<T>
