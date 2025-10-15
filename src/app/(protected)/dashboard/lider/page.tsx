@@ -11,6 +11,7 @@ import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-biblia'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
+import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
 import { useAvisos } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
@@ -23,6 +24,7 @@ export default function DashboardLiderPage() {
   const featureFlags = useDomainFeatureFlags()
   const domainUserQuery = useDomainUser(true)
   const domainUser = domainUserQuery.data?.data
+  const summaryQuery = useDashboardSummary('lider')
 
   useSetPageMetadata({
     title: "Dashboard Líder",
@@ -77,8 +79,19 @@ export default function DashboardLiderPage() {
   )
   const solicitacoes = solicitacoesQuery.data?.data ?? []
   const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
+  const summaryStats = summaryQuery.data?.data.stats ?? {}
+  const totalCelulasSummary = summaryStats.totalCelulas ?? celulasParaExibir.length
+  const membrosAtivosSummary =
+    summaryStats.membrosAtivos ??
+    celulasParaExibir.reduce(
+      (acc, celula) => acc + (celula.membros?.filter((membro) => membro.ativo).length ?? 0),
+      0,
+    )
+  const convitesPendentesSummary = summaryStats.convitesPendentes ?? convitesPendentes.length
+  const solicitacoesPendentesSummary =
+    summaryStats.solicitacoesPendentes ?? solicitacoes.filter((item) => item.status === 'PENDENTE').length
 
-  if (celulasQuery.isLoading) {
+  if (celulasQuery.isLoading || summaryQuery.isLoading) {
     return (
       <div className="grid gap-6">
         <Skeleton className="h-32" />
@@ -185,7 +198,7 @@ export default function DashboardLiderPage() {
                   </div>
                   <div>
                     <p className="text-xs uppercase text-muted-foreground">Pendentes</p>
-                    <p className="text-2xl font-semibold">{convitesPendentes.length}</p>
+                    <p className="text-2xl font-semibold">{convitesPendentesSummary}</p>
                   </div>
                 </div>
                 <ul className="space-y-2">

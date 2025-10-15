@@ -17,6 +17,7 @@ import { useDevocionais } from '@/hooks/use-devocionais'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
+import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
 
 export default function DashboardPastorPage() {
   const igrejasQuery = useIgrejas({ includeCelulas: true, includePlano: true })
@@ -44,6 +45,7 @@ export default function DashboardPastorPage() {
     take: 5,
     enabled: Boolean(domainUser),
   })
+  const summaryQuery = useDashboardSummary('pastor')
   const convitesQuery = useConvites({
     includeCelula: true,
     includeConvidadoPor: true,
@@ -69,13 +71,16 @@ export default function DashboardPastorPage() {
     devocionaisQuery.isLoading ||
     avisosQuery.isLoading ||
     convitesQuery.isLoading ||
-    domainUserQuery.isLoading
+    domainUserQuery.isLoading ||
+    summaryQuery.isLoading
   const featureFlags = useDomainFeatureFlags()
   const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
-  const totalIgrejas = igrejasQuery.data?.data.length ?? 0
-  const totalCelulas = celulasQuery.data?.data.length ?? 0
-  const totalMembros = (celulasQuery.data?.data ?? []).reduce((acc, celula) => acc + (celula.membros?.length ?? 0), 0)
+  const summaryStats = summaryQuery.data?.data.stats ?? {}
+
+  const totalIgrejas = summaryStats.totalIgrejas ?? igrejasQuery.data?.data.length ?? 0
+  const totalCelulas = summaryStats.totalCelulas ?? celulasQuery.data?.data.length ?? 0
+  const totalMembros = summaryStats.totalDiscipulos ?? (celulasQuery.data?.data ?? []).reduce((acc, celula) => acc + (celula.membros?.length ?? 0), 0)
 
   const contagemPorPerfil = useMemo(() => {
     const usuarios = usuariosQuery.data?.data ?? []

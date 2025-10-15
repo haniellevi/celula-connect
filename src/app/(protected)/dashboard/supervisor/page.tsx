@@ -13,6 +13,7 @@ import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
+import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
 
 function formatDate(date?: string | Date | null) {
   if (!date) return "Sem data definida"
@@ -27,6 +28,8 @@ export default function DashboardSupervisorPage() {
   const domainUserQuery = useDomainUser(true)
   const domainUser = domainUserQuery.data?.data
   const solicitacoesPendentesQuery = useTrilhaSolicitacoes({ scope: 'pendentes', take: 5 })
+  const featureFlags = useDomainFeatureFlags()
+  const summaryQuery = useDashboardSummary('supervisor')
 
   useSetPageMetadata({
     title: "Dashboard Supervisor",
@@ -58,9 +61,10 @@ export default function DashboardSupervisorPage() {
     enabled: Boolean(domainUser),
   })
 
-  const totalCelulas = celulasSupervisionadas.length
-  const totalMembros = celulasSupervisionadas.reduce((acc, celula) => acc + (celula.membros?.length ?? 0), 0)
-  const mediaPresenca = (() => {
+  const summaryStats = summaryQuery.data?.data.stats ?? {}
+  const totalCelulas = summaryStats.totalCelulas ?? celulasSupervisionadas.length
+  const totalMembros = summaryStats.membrosAtivos ?? celulasSupervisionadas.reduce((acc, celula) => acc + (celula.membros?.length ?? 0), 0)
+  const mediaPresenca = summaryStats.mediaPresenca ?? (() => {
     const reunioes = celulasSupervisionadas.flatMap((celula) => celula.reunioes ?? [])
     if (!reunioes.length) return 0
     const totalPresentes = reunioes.reduce((acc, reuniao) => acc + (reuniao.presentes ?? 0), 0)
@@ -76,7 +80,7 @@ export default function DashboardSupervisorPage() {
   const solicitacoesPendentes = solicitacoesPendentesQuery.data?.data ?? []
   const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
-  if (isLoading) {
+  if (isLoading || summaryQuery.isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Skeleton className="h-28" />
