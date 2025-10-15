@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { Prisma } from '../../../../../prisma/generated/client'
+import { Prisma, PerfilUsuario } from '../../../../../prisma/generated/client'
 import { db } from "@/lib/db";
 import { refreshUserCredits, addUserCredits } from "@/lib/credits/validate-credits";
 import { SUBSCRIPTION_PLANS } from "@/lib/clerk/subscription-utils";
@@ -59,12 +59,29 @@ async function handleClerkWebhook(req: Request) {
     try {
       const primaryEmail = email_addresses.find(email => email.id === evt.data.primary_email_address_id);
       
-      // Create user in database
+      // Create SaaS user (starter-kit)
       const user = await db.user.create({
         data: {
           clerkId: id,
           email: primaryEmail?.email_address || null,
           name: `${first_name || ''} ${last_name || ''}`.trim() || null,
+        },
+      });
+
+      // Create domain user (Igreja) if missing
+      await db.usuario.upsert({
+        where: { clerkUserId: id },
+        update: {
+          nome: `${first_name || ''} ${last_name || ''}`.trim() || `Usuário ${id}`,
+          email: primaryEmail?.email_address || null,
+          ativo: true,
+        },
+        create: {
+          clerkUserId: id,
+          nome: `${first_name || ''} ${last_name || ''}`.trim() || `Usuário ${id}`,
+          email: primaryEmail?.email_address || null,
+          perfil: PerfilUsuario.DISCIPULO,
+          ativo: true,
         },
       });
 
@@ -95,6 +112,14 @@ async function handleClerkWebhook(req: Request) {
         data: {
           email: primaryEmail?.email_address || null,
           name: `${first_name || ''} ${last_name || ''}`.trim() || null,
+        },
+      });
+
+      await db.usuario.updateMany({
+        where: { clerkUserId: id },
+        data: {
+          email: primaryEmail?.email_address || null,
+          nome: `${first_name || ''} ${last_name || ''}`.trim() || undefined,
         },
       });
 
@@ -138,6 +163,11 @@ async function handleClerkWebhook(req: Request) {
     try {
       await db.user.delete({
         where: { clerkId: evt.data.id! },
+      });
+
+      await db.usuario.updateMany({
+        where: { clerkUserId: evt.data.id! },
+        data: { ativo: false },
       });
 
       console.log('User deleted successfully');

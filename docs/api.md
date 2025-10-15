@@ -296,6 +296,17 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 - **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?`, `observacoesLider?`, `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.
 - **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta` e atribui automaticamente o supervisor responsável (ou o valor enviado).
 
+### Feature Flags (Admin)
+
+#### GET /api/admin/feature-flags
+- **Perfis autorizados:** Pastor.
+- **Resposta:** objeto com pares `chave: boolean` representando flags (`feature_flag` em `ConfiguracaoSistema`).
+
+#### PUT /api/admin/feature-flags
+- **Perfis autorizados:** Pastor.
+- **Body:** `{ "key": "ENABLE_DOMAIN_MUTATIONS", "enabled": true, "descricao?": "texto" }`
+- **Comportamento:** persiste valor em `ConfiguracaoSistema` (`categoria=feature_flag`, `tipoCampo=boolean`) e devolve snapshot atualizado.
+
 ### Landing Page Configurável
 
 #### GET /api/public/landing-config
