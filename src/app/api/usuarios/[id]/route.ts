@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
-import { requireDomainUser, hasRole, unauthorizedResponse } from '@/lib/domain-auth'
+import {
+  requireDomainUser,
+  hasRole,
+  unauthorizedResponse,
+  assertDomainMutationsEnabled,
+} from '@/lib/domain-auth'
 import { getUsuarioById, updateUsuario } from '@/lib/queries/usuarios'
 import { PerfilUsuario } from '../../../../../prisma/generated/client'
 import { adaptRouteWithParams } from '@/lib/api/params'
@@ -31,6 +36,14 @@ async function handlePatch(request: Request, params: { id: string }) {
   const usuario = await getUsuarioById(usuarioId)
   if (!usuario) {
     return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+  }
+
+  const mutationsEnabled = await assertDomainMutationsEnabled()
+  if (!mutationsEnabled) {
+    return NextResponse.json(
+      { error: 'Mutação de domínio temporariamente desabilitada. Contate o administrador.' },
+      { status: 423 },
+    )
   }
 
   const body = await request.json().catch(() => null)

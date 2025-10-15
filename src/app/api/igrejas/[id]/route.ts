@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { deleteIgreja, getIgrejaById, updateIgreja } from '@/lib/queries/igrejas'
-import { requireDomainUser, hasRole, unauthorizedResponse } from '@/lib/domain-auth'
+import {
+  requireDomainUser,
+  hasRole,
+  unauthorizedResponse,
+  assertDomainMutationsEnabled,
+} from '@/lib/domain-auth'
 import { PerfilUsuario, StatusAssinatura } from '../../../../../prisma/generated/client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
@@ -30,6 +35,14 @@ async function handlePut(request: Request, params: { id: string }) {
   const igrejaId = params.id
   if (!igrejaId) {
     return NextResponse.json({ error: 'ID da igreja é obrigatório' }, { status: 400 })
+  }
+
+  const mutationsEnabled = await assertDomainMutationsEnabled()
+  if (!mutationsEnabled) {
+    return NextResponse.json(
+      { error: 'Mutação de domínio temporariamente desabilitada. Contate o administrador.' },
+      { status: 423 },
+    )
   }
 
   const body = await request.json().catch(() => null)
@@ -67,6 +80,14 @@ async function handleDelete(_request: Request, params: { id: string }) {
   const igreja = await getIgrejaById(params.id)
   if (!igreja) {
     return NextResponse.json({ error: 'Igreja não encontrada' }, { status: 404 })
+  }
+
+  const mutationsEnabled = await assertDomainMutationsEnabled()
+  if (!mutationsEnabled) {
+    return NextResponse.json(
+      { error: 'Mutação de domínio temporariamente desabilitada. Contate o administrador.' },
+      { status: 423 },
+    )
   }
 
   await deleteIgreja(igreja.id)
