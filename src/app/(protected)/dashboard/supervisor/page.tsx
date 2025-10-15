@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAvisos } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 
 function formatDate(date?: string | Date | null) {
@@ -73,6 +74,7 @@ export default function DashboardSupervisorPage() {
   }, [celulasSupervisionadas, convitesQuery.data?.data])
   const convitesPendentes = convitesFiltrados.filter((convite) => !convite.usado)
   const solicitacoesPendentes = solicitacoesPendentesQuery.data?.data ?? []
+  const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
   if (isLoading) {
     return (
@@ -101,6 +103,19 @@ export default function DashboardSupervisorPage() {
 
   return (
     <div className="space-y-6">
+      {domainMutationsEnabled ? null : (
+        <Card className="border-destructive/60 bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="text-destructive text-base">Mutação de domínio desabilitada</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-destructive/80">
+              Atualizações administrativas estão bloqueadas. Centralize validações e aguarde liberação da liderança antes de tentar editar igrejas, células ou usuários.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>

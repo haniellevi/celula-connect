@@ -10,6 +10,7 @@ import { useCelulas } from '@/hooks/use-celulas'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-biblia'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useAvisos } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
@@ -19,6 +20,7 @@ export default function DashboardLiderPage() {
   const celulasQuery = useCelulas({ includeMembers: true })
   const bibliaMetasQuery = useBibliaMetas({ includeUsuarios: true, take: 12 })
   const solicitacoesQuery = useTrilhaSolicitacoes({ scope: 'lider', take: 5 })
+  const featureFlags = useDomainFeatureFlags()
   const domainUserQuery = useDomainUser(true)
   const domainUser = domainUserQuery.data?.data
 
@@ -74,6 +76,7 @@ export default function DashboardLiderPage() {
     [convites],
   )
   const solicitacoes = solicitacoesQuery.data?.data ?? []
+  const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
   if (celulasQuery.isLoading) {
     return (
@@ -102,6 +105,19 @@ export default function DashboardLiderPage() {
 
   return (
     <div className="space-y-6">
+      {domainMutationsEnabled ? null : (
+        <Card className="border-destructive/60 bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="text-destructive text-base">Mutação de domínio desabilitada</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-destructive/80">
+              Atualizações de igreja, célula e usuário estão temporariamente bloqueadas pela liderança. Conclua as revisões pendentes e aguarde a reativação da flag.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>

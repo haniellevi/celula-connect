@@ -4,8 +4,13 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, DollarSign, ArrowRight, ShieldCheck } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
+import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 
 export default function AdminSettingsPage() {
+  const { data } = useDomainFeatureFlags()
+  const flags = data?.data ?? {}
+  const domainMutationsDisabled = flags.ENABLE_DOMAIN_MUTATIONS === false
   return (
     <div className="space-y-6">
       <div>
@@ -14,6 +19,20 @@ export default function AdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {domainMutationsDisabled ? (
+          <Card className="md:col-span-3 border-destructive/60 bg-destructive/10 p-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-1 h-5 w-5 text-destructive" />
+              <div>
+                <h2 className="text-lg font-semibold text-destructive">Mutação de domínio desabilitada</h2>
+                <p className="text-sm text-destructive/80">
+                  As rotas de atualização de igreja, célula e usuário estão bloqueadas até que a feature flag seja reativada.
+                  Use a seção "Feature Flags" abaixo para habilitar novamente quando o QA autorizar.
+                </p>
+              </div>
+            </div>
+          </Card>
+        ) : null}
         <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
