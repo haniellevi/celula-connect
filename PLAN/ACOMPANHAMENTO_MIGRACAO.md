@@ -408,6 +408,7 @@ Tempo Gasto: ~4.2 horas
 1. [x] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, webhooks Clerk) — ver `PLAN/PLANO_MIGRACAO.md`, seção **Fase 4 / Priorização de APIs**
 2. [x] Publicar checklist de QA para execução do pipeline de migração antes de cada ambiente — ver `docs/testing/migration-pipeline-checklist.md`
 3. [x] Alinhar comunicação com o time de produto sobre o encerramento da Fase 3 e próximos marcos — atualização enviada ao canal #produto em 12/10/2025 às 18h (registro interno)
+4. [x] Implementar toggle operacional `ENABLE_DOMAIN_MUTATIONS` consumido pelas rotas de igreja/célula/usuário (Fase 4, Sprint 1 — concluído em 13/10/2025)
 
 ---
 
