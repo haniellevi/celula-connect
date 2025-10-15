@@ -279,6 +279,12 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 #### DELETE /api/convites/[token]
 - Remove convite emitido por células sob responsabilidade do usuário autenticado.
 
+#### GET /api/public/convites/[token]
+- **Autenticação:** Não requerida.
+- **Query params:** `includeCelula`, `includeIgreja`.
+- **Resposta:** snapshot sanitizado do convite (`nomeConvidado`, `emailConvidado`, `cargo`, `dataExpiracao`) e resumo opcional da célula/igreja.
+- **Erros:** `404` (inexistente) e `410` (expirado ou já utilizado).
+
 ### Trilha de Crescimento
 
 #### POST /api/trilhas/[trilhaId]/solicitacoes
@@ -313,6 +319,11 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 - **Autenticação:** Não requerida
 - **Query params:** `section` (ex.: `hero`)
 - **Uso:** hidratam conteúdo dinâmico do marketing site.
+
+#### GET /api/public/landing-preview
+- **Autenticação:** Não requerida
+- **Uso:** preview consolidado para o builder e smoke tests da landing page.
+- **Retorno:** `{ hero, plans, generatedAt }`, onde `hero` agrega pares chave/valor e `plans` espelha o snapshot simplificado de `getActivePlansSorted`.
 
 #### GET /api/admin/landing-config
 - **Perfis autorizados:** Pastor, Supervisor
@@ -870,6 +881,20 @@ Retorna células com filtros hierárquicos e ordenação configurável.
 
 
 ## Bíblia
+
+### GET /api/public/biblia/livros
+- **Autenticação:** Não requerida.
+- **Query params:** `testamento`, `search`, `take`, `skip`.
+- **Resposta:** livros com `id`, `nome`, `abreviacao`, `testamento`, `ordem`.
+
+### GET /api/public/biblia/livros/[id]/capitulos
+- **Autenticação:** Não requerida.
+- **Query params:** `includeVersiculos`, `take`, `skip`.
+- **Resposta:** capítulos do livro e, opcionalmente, versículos (`id`, `numero`, `texto`).
+
+### GET /api/public/biblia/capitulos/[id]
+- **Autenticação:** Não requerida.
+- **Resposta:** capítulo único com metadados do livro e lista completa de versículos.
 
 ### GET /api/biblia/metas/summary
 
