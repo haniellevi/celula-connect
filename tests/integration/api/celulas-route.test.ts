@@ -6,6 +6,7 @@ import { getCelulaById, updateCelula } from '@/lib/queries/celulas'
 jest.mock('@/lib/domain-auth', () => ({
   requireDomainUser: jest.fn(),
   unauthorizedResponse: jest.fn(),
+  assertDomainMutationsEnabled: jest.fn(),
 }))
 
 jest.mock('@/lib/queries/celulas', () => ({
@@ -14,9 +15,10 @@ jest.mock('@/lib/queries/celulas', () => ({
   deleteCelula: jest.fn(),
 }))
 
-const { requireDomainUser, unauthorizedResponse } = require('@/lib/domain-auth') as {
+const { requireDomainUser, unauthorizedResponse, assertDomainMutationsEnabled } = require('@/lib/domain-auth') as {
   requireDomainUser: jest.Mock
   unauthorizedResponse: jest.Mock
+  assertDomainMutationsEnabled: jest.Mock
 }
 
 describe('PUT /api/celulas/[id]', () => {
@@ -25,10 +27,12 @@ describe('PUT /api/celulas/[id]', () => {
     unauthorizedResponse.mockReset()
     ;(getCelulaById as jest.Mock).mockReset()
     ;(updateCelula as jest.Mock).mockReset()
+    assertDomainMutationsEnabled.mockReset()
 
     unauthorizedResponse.mockImplementation(() =>
       NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
     )
+    assertDomainMutationsEnabled.mockResolvedValue(true)
   })
 
   it('permite atualização quando pastor está autenticado', async () => {
