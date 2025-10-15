@@ -25,11 +25,11 @@
 ## 📈 VISÃO GERAL DO PROGRESSO
 
 ```
-███████████████████░░░░░░ 50% Completo (2/8 fases + Fase 3 em andamento)
+███████████████████████░░ 60% Completo (3/8 fases concluídas, próxima fase em preparação)
 
 Fase 1: ████████████████████ 100% ✅ CONCLUÍDA
 Fase 2: ████████████████████ 100% ✅ CONCLUÍDA
-Fase 3: ██████████████░░░░░░  75% 🚧 EM ANDAMENTO
+Fase 3: ████████████████████ 100% ✅ CONCLUÍDA
 Fase 4: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
 Fase 5: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
 Fase 6: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
@@ -42,9 +42,11 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 ## 🎯 STATUS ATUAL
 
 ### 🔥 Prioridade Imediata
-**Sprint 4 – Dia 1**: Consolidar módulos de comunicação (avisos/devocionais) e iniciar preparação das rotas públicas/admin relacionadas às configurações dinâmicas.
+Preparar kickoff da **Fase 4 – Migração de Backend**, validando backlog de APIs restantes (trilha/aprovação, webhooks Clerk, endpoints públicos) e definindo responsáveis.
 
 ### ✅ Últimas Tarefas Concluídas
+- **Data**: 12 de outubro de 2025 (tarde) — Pipeline de migração implementado e Fase 3 encerrada.  
+  **Resultado**: `scripts/migrate-data.ts` executa importação idempotente a partir do export legado (`OLD_DB_EXPORT`), cobrindo usuários, igrejas, células, trilhas, comunicação, metas bíblicas e configurações. Documentação e planos atualizados com progresso final.
 - **Data**: 12 de outubro de 2025 (manhã) — Integração do Sprint 4 (comunicação e configurações dinâmicas) na camada cliente.  
   **Resultado**: hooks `useAvisos`, `useDevocionais`, `useConvites`, `useLandingConfig` e `useDomainUser` publicados; dashboards (discípulo, líder, supervisor, pastor) passaram a consumir avisos/devocionais/convites; landing page carrega headline/CTA direto de `LandingPageConfig`; novo builder protegido em `/dashboard/pastor/landing-config` com formulários validados para hero + parâmetros de sistema; documentação REST (`docs/api.md`) atualizada.
 - **Data**: 11 de outubro de 2025 (noite) — Finalização do Sprint 3 e adequação das rotas tipadas do App Router.  
@@ -390,9 +392,9 @@ Tempo Gasto: ~4.2 horas
 
 ---
 
-### 🚧 FASE 3: MIGRAÇÃO DE BANCO DE DADOS (EM ANDAMENTO)
+### ✅ FASE 3: MIGRAÇÃO DE BANCO DE DADOS (CONCLUÍDA)
 
-**Status**: 🚧 Em andamento — modelagem expandida (trilhas/comunicação/convites/configurações) e Sprint 3 concluído (sistema bíblico + queries) em 11/10 às 21:45  
+**Status**: ✅ Concluída em 12/10/2025 — pipeline de migração implementado, dados estruturados importados e documentação atualizada.  
 **Duração Planejada**: 4 dias  
 **Tarefas Totais**: 33 modelos Prisma
 
@@ -402,17 +404,16 @@ Tempo Gasto: ~4.2 horas
 - ✅ Strict mode habilitado no `tsconfig.json` e scripts de seed disponíveis no `package.json`.
 - ✅ Queries de comparação e função `getSeedStats()` atualizadas para cobrir os novos módulos (`trilhas`, `avisos`, `convites`, `configurações`).
 
-#### Próximas Ações
-1. [x] Sprint 1: Criar modelos core (Usuários, Igrejas, Planos) — validar contra seeds `seed-user-*`, `seed-igreja-central`, `seed-plano-basico`
-2. [x] Sprint 2: Criar modelos de células e trilha — reutilizar fixtures `seed-celula-vida`, `seed-membro-*`
-3. [x] Sprint 3: Criar modelos do sistema bíblico (ampliar versículos + metas avançadas)
-4. [x] Sprint 4: Criar modelos de comunicação (avisos/devocionais), convites e configurações avançadas + integrar rotas correspondente no front/admin
+#### Hand-off imediato
+1. [ ] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, webhooks Clerk)
+2. [ ] Publicar checklist de QA para execução do pipeline de migração antes de cada ambiente
+3. [ ] Alinhar comunicação com o time de produto sobre o encerramento da Fase 3 e próximos marcos
 
 ---
 
 ### ⏸️ FASE 4: MIGRAÇÃO DE BACKEND (AGUARDANDO)
 
-**Status**: ⏸️ Aguardando conclusão da Fase 3  
+**Status**: ⏸️ Aguardando kickoff (Fase 3 encerrada)  
 **Duração Planejada**: 6 dias  
 **Tarefas Totais**: 15+ API Routes
 
@@ -549,7 +550,7 @@ Tempo Gasto: ~4.2 horas
 |------|----------------|------------|-----------|
 | Fase 1 | 5 | 5 | 100% ✅ |
 | Fase 2 | 15 | 15 | 100% ✅ |
-| Fase 3 | ~40 | 24 | 60% 🚧 |
+| Fase 3 | ~40 | ~40 | 100% ✅ |
 | Fase 4 | ~25 | 0 | 0% ⏸️ |
 | Fase 5 | ~100 | 0 | 0% ⏸️ |
 | Fase 6 | 8 | 0 | 0% ⏸️ |
@@ -559,8 +560,8 @@ Tempo Gasto: ~4.2 horas
 ### Estatísticas Gerais
 
 - **Total de Tarefas**: ~216
-- **Tarefas Concluídas**: 44
-- **Progresso Global**: ~20.4%
+- **Tarefas Concluídas**: 60
+- **Progresso Global**: ~27.8%
 - **Dias Trabalhados**: 3
 - **Dias Restantes**: 31
 
@@ -571,7 +572,8 @@ Tempo Gasto: ~4.2 horas
 ### Meta da Semana Atual (Semana 1)
 - [x] ✅ Concluir Fase 1: Planejamento
 - [x] ✅ Concluir Fase 2: Setup do Projeto
-- [x] 🔄 Iniciar Fase 3: Migração de Banco (em curso)
+- [x] ✅ Concluir Fase 3: Migração de Banco
+- [ ] 🚩 Preparar kickoff da Fase 4 (definir backlog e responsáveis)
 
 ### Próximas Milestones
 

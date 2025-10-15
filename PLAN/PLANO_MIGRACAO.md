@@ -989,7 +989,7 @@ Celula-Connect/
 
 **Entregáveis (status atual):**
 - ✅ Projeto Next.js configurado (base Next 15 + Tailwind v4 ativa)
-- ⏳ Prisma schema completo (depende da modelagem das 33 tabelas a partir dos docs do Igreja-12)
+- ✅ Prisma schema completo (33 modelos mapeados e sincronizados com PostgreSQL)
 - ✅ Clerk integrado (provider, middleware, OAuth Google/GitHub ativados; aguarda chaves finais)
 - ✅ Estrutura de pastas organizada
 
@@ -1001,7 +1001,7 @@ Celula-Connect/
 
 #### 3.1 Priorização de Migração
 
-**Status Atual**: ⏸️ Não iniciado — pré-requisitos satisfeitos; aguardando kickoff do Sprint 1.
+**Status Atual**: ✅ Concluída em 12/10/2025 — modelos migrados, seeds atualizadas e pipeline de dados publicado.
 
 **Pré-requisitos confirmados (10/10)**
 - ✅ Seeds `seed-*` aplicadas no Supabase dev (`npm run db:seed`) para servir de baseline em testes de migração.
@@ -1025,25 +1025,25 @@ SELECT COUNT(*) AS reunioes_seed FROM "ReuniaoCelula" WHERE celulaId = 'seed-cel
 ```
 
 **Sprint 1 - Core (Dia 1):**
-- [ ] Usuários e autenticação _(comparar dados reais vs seeds `seed-user-*`)_
-- [ ] Igrejas e planos _(validar com `seed-igreja-central` / `seed-plano-basico`)_
-- [ ] Células básicas _(usar `seed-celula-vida` para smoke tests)_
+- [x] Usuários e autenticação _(comparar dados reais vs seeds `seed-user-*`)_
+- [x] Igrejas e planos _(validar com `seed-igreja-central` / `seed-plano-basico`)_
+- [x] Células básicas _(usar `seed-celula-vida` para smoke tests)_
 
 **Sprint 2 - Funcionalidades Críticas (Dia 2):**
-- [ ] Trilha de crescimento (com aprovação)
-- [ ] Membros de célula _(cross-check com fixtures `seed-membro-*`)_
-- [ ] Reuniões _(usar seed inicial para testar dashboards e relatórios)_
+- [x] Trilha de crescimento (com aprovação)
+- [x] Membros de célula _(cross-check com fixtures `seed-membro-*`)_
+- [x] Reuniões _(usar seed inicial para testar dashboards e relatórios)_
 
 **Sprint 3 - Sistema Bíblico (Dia 3):**
-- [ ] Livros, capítulos, versículos
-- [ ] Metas de leitura
-- [ ] Progresso automático
+- [x] Livros, capítulos, versículos
+- [x] Metas de leitura
+- [x] Progresso automático
 
 **Sprint 4 - Comunicação e Outros (Dia 4):**
-- [ ] Avisos dinâmicos
-- [ ] Devocionais
-- [ ] Convites
-- [ ] Configurações
+- [x] Avisos dinâmicos
+- [x] Devocionais
+- [x] Convites
+- [x] Configurações
 
 #### 3.2 Script de Migração de Dados
 
@@ -1081,9 +1081,9 @@ async function main() {
 **Entregáveis (planejados):**
 - ✅ Schema Prisma base (modelos principais e seeds de célula)
 - ✅ Seeds de referência aplicadas em ambiente dev (Supabase)
-- ⏳ Schema Prisma completo (31 modelos)
-- ⏳ Dados migrados de D1 para PostgreSQL
-- ⏳ Scripts de migração documentados
+- ✅ Schema Prisma completo (31 modelos)
+- ✅ Dados migrados de D1 para PostgreSQL (pipeline `scripts/migrate-data.ts`)
+- ✅ Scripts de migração documentados
 - ⏳ Backup de dados antigos
 
 ---
