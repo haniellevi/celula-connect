@@ -186,3 +186,120 @@ export function useDeleteAviso() {
     },
   })
 }
+
+const PRIORIDADE_ORDER: Record<PrioridadeAviso, number> = {
+  URGENTE: 0,
+  ALTA: 1,
+  NORMAL: 2,
+  BAIXA: 3,
+}
+
+type AvisoScope = 'usuario' | 'celula' | 'igreja' | 'geral'
+
+export interface UseAvisosFeedContext {
+  usuarioId?: string
+  celulaIds?: string[]
+  igrejaId?: string
+}
+
+export interface AvisoFeedItem {
+  aviso: AvisoWithRelations
+  status: 'ATIVO' | 'AGENDADO' | 'EXPIRADO'
+  scope: AvisoScope
+  scopeLabel: string
+  dataInicio: Date
+  dataFim: Date | null
+  isUrgente: boolean
+  isAgendado: boolean
+}
+
+export function useAvisosFeed(
+  options: UseAvisosOptions = {},
+  context: UseAvisosFeedContext = {},
+) {
+  const query = useAvisos({
+    ...options,
+    includeIgreja: true,
+    includeCelula: true,
+    includeUsuario: true,
+  })
+
+  const items = useMemo<AvisoFeedItem[]>(() => {
+    const now = new Date()
+    const avisos = query.data?.data ?? []
+
+    return avisos
+      .map((aviso) => {
+        const dataInicio = new Date(aviso.dataInicio)
+        const dataFim = aviso.dataFim ? new Date(aviso.dataFim) : null
+        const ativo = aviso.ativo && dataInicio <= now && (!dataFim || dataFim >= now)
+        const agendado = aviso.ativo && dataInicio > now
+        const expirado = !aviso.ativo || (!!dataFim && dataFim < now)
+
+        let scope: AvisoScope = 'geral'
+        let scopeLabel = 'Comunicado geral'
+        let scopeRank = 3
+
+        if (aviso.usuarioId) {
+          scope = 'usuario'
+          const matches = aviso.usuarioId === context.usuarioId
+          scopeLabel = matches ? 'Direcionado a você' : 'Usuário específico'
+          scopeRank = matches ? 0 : 3
+        } else if (aviso.celulaId) {
+          scope = 'celula'
+          const matchCelula = context.celulaIds?.includes(aviso.celulaId) ?? false
+          scopeLabel = matchCelula ? 'Sua célula' : 'Outras células'
+          scopeRank = matchCelula ? 1 : 2
+        } else if (aviso.igrejaId) {
+          scope = 'igreja'
+          const matchIgreja = aviso.igrejaId === context.igrejaId
+          scopeLabel = matchIgreja ? 'Sua igreja' : 'Rede'
+          scopeRank = matchIgreja ? 2 : 3
+        }
+
+        const priorityRank = PRIORIDADE_ORDER[aviso.prioridade]
+        const statusRank = ativo ? 0 : agendado ? 1 : 2
+        const timeRank = agendado ? dataInicio.getTime() : -dataInicio.getTime()
+
+        return {
+          aviso,
+          status: ativo ? 'ATIVO' : agendado ? 'AGENDADO' : 'EXPIRADO',
+          scope,
+          scopeLabel,
+          dataInicio,
+          dataFim,
+          isUrgente: aviso.prioridade === PrioridadeAviso.URGENTE,
+          isAgendado: agendado,
+          _priorityRank: priorityRank,
+          _statusRank: statusRank,
+          _scopeRank: scopeRank,
+          _timeRank: timeRank,
+        }
+      })
+      .filter((item) => item.status !== 'EXPIRADO')
+      .sort((a, b) => {
+        if (a._statusRank !== b._statusRank) return a._statusRank - b._statusRank
+        if (a._priorityRank !== b._priorityRank) return a._priorityRank - b._priorityRank
+        if (a._scopeRank !== b._scopeRank) return a._scopeRank - b._scopeRank
+        return a._timeRank - b._timeRank
+      })
+      .slice(0, options.take ?? 5)
+      .map(({ _priorityRank, _statusRank, _scopeRank, _timeRank, ...rest }) => rest)
+  }, [context.celulaIds, context.igrejaId, context.usuarioId, options.take, query.data?.data])
+
+  const urgentCount = useMemo(
+    () => items.filter((item) => item.isUrgente).length,
+    [items],
+  )
+  const upcomingCount = useMemo(
+    () => items.filter((item) => item.isAgendado).length,
+    [items],
+  )
+
+  return {
+    ...query,
+    items,
+    urgentCount,
+    upcomingCount,
+  }
+}

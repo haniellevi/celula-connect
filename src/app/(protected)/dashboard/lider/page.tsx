@@ -12,7 +12,7 @@ import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-bibli
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
-import { useAvisos } from '@/hooks/use-avisos'
+import { useAvisosFeed } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
 
@@ -43,14 +43,21 @@ export default function DashboardLiderPage() {
   }, [celulasQuery.data?.data, user?.id])
 
   const celulasParaExibir = celulasLideradas.length ? celulasLideradas : celulasQuery.data?.data ?? []
-  const avisosQuery = useAvisos({
-    igrejaId: domainUser?.igrejaId ?? undefined,
-    celulaId: celulasLideradas.length === 1 ? celulasLideradas[0]?.id : undefined,
-    includeCelula: true,
-    includeUsuario: true,
-    take: 5,
-    enabled: Boolean(domainUser),
-  })
+  const celulasLideradasIds = useMemo(() => celulasLideradas.map((celula) => celula.id), [celulasLideradas])
+  const avisosFeed = useAvisosFeed(
+    {
+      igrejaId: domainUser?.igrejaId ?? undefined,
+      celulaId: celulasLideradas.length === 1 ? celulasLideradas[0]?.id : undefined,
+      usuarioId: domainUser?.id ?? undefined,
+      take: 8,
+      enabled: Boolean(domainUser),
+    },
+    {
+      usuarioId: domainUser?.id ?? undefined,
+      celulaIds: celulasLideradasIds,
+      igrejaId: domainUser?.igrejaId ?? undefined,
+    },
+  )
   const convitesQuery = useConvites({
     convidadoPorId: domainUser?.id ?? undefined,
     includeCelula: true,
@@ -71,7 +78,7 @@ export default function DashboardLiderPage() {
     })
     return map
   }, [bibliaMetasQuery.data?.data])
-  const avisos = avisosQuery.data?.data ?? []
+  const avisos = avisosFeed.items
   const convites = useMemo(
     () => convitesQuery.data?.data ?? [],
     [convitesQuery.data?.data],
@@ -189,11 +196,11 @@ export default function DashboardLiderPage() {
           <CardHeader>
             <CardTitle>Avisos da liderança</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Mensagens direcionadas para as suas células e equipe imediata.
+              Mensagens priorizadas para as suas células, equipe e comunicados gerais da igreja.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {avisosQuery.isLoading ? (
+            {avisosFeed.isLoading ? (
               <div className="space-y-2">
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-4 w-2/3" />
@@ -201,21 +208,31 @@ export default function DashboardLiderPage() {
               </div>
             ) : avisos.length ? (
               <ul className="space-y-3">
-                {avisos.map((aviso) => (
-                  <li key={aviso.id} className="rounded-lg border border-border/40 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold">{aviso.titulo}</p>
-                      <Badge variant={aviso.prioridade === 'URGENTE' ? 'destructive' : 'outline'}>
-                        {aviso.prioridade}
-                      </Badge>
+                {avisos.map((item) => (
+                  <li key={item.aviso.id} className="rounded-lg border border-border/40 p-3">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold">{item.aviso.titulo}</p>
+                          <p className="text-xs text-muted-foreground">{item.scopeLabel}</p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={item.isUrgente ? 'destructive' : 'outline'}>
+                            {item.aviso.prioridade.toLowerCase()}
+                          </Badge>
+                          <Badge variant={item.status === 'AGENDADO' ? 'secondary' : 'outline'}>
+                            {item.status === 'ATIVO' ? 'ativo' : item.status.toLowerCase()}
+                          </Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Vigência: {item.dataInicio.toLocaleDateString('pt-BR')}
+                        {item.dataFim ? ` até ${item.dataFim.toLocaleDateString('pt-BR')}` : ''}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {aviso.celula?.nome ?? aviso.igreja?.nome ?? 'Comunicação geral'} ·{' '}
-                      {new Date(aviso.dataInicio).toLocaleDateString('pt-BR')}
-                    </p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      {aviso.conteudo.slice(0, 160)}
-                      {aviso.conteudo.length > 160 ? '…' : ''}
+                      {item.aviso.conteudo.slice(0, 160)}
+                      {item.aviso.conteudo.length > 160 ? '…' : ''}
                     </p>
                   </li>
                 ))}

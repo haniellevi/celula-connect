@@ -45,7 +45,7 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 - **Fase 5 – Sprint 4 (Comunicação)** em andamento: consolidar superfícies de avisos e devocionais.
   - [x] Central de avisos em `/avisos` com filtragem, métricas e formulário completo.
   - [x] Biblioteca de devocionais em `/devocionais` com agenda, preview e CRUD.
-  - [ ] Feed dinâmico nos dashboards ajustado para novas prioridades/segmentações.
+  - [x] Feed dinâmico nos dashboards ajustado para novas prioridades/segmentações.
 - **Marcos imediatos**
   - 15/10 PM — Sincronizar backlog do feed dinâmico com Produto (ordenar blocos por prioridade e contexto).
   - 16/10 AM — Revisar notificações/avisos urgentes após publicação (QA + Customer Ops).
