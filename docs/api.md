@@ -289,18 +289,21 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 
 #### POST /api/trilhas/[trilhaId]/solicitacoes
 - **Perfis autorizados:** Discípulo (para si mesmo), Líder de célula, Supervisor, Pastor.
-- **Body:** `areaSupervisaoId`, `motivo`, `liderSolicitanteId?`, `usuarioId?`, `observacoesLider?`.
-- **Comportamento:** cria solicitação com status `PENDENTE`; líderes/pastores podem omitir `liderSolicitanteId` (usa o próprio usuário).
+- **Body:** `areaSupervisaoId` (string obrigatória), `motivo` (1–500 caracteres), `liderSolicitanteId?`, `usuarioId?`, `observacoesLider?` (≤ 500).
+- **Regras:** discípulo não pode enviar `usuarioId` diferente do próprio; `liderSolicitanteId` é preenchido automaticamente para líderes/pastores.
+- **Comportamento:** cria solicitação com status `PENDENTE`, define `dataSolicitacao=now` e inclui relacionamentos (`usuario`, `trilha`, `lider`, `area`).
 
 #### GET /api/trilhas/solicitacoes
 - **Perfis autorizados:** Discípulo, Líder, Supervisor, Pastor (com filtros automáticos conforme o perfil).
-- **Query params:** `scope=mine|lider|pendentes|all`, `status`, `take`, `skip`, `areaSupervisaoId`, `include*`.
-- **Retorno:** lista com `usuario`, `trilha`, `area`, `liderSolicitante` e metadados (`count`, `hasMore`).
+- **Query params:** `scope=mine|lider|pendentes|all`, `status` (normalizado para `StatusSolicitacao` via uppercase), `take` (1–100), `skip` (>=0), `areaSupervisaoId`, `usuarioId`, `includeUsuario|Trilha|Area|Lider|Supervisor`.
+- **Retorno:** lista com `usuario`, `trilha`, `area`, `liderSolicitante` (por padrão `true`) e metadados (`count`, `hasMore`).
+- **Observação:** supervisores recebem filtragem automática por área/cargo quando `scope` não é `all`.
 
 #### PATCH /api/trilhas/solicitacoes/[id]
 - **Perfis autorizados:** Supervisor, Pastor.
-- **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?`, `observacoesLider?`, `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.
-- **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta` e atribui automaticamente o supervisor responsável (ou o valor enviado).
+- **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?` (≤ 500), `observacoesLider?` (≤ 500), `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.
+- **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta` e atribui automaticamente o supervisor responsável (caso não informado).
+- **Erros comuns:** `404` para IDs inexistentes, `400` quando nenhum campo válido é enviado.
 
 ### Feature Flags (Admin)
 

@@ -38,8 +38,9 @@ Run these when validating new admin functionality or before major releases:
 3. **Invite lifecycle** – verify resend/revoke on actual Clerk invitations (requires email delivery setup).
 4. **Exports** – download the Usage CSV and inspect content for correct delimiter/quoting.
 5. **Storage deletion** – confirm blobs disappear from the storage provider (Verel Blob/S3) and are soft-deleted in DB.
-6. **Settings persistence** – tweak feature costs and plan mappings, verify data in the database and via API responses.
-7. **Access control** – ensure non-admin accounts hit redirects from `/admin` routes when `E2E_AUTH_BYPASS` is disabled.
+6. **Feature flags** – alternar `ENABLE_DOMAIN_MUTATIONS` em `/admin/settings/feature-flags`, validar aviso nos dashboards e confirmar que mutações de igreja/célula/usuário retornam `423 Locked` enquanto desabilitadas.
+7. **Settings persistence** – tweak feature costs and plan mappings, verify data in the database and via API responses.
+8. **Access control** – ensure non-admin accounts hit redirects from `/admin` routes when `E2E_AUTH_BYPASS` is disabled.
 
 ## 5. Running the Playwright Suite
 ```bash

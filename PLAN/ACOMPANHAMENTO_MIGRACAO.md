@@ -42,9 +42,24 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 ## 🎯 STATUS ATUAL
 
 ### 🔥 Prioridade Imediata
-Preparar kickoff da **Fase 4 – Migração de Backend**, validando backlog de APIs restantes (trilha/aprovação, webhooks Clerk, endpoints públicos) e definindo responsáveis.
+- **Fase 5 – Sprint 3 (UI críticas)** em andamento: consolidar interfaces de domínio no App Router.
+  - [x] Sistema de aprovação da trilha publicado em `/trilha/aprovacao` com filtros por status/escopo e ações de aprovação/rejeição.
+  - [ ] Gestão de células (listagem + atalhos de ações) disponível em `/celulas`.
+  - [ ] Painel de trilhas (overview + detalhes de etapas) com navegação dedicada.
+- **Marcos imediatos**
+  - 15/10 AM — Validar UX do fluxo de aprovação com supervisores (Product/UX).
+  - 15/10 PM — Definir layout final da gestão de células (Frontend + Produto).
+- **Checklist de suporte**
+  - QA: alinhar cenários end-to-end para aprovação (usar `docs/testing/trilha-api-validation.md` como base).
+  - Produto: priorizar requisitos de UI para módulos de células e trilha antes do desenvolvimento.
 
 ### ✅ Últimas Tarefas Concluídas
+- **Data**: 14 de outubro de 2025 (noite) — Interface de aprovação da trilha disponível no App Router.  
+  **Resultado**: página `/trilha/aprovacao` com visão unificada das solicitações, filtros por status e escopo, detalhamento contextual e ações de aprovação/rejeição com feedback via toast; atalho adicionado na sidebar e página `/trilha` criada como hub do módulo.
+- **Data**: 14 de outubro de 2025 (manhã) — Smoke automatizado das rotas críticas executado.  
+  **Resultado**: `npm run test -- trilhas-solicitacoes-route --runInBand` e `npm run test -- webhooks-clerk-route --runInBand` registraram os cenários principais (criação/aprovação de solicitação, sincronização de créditos) com logs arquivados para evidência.
+- **Data**: 13 de outubro de 2025 (noite) — Cobertura de webhooks Clerk concluída com documentação de QA.  
+  **Resultado**: testes dedicados (`tests/integration/api/webhooks-clerk-route.test.ts`) validam sincronização de planos e créditos, e o checklist admin ganhou o passo explícito para alternar `ENABLE_DOMAIN_MUTATIONS` (`docs/testing/admin-qa-guide.md`).
 - **Data**: 13 de outubro de 2025 (manhã) — Relatórios avançados de metas bíblicas concluídos.  
   **Resultado**: endpoint `/api/biblia/metas/summary` agrega totais, distribuição e histórico; hook `useBibliaMetasSummary` publicado e painel de metas exibe insights (progresso médio, destaques, histórico de leituras). Documentação de API atualizada.
 - **Data**: 13 de outubro de 2025 (tarde) — Otimização de filtros e paginação das rotas de usuários e células.  
@@ -582,7 +597,7 @@ Tempo Gasto: ~4.2 horas
 - [x] ✅ Concluir Fase 1: Planejamento
 - [x] ✅ Concluir Fase 2: Setup do Projeto
 - [x] ✅ Concluir Fase 3: Migração de Banco
-- [ ] 🚩 Preparar kickoff da Fase 4 (definir backlog e responsáveis)
+- [x] 🚩 Preparar kickoff da Fase 4 (definir backlog e responsáveis) — 13/10/2025, backlog priorizado e owners alinhados (Luís, Marina, Carla, Júlia)
 
 ### Próximas Milestones
 

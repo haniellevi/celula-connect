@@ -34,6 +34,9 @@ If you're new to this project, start here:
 ### Testing & QA
 - **[Migration Pipeline Checklist](./testing/migration-pipeline-checklist.md)** - Passo a passo para validar a importação de dados legados
 - **[Admin QA Guide](./testing/admin-qa-guide.md)** - Roteiro de verificação para o painel administrativo
+- **[Trilha – Checklist de Validação](./testing/trilha-api-validation.md)** - Regras de payload/query para solicitações de trilha
+- **[Clerk Webhook Scenarios](./testing/clerk-webhook-scenarios.md)** - Como exercitar eventos de assinatura/créditos localmente
+- **[Smoke QA – Fase 4](./testing/fase4-smoke-checklist.md)** - Passo a passo rápido para validar as rotas de backend
 - **[Controle de Mutação de Domínio](./migration/domain-mutations.md)** - Como habilitar/desabilitar `ENABLE_DOMAIN_MUTATIONS` e seus impactos
 
 ## Technology Stack

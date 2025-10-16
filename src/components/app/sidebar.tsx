@@ -14,6 +14,7 @@ import {
   Bot,
   Map,
   Book,
+  GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ export const navigationItems = [
   { name: "Líder", href: "/dashboard/lider", icon: Users },
   { name: "Supervisor", href: "/dashboard/supervisor", icon: Map },
   { name: "Pastor", href: "/dashboard/pastor", icon: Settings },
+  { name: "Trilha", href: "/trilha", icon: GraduationCap },
   { name: "Bíblia", href: "/biblia/leitor", icon: Book },
  ];
 
