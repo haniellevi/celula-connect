@@ -42,18 +42,22 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 ## 🎯 STATUS ATUAL
 
 ### 🔥 Prioridade Imediata
-- **Fase 5 – Sprint 3 (UI críticas)** em andamento: consolidar interfaces de domínio no App Router.
-  - [x] Sistema de aprovação da trilha publicado em `/trilha/aprovacao` com filtros por status/escopo e ações de aprovação/rejeição.
-  - [x] Gestão de células (listagem + atalhos de ações) disponível em `/celulas`.
-  - [x] Painel de trilhas (overview + detalhes de etapas) com navegação dedicada.
+- **Fase 5 – Sprint 4 (Comunicação)** em andamento: consolidar superfícies de avisos e devocionais.
+  - [x] Central de avisos em `/avisos` com filtragem, métricas e formulário completo.
+  - [x] Biblioteca de devocionais em `/devocionais` com agenda, preview e CRUD.
+  - [ ] Feed dinâmico nos dashboards ajustado para novas prioridades/segmentações.
 - **Marcos imediatos**
-  - 15/10 AM — Validar UX do fluxo de aprovação com supervisores (Product/UX).
-  - 15/10 PM — Definir layout final da gestão de células (Frontend + Produto).
+  - 15/10 PM — Sincronizar backlog do feed dinâmico com Produto (ordenar blocos por prioridade e contexto).
+  - 16/10 AM — Revisar notificações/avisos urgentes após publicação (QA + Customer Ops).
 - **Checklist de suporte**
-  - QA: alinhar cenários end-to-end para aprovação (usar `docs/testing/trilha-api-validation.md` como base).
-  - Produto: priorizar requisitos de UI para módulos de células e trilha antes do desenvolvimento.
+  - QA: preparar smoke para POST `/api/avisos` e `/api/devocionais` cobrindo segmentação/data única.
+  - Produto: definir copy padrão e guidelines de agendamento para devocionais e avisos urgentes.
 
 -### ✅ Últimas Tarefas Concluídas
+- **Data**: 15 de outubro de 2025 (tarde) — Central de avisos publicada no App Router.  
+  **Resultado**: página `/avisos` com cards de métricas, filtros de status/prioridade, listagem segmentada e formulário de criação/edição; mutações client-side via `useCreateAviso`/`useUpdateAviso`.
+- **Data**: 15 de outubro de 2025 (tarde) — Biblioteca de devocionais com agenda e preview.  
+  **Resultado**: página `/devocionais` apresenta métricas, agenda navegável, preview enriquecido e CRUD integrado aos hooks `useDevocionais`.
 - **Data**: 15 de outubro de 2025 (tarde) — Leitor bíblico integrado ao progresso automático.  
   **Resultado**: endpoint `/api/biblia/leituras` criado com atualização de `MetaLeituraUsuario`/`ProgressoAutomaticoMeta`, novo hook `useRegistrarLeitura` e UI do leitor permitindo registrar capítulos e vincular metas; metas pessoais exibem progresso em tempo real.
 - **Data**: 15 de outubro de 2025 (manhã) — Painel de trilhas modernizado com overview e detalhes de etapas.  
