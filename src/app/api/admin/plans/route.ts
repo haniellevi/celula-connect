@@ -5,6 +5,7 @@ import { db } from '@/lib/db'
 import { Prisma } from '../../../../../prisma/generated/client'
 import { withApiLogging } from '@/lib/logging/api'
 import { adaptRouteWithParams } from '@/lib/api/params'
+import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
 
 
 function normalizeFeatures(features: unknown) {
@@ -146,6 +147,7 @@ async function handleAdminPlansPost(req: Request) {
         data.features = Prisma.JsonNull
       }
       const created = await db.plan.create({ data })
+      await revalidateMarketingSnapshots()
       return NextResponse.json({ plan: {
         id: created.id,
         clerkId: created.clerkId,
@@ -244,6 +246,7 @@ async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }) 
     if (body.ctaLabel !== undefined) data.ctaLabel = body.ctaLabel === null ? null : (String(body.ctaLabel).trim() || null)
     if (body.ctaUrl !== undefined) data.ctaUrl = body.ctaUrl === null ? null : (String(body.ctaUrl).trim() || null)
     const updated = await db.plan.update({ where: { id: current.id }, data })
+    await revalidateMarketingSnapshots()
     return NextResponse.json({ plan: {
       id: updated.id,
       clerkId: updated.clerkId,
@@ -273,6 +276,7 @@ async function handleAdminPlansDelete(_req: Request, params: { clerkId?: string 
     const plan = await findPlanByIdentifier(identifier)
     if (!plan) return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })
     await db.plan.delete({ where: { id: plan.id } })
+    await revalidateMarketingSnapshots()
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     if (String((e as { code?: string })?.code) === 'P2025') return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })

@@ -4,6 +4,7 @@ import { isAdmin } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 import { adaptRouteWithParams } from '@/lib/api/params'
+import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
 
 function normalizeFeatures(features: unknown) {
   if (!Array.isArray(features)) return null
@@ -117,6 +118,7 @@ async function handleAdminPlanUpdate(
     if (body.ctaLabel !== undefined) data.ctaLabel = body.ctaLabel === null ? null : (String(body.ctaLabel).trim() || null)
     if (body.ctaUrl !== undefined) data.ctaUrl = body.ctaUrl === null ? null : (String(body.ctaUrl).trim() || null)
     const updated = await db.plan.update({ where: { id: current.id }, data })
+    await revalidateMarketingSnapshots()
     return NextResponse.json({ plan: {
       id: updated.id,
       clerkId: updated.clerkId,
@@ -147,6 +149,7 @@ async function handleAdminPlanDelete(
     const plan = await findPlanByIdentifier(identifier)
     if (!plan) return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })
     await db.plan.delete({ where: { id: plan.id } })
+    await revalidateMarketingSnapshots()
     return NextResponse.json({ ok: true })
   } catch (e) {
     if (String((e as { code?: string })?.code) === 'P2025') return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })

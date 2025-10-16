@@ -326,7 +326,7 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 #### GET /api/public/landing-preview
 - **Autenticação:** Não requerida
 - **Uso:** preview consolidado para o builder e smoke tests da landing page.
-- **Retorno:** `{ hero, plans, generatedAt }`, onde `hero` agrega pares chave/valor e `plans` espelha o snapshot simplificado de `getActivePlansSorted`.
+- **Retorno:** `{ hero, features, testimonials, plans, generatedAt }`, onde `hero` agrega pares chave/valor, `features` lista cartões configurados, `testimonials` traz depoimentos publicados e `plans` espelha o snapshot simplificado de `getActivePlansSorted`.
 
 #### GET /api/admin/landing-config
 - **Perfis autorizados:** Pastor, Supervisor

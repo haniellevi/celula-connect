@@ -886,7 +886,7 @@ model Convite {
 2. API para configurações `/api/landing-config`
 3. ✅ Hook `useLandingConfig()` e consumo no Hero
 4. ✅ Editor visual para admin (builder protegido)
-5. SSG para performance
+5. ✅ SSG para performance
 
 ---
 

@@ -12,6 +12,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/domain-auth'
 import { PerfilUsuario } from '../../../../../prisma/generated/client'
+import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
 
 const querySchema = z.object({
   section: z
@@ -90,6 +91,8 @@ async function handlePut(request: Request) {
     tipo: payload.type,
   })
 
+  await revalidateMarketingSnapshots()
+
   return NextResponse.json({ success: true, data: entry })
 }
 
@@ -108,6 +111,7 @@ async function handleDelete(request: Request) {
 
   const payload = parseResult.data
   await deleteLandingPageConfigEntry(payload.section, payload.key)
+  await revalidateMarketingSnapshots()
   return NextResponse.json({ success: true })
 }
 

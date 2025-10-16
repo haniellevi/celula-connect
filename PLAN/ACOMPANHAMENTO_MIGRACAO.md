@@ -55,6 +55,8 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
   - Produto: definir copy padrão e guidelines de agendamento para devocionais e avisos urgentes.
 
 -### ✅ Últimas Tarefas Concluídas
+- **Data**: 16 de outubro de 2025 (tarde) — Landing page pública com cache incremental e builder revalidando automaticamente.  
+  **Resultado**: rota `/` passa a usar ISR (`revalidate=300`) e toda atualização via `/api/admin/landing-config` invalida o cache com `revalidatePath('/')`, garantindo que hero, benefícios e depoimentos publicados no builder apareçam imediatamente; documentação de API permanece em sincronia. 
 - **Data**: 16 de outubro de 2025 (manhã) — Painel administrativo migrado para métricas do domínio.  
   **Resultado**: `/api/admin/dashboard` agora agrega usuários, células, avisos, devocionais, leituras/mês e metas concluídas; `/admin` exibe cards e gráficos alinhados ao engajamento espiritual da plataforma.
 - **Data**: 15 de outubro de 2025 (tarde) — Central de avisos publicada no App Router.  

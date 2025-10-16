@@ -4,21 +4,25 @@ import { NextResponse } from 'next/server'
 import { withApiLogging } from '@/lib/logging/api'
 import { getActivePlansSorted } from '@/lib/queries/plans'
 import { listLandingPageConfig } from '@/lib/queries/settings'
+import { extractFeatures, extractHeroContent, extractTestimonials } from '@/lib/landing-config/parsers'
 
 async function handleGet() {
-  const [plans, heroConfig] = await Promise.all([
+  const [plans, heroConfig, featuresConfig, testimonialsConfig] = await Promise.all([
     getActivePlansSorted(),
     listLandingPageConfig('hero'),
+    listLandingPageConfig('features'),
+    listLandingPageConfig('testimonials'),
   ])
 
-  const hero = heroConfig.reduce<Record<string, string>>((acc, entry) => {
-    acc[entry.chave] = entry.valor
-    return acc
-  }, {})
+  const hero = extractHeroContent(heroConfig)
+  const features = extractFeatures(featuresConfig)
+  const testimonials = extractTestimonials(testimonialsConfig)
 
   return NextResponse.json({
     data: {
       hero,
+      features,
+      testimonials,
       plans: plans.map((plan) => ({
         id: plan.id,
         clerkId: plan.clerkId,
