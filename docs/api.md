@@ -916,6 +916,26 @@ Aggregated insights for Bible reading goals, combining totals, distribution and 
   - `generatedAt`: ISO timestamp of the aggregation.
 - **Permissions:** Requires authenticated domain user; respects church scope based on logged-in user.
 
+### POST /api/biblia/leituras
+
+Registers a new Bible reading for the authenticated user, optionally contributing to a reading goal.
+
+- **Body**
+  - `livroCodigo` (string, required): Bible book code (`GEN`, `JO` …) matching `LivroBiblia.codigo`.
+  - `capitulo` (number, required): Chapter number (1–150).
+  - `metaId` (string, optional): Goal id (`MetaLeitura.id`) to credit the reading.
+  - `tempoLeitura` (number, optional): Minutes spent reading (1–600).
+  - `dataLeitura` (ISO string, optional): Override reading timestamp (defaults to `now()`).
+  - `observacoes` (string, optional, ≤ 500 chars): Notes about the reading.
+- **Behaviour**
+  - Persists a `LeituraRegistro` bound to the logged-in user.
+  - When `metaId` is provided, increments `MetaLeituraUsuario.progressoAtual`, records an entry in
+    `ProgressoAutomaticoMeta` and recalculates the user’s percentage progress.
+  - Response payload includes the created `leitura` and the updated `metaUsuario` (or `null` when no goal is linked).
+- **Permissions:** Requires authenticated user linked to a domain profile.
+- **Side Effects:** Invalidate/refresh dashboards that rely on `GET /api/biblia/metas/summary`
+  and `GET /api/biblia/metas/usuarios/[usuarioId]`.
+
 
 ## Testing
 

@@ -148,7 +148,10 @@ export default function BibliaMetasPage() {
     metasPorTipo: {},
     metasPorUnidade: {},
   }
-  const history = metasSummaryQuery.data?.data?.history?.leiturasPorDia ?? []
+  const history = useMemo(
+    () => metasSummaryQuery.data?.data?.history?.leiturasPorDia ?? [],
+    [metasSummaryQuery.data?.data?.history?.leiturasPorDia],
+  )
   const highlights = metasSummaryQuery.data?.data?.highlights ?? {
     metasEmDestaque: [],
     metasEmRisco: [],
@@ -159,6 +162,13 @@ export default function BibliaMetasPage() {
     () => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }),
     [],
   )
+  const tempoMedioPorLeitura =
+    resumo.leiturasPeriodo > 0 ? resumo.tempoLeituraPeriodo / resumo.leiturasPeriodo : 0
+  const leiturasRecentes = useMemo(
+    () => history.filter((item) => item.leituras > 0).slice(-10).reverse(),
+    [history],
+  )
+  const ultimoRegistro = leiturasRecentes[0] ?? null
 
   const celulasDisponiveis = useMemo(() => {
     const todasCelulas = celulasQuery.data?.data ?? []
@@ -415,7 +425,8 @@ export default function BibliaMetasPage() {
           <CardContent>
             <p className="text-sm text-muted-foreground">
               {formatInteger.format(resumo.leiturasPeriodo)} leituras nos últimos {rangeDays} dias ·{' '}
-              {formatInteger.format(resumo.tempoLeituraPeriodo)} minutos dedicados.
+              {formatInteger.format(resumo.tempoLeituraPeriodo)} minutos dedicados (
+              {formatDecimal.format(tempoMedioPorLeitura || 0)} min/leitura).
             </p>
           </CardContent>
         </Card>
@@ -433,6 +444,57 @@ export default function BibliaMetasPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Engajamento recente</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Últimos registros consolidados conforme o leitor bíblico sincroniza novas leituras.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {ultimoRegistro ? (
+              <div className="rounded-lg border border-border/50 bg-background/50 p-4">
+                <p className="text-xs uppercase text-muted-foreground">Último dia com leitura</p>
+                <p className="text-lg font-semibold">
+                  {new Date(ultimoRegistro.date).toLocaleDateString('pt-BR')}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {formatInteger.format(ultimoRegistro.leituras)} leituras ·{' '}
+                  {formatInteger.format(ultimoRegistro.tempoTotal)} minutos dedicados
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Ainda não há leituras registradas no recorte selecionado.
+              </p>
+            )}
+            <div>
+              <p className="text-xs uppercase text-muted-foreground mb-2">Histórico curto</p>
+              {leiturasRecentes.length ? (
+                <ScrollArea className="h-40 pr-2">
+                  <ul className="space-y-2 text-sm">
+                    {leiturasRecentes.map((entry) => (
+                      <li
+                        key={entry.date}
+                        className="flex items-center justify-between rounded border border-border/40 px-3 py-2"
+                      >
+                        <span>{new Date(entry.date).toLocaleDateString('pt-BR')}</span>
+                        <span className="font-semibold">
+                          {formatInteger.format(entry.leituras)} leituras ·{' '}
+                          {formatInteger.format(entry.tempoTotal)} min
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Aguarde novas leituras para acompanhar o engajamento diário.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Distribuição das metas</CardTitle>
@@ -494,20 +556,21 @@ export default function BibliaMetasPage() {
                 <Skeleton className="h-3 w-5/6" />
                 <Skeleton className="h-3 w-2/3" />
               </div>
-            ) : history.some((item) => item.leituras > 0) ? (
+            ) : leiturasRecentes.length ? (
               <ScrollArea className="h-56 pr-2">
                 <ul className="space-y-2 text-sm">
-                  {history
-                    .filter((item) => item.leituras > 0)
-                    .map((entry) => (
-                      <li key={entry.date} className="flex items-center justify-between rounded border border-border/40 px-3 py-2">
-                        <span>{new Date(entry.date).toLocaleDateString('pt-BR')}</span>
-                        <span className="font-semibold">
-                          {formatInteger.format(entry.leituras)} leituras ·{' '}
-                          {formatInteger.format(entry.tempoTotal)} min
-                        </span>
-                      </li>
-                    ))}
+                  {history.map((entry) => (
+                    <li
+                      key={entry.date}
+                      className="flex items-center justify-between rounded border border-border/40 px-3 py-2"
+                    >
+                      <span>{new Date(entry.date).toLocaleDateString('pt-BR')}</span>
+                      <span className="font-semibold">
+                        {formatInteger.format(entry.leituras)} leituras ·{' '}
+                        {formatInteger.format(entry.tempoTotal)} min
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </ScrollArea>
             ) : (
