@@ -348,3 +348,40 @@ export function useBibliaLeiturasUsuario(
     },
   })
 }
+
+export interface RegistrarLeituraInput {
+  livroCodigo: string
+  capitulo: number
+  dataLeitura?: string
+  tempoLeitura?: number
+  observacoes?: string
+  metaId?: string
+}
+
+export interface RegistrarLeituraResponse {
+  leitura: LeituraRegistroWithMeta
+  metaUsuario:
+    | (MetaLeituraUsuarioWithRelations & {
+        meta: MetaLeituraWithRelations
+      })
+    | null
+}
+
+export function useRegistrarLeitura() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: RegistrarLeituraInput) => {
+      const response = await api.post<{ success: boolean; data: RegistrarLeituraResponse }>(
+        '/api/biblia/leituras',
+        payload,
+      )
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['biblia', 'leituras', 'usuario'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['biblia', 'metas', 'usuario'], exact: false })
+      queryClient.invalidateQueries({ queryKey: ['biblia', 'metas', 'summary'], exact: false })
+    },
+  })
+}

@@ -44,8 +44,8 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 ### 🔥 Prioridade Imediata
 - **Fase 5 – Sprint 3 (UI críticas)** em andamento: consolidar interfaces de domínio no App Router.
   - [x] Sistema de aprovação da trilha publicado em `/trilha/aprovacao` com filtros por status/escopo e ações de aprovação/rejeição.
-  - [ ] Gestão de células (listagem + atalhos de ações) disponível em `/celulas`.
-  - [ ] Painel de trilhas (overview + detalhes de etapas) com navegação dedicada.
+  - [x] Gestão de células (listagem + atalhos de ações) disponível em `/celulas`.
+  - [x] Painel de trilhas (overview + detalhes de etapas) com navegação dedicada.
 - **Marcos imediatos**
   - 15/10 AM — Validar UX do fluxo de aprovação com supervisores (Product/UX).
   - 15/10 PM — Definir layout final da gestão de células (Frontend + Produto).
@@ -53,7 +53,13 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
   - QA: alinhar cenários end-to-end para aprovação (usar `docs/testing/trilha-api-validation.md` como base).
   - Produto: priorizar requisitos de UI para módulos de células e trilha antes do desenvolvimento.
 
-### ✅ Últimas Tarefas Concluídas
+-### ✅ Últimas Tarefas Concluídas
+- **Data**: 15 de outubro de 2025 (tarde) — Leitor bíblico integrado ao progresso automático.  
+  **Resultado**: endpoint `/api/biblia/leituras` criado com atualização de `MetaLeituraUsuario`/`ProgressoAutomaticoMeta`, novo hook `useRegistrarLeitura` e UI do leitor permitindo registrar capítulos e vincular metas; metas pessoais exibem progresso em tempo real.
+- **Data**: 15 de outubro de 2025 (manhã) — Painel de trilhas modernizado com overview e detalhes de etapas.  
+  **Resultado**: página `/trilha` agora apresenta métricas globais, filtros por status/busca, lista de trilhas com highlights e painel detalhado com etapas, áreas e ações rápidas integradas ao fluxo de aprovação.
+- **Data**: 15 de outubro de 2025 (manhã) — Gestão de células publicada no App Router.  
+  **Resultado**: página `/celulas` com filtros por status/igreja, cartões de métricas, tabela com liderança/membros e atalhos de ação; item da sidebar atualizado para acesso rápido.
 - **Data**: 14 de outubro de 2025 (noite) — Interface de aprovação da trilha disponível no App Router.  
   **Resultado**: página `/trilha/aprovacao` com visão unificada das solicitações, filtros por status e escopo, detalhamento contextual e ações de aprovação/rejeição com feedback via toast; atalho adicionado na sidebar e página `/trilha` criada como hub do módulo.
 - **Data**: 14 de outubro de 2025 (manhã) — Smoke automatizado das rotas críticas executado.  
