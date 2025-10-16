@@ -46,6 +46,7 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
   - [x] Central de avisos em `/avisos` com filtragem, métricas e formulário completo.
   - [x] Biblioteca de devocionais em `/devocionais` com agenda, preview e CRUD.
   - [x] Feed dinâmico nos dashboards ajustado para novas prioridades/segmentações.
+  - [x] Painel administrativo usando métricas do domínio (usuários, células, metas, avisos, leituras).
 - **Marcos imediatos**
   - 15/10 PM — Sincronizar backlog do feed dinâmico com Produto (ordenar blocos por prioridade e contexto).
   - 16/10 AM — Revisar notificações/avisos urgentes após publicação (QA + Customer Ops).
@@ -54,6 +55,8 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
   - Produto: definir copy padrão e guidelines de agendamento para devocionais e avisos urgentes.
 
 -### ✅ Últimas Tarefas Concluídas
+- **Data**: 16 de outubro de 2025 (manhã) — Painel administrativo migrado para métricas do domínio.  
+  **Resultado**: `/api/admin/dashboard` agora agrega usuários, células, avisos, devocionais, leituras/mês e metas concluídas; `/admin` exibe cards e gráficos alinhados ao engajamento espiritual da plataforma.
 - **Data**: 15 de outubro de 2025 (tarde) — Central de avisos publicada no App Router.  
   **Resultado**: página `/avisos` com cards de métricas, filtros de status/prioridade, listagem segmentada e formulário de criação/edição; mutações client-side via `useCreateAviso`/`useUpdateAviso`.
 - **Data**: 15 de outubro de 2025 (tarde) — Biblioteca de devocionais com agenda e preview.  

@@ -936,6 +936,24 @@ Registers a new Bible reading for the authenticated user, optionally contributin
 - **Side Effects:** Invalidate/refresh dashboards that rely on `GET /api/biblia/metas/summary`
   and `GET /api/biblia/metas/usuarios/[usuarioId]`.
 
+## Administração
+
+### GET /api/admin/dashboard
+
+Painel executivo com indicadores do domínio (usuários, células, comunicação e metas).
+
+- **Autenticação:** obrigatória. Apenas usuários marcados como administradores (`isAdmin`).
+- **Resposta**
+  - `totalUsuarios`: total de registros em `Usuario`.
+  - `totalCelulas`: quantidade de células cadastradas.
+  - `avisosAtivos` / `avisosUrgentes`: totais de avisos ativos e urgentes vigentes.
+  - `devocionaisAtivos`: devocionais disponíveis para a semana corrente.
+  - `metasAtivas`: metas de leitura em andamento (`MetaLeituraUsuario.ativa`).
+  - `leiturasPorMes`: série dos últimos 6 meses com `{ label, value }` (capítulos lidos).
+  - `metasConcluidasNoMes`: série mensal de metas concluídas.
+  - `activity`: últimos 10 dias com leituras registradas (para grafos rápidos).
+- **Observações:** valores são agregados diretamente do banco (`leituraRegistro`, `metaLeituraUsuario`, `aviso`, `devocional`).
+
 
 ## Testing
 
