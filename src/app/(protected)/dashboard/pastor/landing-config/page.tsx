@@ -18,6 +18,9 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useToast } from '@/hooks/use-toast'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useLandingPreview } from '@/hooks/use-landing-preview'
+import { formatCurrency } from '@/components/plans/pricing-utils'
+import type { LandingPreviewPlan } from '@/lib/landing-config/types'
 
 const heroSchema = z.object({
   headline: z.string().min(10, 'Digite um título com pelo menos 10 caracteres.'),
@@ -128,6 +131,18 @@ function buildTestimonialsDefaults(): TestimonialsFormValues {
   }
 }
 
+function resolvePlanPriceLabel(plan: LandingPreviewPlan): string | null {
+  if (plan.priceMonthlyCents != null) {
+    return `${formatCurrency(plan.priceMonthlyCents, plan.currency)} / mês`
+  }
+
+  if (plan.priceYearlyCents != null) {
+    return `${formatCurrency(plan.priceYearlyCents, plan.currency)} / ano`
+  }
+
+  return null
+}
+
 export default function LandingConfigPage() {
   useSetPageMetadata({
     title: 'Builder da landing page',
@@ -187,6 +202,24 @@ export default function LandingConfigPage() {
     name: 'testimonials',
   })
 
+  const landingPreviewQuery = useLandingPreview()
+  const publishedSnapshot = landingPreviewQuery.data?.data
+  const publishedHero = publishedSnapshot?.hero ?? {}
+  const publishedFeatures = publishedSnapshot?.features ?? []
+  const publishedTestimonials = publishedSnapshot?.testimonials ?? []
+  const publishedPlans = publishedSnapshot?.plans ?? []
+  let publishedGeneratedAtLabel: string | null = null
+
+  if (publishedSnapshot?.generatedAt) {
+    const parsedTimestamp = new Date(publishedSnapshot.generatedAt)
+    if (!Number.isNaN(parsedTimestamp.getTime())) {
+      publishedGeneratedAtLabel = new Intl.DateTimeFormat('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+      }).format(parsedTimestamp)
+    }
+  }
+
   useEffect(() => {
     if (!heroConfigQuery.data) return
     const entries = heroConfigQuery.data.data
@@ -241,6 +274,8 @@ export default function LandingConfigPage() {
       title: 'Landing atualizada',
       description: 'O conteúdo da seção principal foi publicado com sucesso.',
     })
+
+    void landingPreviewQuery.refetch()
   }
 
   async function handleSubmitSystem(values: SystemFormValues) {
@@ -306,6 +341,8 @@ export default function LandingConfigPage() {
       title: 'Seção de benefícios atualizada',
       description: 'Conteúdo publicado com sucesso na landing page.',
     })
+
+    void landingPreviewQuery.refetch()
   }
 
   async function handleSubmitTestimonials(values: TestimonialsFormValues) {
@@ -363,6 +400,8 @@ export default function LandingConfigPage() {
       title: 'Depoimentos atualizados',
       description: 'As histórias compartilhadas foram publicadas com sucesso.',
     })
+
+    void landingPreviewQuery.refetch()
   }
 
   const isHeroLoading = heroConfigQuery.isLoading || heroMutation.isPending
@@ -657,53 +696,220 @@ export default function LandingConfigPage() {
               Campos preenchidos acima aparecem aqui para uma revisão rápida antes da publicação.
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Hero</h3>
-              <div className="mt-2 space-y-2 rounded-lg border bg-muted/40 p-4">
-                <p className="text-lg font-semibold leading-snug">
-                  {heroPreview.headline || 'Headline em destaque'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {heroPreview.ctaLabel ? `CTA: ${heroPreview.ctaLabel}` : 'Defina o texto do botão principal.'}
+              <div>
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Rascunho atual</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Conteúdo baseado nos formulários acima antes da publicação.
                 </p>
               </div>
-            </section>
+              <div className="mt-4 space-y-6">
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Hero</h4>
+                  <div className="mt-2 space-y-2 rounded-lg border bg-muted/40 p-4">
+                    <p className="text-lg font-semibold leading-snug">
+                      {heroPreview.headline || 'Headline em destaque'}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {heroPreview.ctaLabel ? `CTA: ${heroPreview.ctaLabel}` : 'Defina o texto do botão principal.'}
+                    </p>
+                  </div>
+                </section>
 
-            <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Benefícios</h3>
-              <div className="mt-2 space-y-3">
-                {visibleFeatures.length > 0 ? (
-                  visibleFeatures.map((feature, index) => (
-                    <div key={index} className="rounded-lg border p-3">
-                      <p className="font-medium leading-tight">{feature.title}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{feature.description}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Adicione pelo menos um benefício para aparecer na landing.
-                  </p>
-                )}
-              </div>
-            </section>
-
-            <section>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Depoimentos</h3>
-              <div className="mt-2 space-y-3">
-                {visibleTestimonials.length > 0 ? (
-                  visibleTestimonials.map((testimonial, index) => (
-                    <div key={index} className="rounded-lg border p-3">
-                      <p className="font-semibold leading-tight">“{testimonial.quote}”</p>
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {testimonial.name}
-                        {testimonial.role ? ` · ${testimonial.role}` : ''}
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Benefícios</h4>
+                  <div className="mt-2 space-y-3">
+                    {visibleFeatures.length > 0 ? (
+                      visibleFeatures.map((feature, index) => (
+                        <div key={index} className="rounded-lg border p-3">
+                          <p className="font-medium leading-tight">{feature.title}</p>
+                          <p className="mt-1 text-sm text-muted-foreground">{feature.description}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Adicione pelo menos um benefício para aparecer na landing.
                       </p>
-                    </div>
-                  ))
+                    )}
+                  </div>
+                </section>
+
+                <section>
+                  <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Depoimentos</h4>
+                  <div className="mt-2 space-y-3">
+                    {visibleTestimonials.length > 0 ? (
+                      visibleTestimonials.map((testimonial, index) => (
+                        <div key={index} className="rounded-lg border p-3">
+                          <p className="font-semibold leading-tight">“{testimonial.quote}”</p>
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {testimonial.name}
+                            {testimonial.role ? ` · ${testimonial.role}` : ''}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Os depoimentos aparecerão aqui quando você preencher nome, cargo e mensagem.
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Publicação vigente</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Snapshot publicado para visitantes após a última atualização.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {publishedGeneratedAtLabel ? (
+                    <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+                      Atualizado em {publishedGeneratedAtLabel}
+                    </span>
+                  ) : null}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => landingPreviewQuery.refetch()}
+                    disabled={landingPreviewQuery.isFetching}
+                  >
+                    {landingPreviewQuery.isFetching ? 'Atualizando…' : 'Atualizar preview'}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-5">
+                {landingPreviewQuery.isLoading ? (
+                  <div className="space-y-3">
+                    <Skeleton className="h-16" />
+                    <Skeleton className="h-16" />
+                    <Skeleton className="h-24" />
+                    <Skeleton className="h-24" />
+                  </div>
+                ) : landingPreviewQuery.isError ? (
+                  <p className="text-sm text-destructive">
+                    Não foi possível carregar o preview publicado. Tente novamente mais tarde.
+                  </p>
+                ) : publishedSnapshot ? (
+                  <div className="space-y-6">
+                    <section>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Hero publicado
+                      </h4>
+                      <div className="mt-2 space-y-2 rounded-lg border bg-muted/40 p-4">
+                        <p className="text-lg font-semibold leading-snug">
+                          {publishedHero.headline || 'Headline em destaque'}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {publishedHero.cta_label
+                            ? `CTA: ${publishedHero.cta_label}`
+                            : 'Defina o texto do botão principal para a landing.'}
+                        </p>
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Benefícios publicados
+                      </h4>
+                      <div className="mt-2 space-y-3">
+                        {publishedFeatures.length > 0 ? (
+                          publishedFeatures.map((feature, index) => (
+                            <div key={`published-feature-${index}`} className="rounded-lg border bg-background p-3">
+                              <p className="font-medium leading-tight">{feature.title}</p>
+                              <p className="mt-1 text-sm text-muted-foreground">{feature.description}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            Publique pelo menos um benefício para destacar os diferenciais na landing.
+                          </p>
+                        )}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Depoimentos publicados
+                      </h4>
+                      <div className="mt-2 space-y-3">
+                        {publishedTestimonials.length > 0 ? (
+                          publishedTestimonials.map((testimonial, index) => (
+                            <div key={`published-testimonial-${index}`} className="rounded-lg border bg-background p-3">
+                              <p className="font-semibold leading-tight">“{testimonial.quote}”</p>
+                              <p className="mt-2 text-sm text-muted-foreground">
+                                {testimonial.name}
+                                {testimonial.role ? ` · ${testimonial.role}` : ''}
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            Publique depoimentos para reforçar resultados reais com a plataforma.
+                          </p>
+                        )}
+                      </div>
+                    </section>
+
+                    <section>
+                      <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        Planos publicados
+                      </h4>
+                      <div className="mt-2 space-y-3">
+                        {publishedPlans.length > 0 ? (
+                          publishedPlans.map((plan) => (
+                            <div
+                              key={plan.id}
+                              className={`rounded-lg border p-4 ${
+                                plan.highlight ? 'border-primary/60 bg-primary/5 shadow-sm' : 'bg-background'
+                              }`}
+                            >
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                <div>
+                                  <p className="font-semibold leading-tight">{plan.name}</p>
+                                  {plan.description ? (
+                                    <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+                                  ) : null}
+                                  <p className="mt-2 text-sm text-muted-foreground">
+                                    {resolvePlanPriceLabel(plan) ?? 'Preço sob consulta'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">Créditos: {plan.credits}</p>
+                                </div>
+                                {plan.badge ? (
+                                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                                    {plan.badge}
+                                  </span>
+                                ) : null}
+                              </div>
+                              {plan.features && plan.features.length > 0 ? (
+                                <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
+                                  {plan.features.map((feature, featureIndex) => (
+                                    <li key={`plan-${plan.id}-feature-${featureIndex}`} className="leading-snug">
+                                      {feature.name}
+                                      {feature.description ? ` - ${feature.description}` : ''}
+                                      {!feature.included ? ' (não incluso)' : ''}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-muted-foreground">
+                            Os planos ativos serão apresentados aqui para promover a conversão na landing.
+                          </p>
+                        )}
+                      </div>
+                    </section>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Os depoimentos aparecerão aqui quando você preencher nome, cargo e mensagem.
+                    Nenhum conteúdo foi publicado ainda. Salve as seções para gerar um preview.
                   </p>
                 )}
               </div>

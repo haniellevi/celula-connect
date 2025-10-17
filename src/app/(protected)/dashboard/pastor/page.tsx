@@ -18,6 +18,7 @@ import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
+import { InvitationShareDialog } from '@/components/invitations/invitation-share-dialog'
 
 export default function DashboardPastorPage() {
   const igrejasQuery = useIgrejas({ includeCelulas: true, includePlano: true })
@@ -134,6 +135,18 @@ export default function DashboardPastorPage() {
     () => convites.filter((convite) => !convite.usado),
     [convites],
   )
+  const convitesVisualizacoesTotais = convites.reduce(
+    (total, convite) => total + (convite.totalVisualizacoes ?? 0),
+    0,
+  )
+  const convitesAcessosValidos = convites.reduce(
+    (total, convite) => total + (convite.totalAcessosValidos ?? 0),
+    0,
+  )
+  const convitesConvertidos = convites.filter((convite) => convite.usado).length
+  const taxaConversaoPercentual = convitesAcessosValidos > 0
+    ? Math.round((convitesConvertidos / convitesAcessosValidos) * 100)
+    : 0
 
   if (isLoading) {
     return (
@@ -345,19 +358,36 @@ export default function DashboardPastorPage() {
                     <p className="text-2xl font-semibold">{convites.length - convitesPendentes.length}</p>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {convitesVisualizacoesTotais} visualizações • conversão {taxaConversaoPercentual}%
+                </p>
                 <ul className="space-y-2">
                   {convites.slice(0, 5).map((convite) => (
                     <li key={convite.id} className="rounded border border-border/40 p-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium">{convite.nomeConvidado}</p>
-                        <Badge variant={convite.usado ? 'default' : 'outline'}>
-                          {convite.usado ? 'Utilizado' : 'Pendente'}
-                        </Badge>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium">{convite.nomeConvidado}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {convite.celula?.nome ?? 'Sem célula'} · expira{' '}
+                            {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Visualizações: {convite.totalVisualizacoes ?? 0} · Acessos válidos:{' '}
+                            {convite.totalAcessosValidos ?? 0}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={convite.usado ? 'default' : 'outline'}>
+                            {convite.usado ? 'Utilizado' : 'Pendente'}
+                          </Badge>
+                          {!convite.usado && convite.tokenConvite ? (
+                            <InvitationShareDialog
+                              token={convite.tokenConvite}
+                              convidado={convite.nomeConvidado}
+                            />
+                          ) : null}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {convite.celula?.nome ?? 'Sem célula'} · expira{' '}
-                        {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
-                      </p>
                     </li>
                   ))}
                 </ul>

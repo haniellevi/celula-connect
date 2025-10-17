@@ -262,7 +262,7 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 - **Autenticação:** Obrigatória
 - **Perfis autorizados:** Pastor, Supervisor, Líder
 - **Query params:** `celulaId`, `convidadoPorId`, `usado`, flags `include*`, paginação.
-- **Resposta:** convites ordenados por `usado` e data de expiração.
+- **Resposta:** convites ordenados por `usado` e data de expiração, incluindo métricas de engajamento (`totalVisualizacoes`, `totalAcessosValidos`, `ultimaVisualizacaoEm`).
 
 #### POST /api/convites
 - **Perfis autorizados:** Pastor, Supervisor, Líder
@@ -282,7 +282,7 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 #### GET /api/public/convites/[token]
 - **Autenticação:** Não requerida.
 - **Query params:** `includeCelula`, `includeIgreja`.
-- **Resposta:** snapshot sanitizado do convite (`nomeConvidado`, `emailConvidado`, `cargo`, `dataExpiracao`) e resumo opcional da célula/igreja.
+- **Resposta:** snapshot sanitizado do convite (`nomeConvidado`, `emailConvidado`, `cargo`, `dataExpiracao`) e resumo opcional da célula/igreja. Cada acesso incrementa `totalVisualizacoes`; convites ainda válidos incrementam também `totalAcessosValidos` e atualizam `ultimaVisualizacaoEm`.
 - **Erros:** `404` (inexistente) e `410` (expirado ou já utilizado).
 
 ### Trilha de Crescimento

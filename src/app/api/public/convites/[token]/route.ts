@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
-import { getConviteByToken } from '@/lib/queries/convites'
+import { getConviteByToken, registerConviteView } from '@/lib/queries/convites'
 import { getCelulaById } from '@/lib/queries/celulas'
 
 const querySchema = z.object({
@@ -36,12 +36,22 @@ async function handleGet(request: Request, params: { token: string }) {
     return NextResponse.json({ error: 'Convite não encontrado' }, { status: 404 })
   }
 
-  if (convite.usado) {
+  const agora = new Date()
+  const status: 'valid' | 'expired' | 'used' = convite.usado
+    ? 'used'
+    : convite.dataExpiracao < agora
+      ? 'expired'
+      : 'valid'
+
+  await registerConviteView(convite.tokenConvite, status).catch((error) => {
+    console.error('Falha ao registrar visualização de convite', error)
+  })
+
+  if (status === 'used') {
     return NextResponse.json({ error: 'Convite já utilizado' }, { status: 410 })
   }
 
-  const agora = new Date()
-  if (convite.dataExpiracao < agora) {
+  if (status === 'expired') {
     return NextResponse.json({ error: 'Convite expirado' }, { status: 410 })
   }
 
@@ -78,6 +88,9 @@ async function handleGet(request: Request, params: { token: string }) {
       emailConvidado: convite.emailConvidado,
       cargo: convite.cargo,
       dataExpiracao: convite.dataExpiracao.toISOString(),
+      totalVisualizacoes: convite.totalVisualizacoes + 1,
+      totalAcessosValidos: convite.totalAcessosValidos + 1,
+      ultimaVisualizacaoEm: new Date().toISOString(),
       celula: celulaDetalhes ?? null,
     },
   })

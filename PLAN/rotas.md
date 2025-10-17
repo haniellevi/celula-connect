@@ -7,6 +7,7 @@ Referência rápida das páginas acessíveis via navegador, considerando os agru
 - `/sign-in` — Autenticação via Clerk.
 - `/sign-up` — Criação de conta via Clerk.
 - `/subscribe` — Fluxo de assinatura/upgrade.
+- `/convites/[token]` — Processamento público de convites, valida token e orienta próximo passo.
 
 ## Área autenticada (qualquer usuário logado)
 - `/dashboard` — Redireciona para o dashboard do perfil do usuário logado.

@@ -902,9 +902,9 @@ model Convite {
 **Migração:**
 1. Modelo Prisma de convites
 2. ✅ API para geração e validação + hooks (`useConvites`)
-3. Página pública de processamento
-4. QR code com biblioteca React
-5. Analytics de conversão
+3. ✅ Página pública de processamento
+4. ✅ QR code com biblioteca React
+5. ✅ Analytics de conversão
 
 ---
 
@@ -1636,6 +1636,9 @@ cp .env.example .env.local
 - ❌ Não skipar testes das features exclusivas
 - ❌ Não fazer deploy sem testes E2E
 - ❌ Não migrar sem backups completos
+
+### Ambiente de Desenvolvimento
+- ✅ Executar comandos que dependem do banco (ex.: `npx prisma generate`, `npx prisma db push`) diretamente no ambiente local com Docker, pois o sandbox remoto não tem acesso à instância PostgreSQL.
 
 ### Oportunidades de Melhoria
 - ✨ Adicionar system dark/light theme

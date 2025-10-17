@@ -14,6 +14,7 @@ import { useDomainUser } from '@/hooks/use-domain-user'
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 import { useDashboardSummary } from '@/hooks/use-dashboard-summary'
+import { InvitationShareDialog } from '@/components/invitations/invitation-share-dialog'
 
 function formatDate(date?: string | Date | null) {
   if (!date) return "Sem data definida"
@@ -87,6 +88,18 @@ export default function DashboardSupervisorPage() {
     return (convitesQuery.data?.data ?? []).filter((convite) => ids.has(convite.celulaId))
   }, [celulasSupervisionadas, convitesQuery.data?.data])
   const convitesPendentes = convitesFiltrados.filter((convite) => !convite.usado)
+  const convitesVisualizacoesTotais = convitesFiltrados.reduce(
+    (total, convite) => total + (convite.totalVisualizacoes ?? 0),
+    0,
+  )
+  const convitesAcessosValidos = convitesFiltrados.reduce(
+    (total, convite) => total + (convite.totalAcessosValidos ?? 0),
+    0,
+  )
+  const convitesConvertidos = convitesFiltrados.filter((convite) => convite.usado).length
+  const taxaConversaoPercentual = convitesAcessosValidos > 0
+    ? Math.round((convitesConvertidos / convitesAcessosValidos) * 100)
+    : 0
   const solicitacoesPendentes = solicitacoesPendentesQuery.data?.data ?? []
   const domainMutationsEnabled = featureFlags.data?.data?.ENABLE_DOMAIN_MUTATIONS !== false
 
@@ -210,16 +223,34 @@ export default function DashboardSupervisorPage() {
                     <p className="text-2xl font-semibold">{convitesFiltrados.length}</p>
                   </div>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {convitesVisualizacoesTotais} visualizações • conversão {taxaConversaoPercentual}%
+                </p>
                 <ul className="space-y-2">
                   {convitesPendentes.slice(0, 4).map((convite) => (
                     <li key={convite.id} className="rounded border border-border/40 p-3">
-                      <p className="text-sm font-medium">{convite.nomeConvidado}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {convite.emailConvidado} · expira {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Líder responsável: {convite.convidadoPor?.nome ?? '—'}
-                      </p>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium">{convite.nomeConvidado}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {convite.emailConvidado} · expira{' '}
+                            {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Líder responsável: {convite.convidadoPor?.nome ?? '—'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Visualizações: {convite.totalVisualizacoes ?? 0} · Acessos válidos:{' '}
+                            {convite.totalAcessosValidos ?? 0}
+                          </p>
+                        </div>
+                        {convite.tokenConvite ? (
+                          <InvitationShareDialog
+                            token={convite.tokenConvite}
+                            convidado={convite.nomeConvidado}
+                          />
+                        ) : null}
+                      </div>
                     </li>
                   ))}
                 </ul>

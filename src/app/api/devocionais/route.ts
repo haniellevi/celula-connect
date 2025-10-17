@@ -75,7 +75,21 @@ async function handleGet(request: Request) {
   }
 
   const { searchParams } = new URL(request.url)
-  const parseResult = listQuerySchema.safeParse(Object.fromEntries(searchParams.entries()))
+  const rawParams = Object.fromEntries(searchParams.entries())
+
+  let parseResult
+  try {
+    parseResult = listQuerySchema.safeParse(rawParams)
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: 'Parâmetros inválidos',
+        details: error instanceof Error ? error.message : 'Falha ao validar filtros enviados.',
+      },
+      { status: 400 },
+    )
+  }
+
   if (!parseResult.success) {
     return NextResponse.json(
       { error: 'Parâmetros inválidos', details: parseResult.error.flatten() },

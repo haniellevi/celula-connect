@@ -170,7 +170,10 @@
       "celulaId": "seed-celula-familia",
       "convidadoPorId": "seed-user-lider-familia",
       "tokenConvite": "seed-token-familia",
-      "usado": false
+      "usado": false,
+      "totalVisualizacoes": 7,
+      "totalAcessosValidos": 0,
+      "ultimaVisualizacaoEm": "2025-10-16T15:45:00Z"
     },
     {
       "id": "seed-convite-vida-aceito",
@@ -178,7 +181,10 @@
       "convidadoPorId": "seed-user-lider",
       "usadoPorId": "seed-user-discipulo",
       "tokenConvite": "seed-token-vida",
-      "usado": true
+      "usado": true,
+      "totalVisualizacoes": 12,
+      "totalAcessosValidos": 9,
+      "ultimaVisualizacaoEm": "2025-09-15T20:10:00Z"
     }
   ],
   "reunioes": [
@@ -294,6 +300,66 @@
       "id": "seed-landing-hero-cta",
       "secao": "hero",
       "chave": "cta_label"
+    },
+    {
+      "id": "seed-landing-feature-1-title",
+      "secao": "features",
+      "chave": "feature_1_title"
+    },
+    {
+      "id": "seed-landing-feature-1-description",
+      "secao": "features",
+      "chave": "feature_1_description"
+    },
+    {
+      "id": "seed-landing-feature-2-title",
+      "secao": "features",
+      "chave": "feature_2_title"
+    },
+    {
+      "id": "seed-landing-feature-2-description",
+      "secao": "features",
+      "chave": "feature_2_description"
+    },
+    {
+      "id": "seed-landing-feature-3-title",
+      "secao": "features",
+      "chave": "feature_3_title"
+    },
+    {
+      "id": "seed-landing-feature-3-description",
+      "secao": "features",
+      "chave": "feature_3_description"
+    },
+    {
+      "id": "seed-landing-testimonial-1-name",
+      "secao": "testimonials",
+      "chave": "testimonial_1_name"
+    },
+    {
+      "id": "seed-landing-testimonial-1-role",
+      "secao": "testimonials",
+      "chave": "testimonial_1_role"
+    },
+    {
+      "id": "seed-landing-testimonial-1-quote",
+      "secao": "testimonials",
+      "chave": "testimonial_1_quote"
+    },
+    {
+      "id": "seed-landing-testimonial-2-name",
+      "secao": "testimonials",
+      "chave": "testimonial_2_name"
+    },
+    {
+      "id": "seed-landing-testimonial-2-role",
+      "secao": "testimonials",
+      "chave": "testimonial_2_role"
+    },
+    {
+      "id": "seed-landing-testimonial-2-quote",
+      "secao": "testimonials",
+      "chave": "testimonial_2_quote"
     }
   ],
   "configuracoesSistema": [

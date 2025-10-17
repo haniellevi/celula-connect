@@ -107,3 +107,22 @@ export async function deleteConvite(id: string) {
     where: { id },
   })
 }
+
+export async function registerConviteView(
+  token: string,
+  status: 'valid' | 'expired' | 'used',
+) {
+  const data: Prisma.ConviteUpdateInput = {
+    totalVisualizacoes: { increment: 1 },
+    ultimaVisualizacaoEm: new Date(),
+  }
+
+  if (status === 'valid') {
+    data.totalAcessosValidos = { increment: 1 }
+  }
+
+  return db.convite.update({
+    where: { tokenConvite: token },
+    data,
+  })
+}

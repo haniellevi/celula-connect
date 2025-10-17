@@ -17,6 +17,7 @@ jest.mock('@/lib/queries/convites', () => ({
   getConviteByToken: jest.fn(),
   updateConvite: jest.fn(),
   deleteConvite: jest.fn(),
+  registerConviteView: jest.fn(),
 }))
 
 jest.mock('@/lib/queries/celulas', () => ({

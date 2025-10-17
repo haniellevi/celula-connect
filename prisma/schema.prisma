@@ -734,6 +734,9 @@ model Convite {
   usado          Boolean     @default(false)
   dataExpiracao  DateTime
   usadoPorId     String?
+  totalVisualizacoes   Int       @default(0)
+  totalAcessosValidos  Int       @default(0)
+  ultimaVisualizacaoEm DateTime?
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 

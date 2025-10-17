@@ -495,6 +495,9 @@ async function main() {
     update: {
       dataExpiracao: new Date("2025-11-30T23:59:59Z"),
       usado: false,
+      totalVisualizacoes: 7,
+      totalAcessosValidos: 0,
+      ultimaVisualizacaoEm: new Date("2025-10-16T15:45:00Z"),
     },
     create: {
       id: "seed-convite-familia-novo",
@@ -506,6 +509,9 @@ async function main() {
       tokenConvite: "seed-token-familia",
       usado: false,
       dataExpiracao: new Date("2025-11-30T23:59:59Z"),
+      totalVisualizacoes: 7,
+      totalAcessosValidos: 0,
+      ultimaVisualizacaoEm: new Date("2025-10-16T15:45:00Z"),
     },
   });
 
@@ -526,6 +532,9 @@ async function main() {
       usado: true,
       dataExpiracao: new Date("2025-09-30T23:59:59Z"),
       usadoPorId: discipulo.id,
+      totalVisualizacoes: 12,
+      totalAcessosValidos: 9,
+      ultimaVisualizacaoEm: new Date("2025-09-15T20:10:00Z"),
     },
   });
 
@@ -902,6 +911,116 @@ async function main() {
       tipo: "text",
     },
   });
+
+  const featureSeedEntries = [
+    {
+      id: "seed-landing-feature-1-title",
+      secao: "features",
+      chave: "feature_1_title",
+      valor: "Gestão centralizada das células",
+    },
+    {
+      id: "seed-landing-feature-1-description",
+      secao: "features",
+      chave: "feature_1_description",
+      valor: "Monitore supervisores, líderes e membros em um único painel com dados atualizados.",
+    },
+    {
+      id: "seed-landing-feature-2-title",
+      secao: "features",
+      chave: "feature_2_title",
+      valor: "Trilhas com aprovação guiada",
+    },
+    {
+      id: "seed-landing-feature-2-description",
+      secao: "features",
+      chave: "feature_2_description",
+      valor: "Acompanhe cada etapa da jornada dos líderes com aprovações e alertas inteligentes.",
+    },
+    {
+      id: "seed-landing-feature-3-title",
+      secao: "features",
+      chave: "feature_3_title",
+      valor: "Sistema de avisos inteligente",
+    },
+    {
+      id: "seed-landing-feature-3-description",
+      secao: "features",
+      chave: "feature_3_description",
+      valor: "Entregue comunicados relevantes para cada célula com segmentação automática.",
+    },
+  ];
+
+  for (const entry of featureSeedEntries) {
+    await prisma.landingPageConfig.upsert({
+      where: { id: entry.id },
+      update: {
+        valor: entry.valor,
+      },
+      create: {
+        id: entry.id,
+        secao: entry.secao,
+        chave: entry.chave,
+        valor: entry.valor,
+        tipo: "text",
+      },
+    });
+  }
+
+  const testimonialSeedEntries = [
+    {
+      id: "seed-landing-testimonial-1-name",
+      secao: "testimonials",
+      chave: "testimonial_1_name",
+      valor: "Pr. Ricardo Souza",
+    },
+    {
+      id: "seed-landing-testimonial-1-role",
+      secao: "testimonials",
+      chave: "testimonial_1_role",
+      valor: "Pastor titular, Igreja Vida Plena",
+    },
+    {
+      id: "seed-landing-testimonial-1-quote",
+      secao: "testimonials",
+      chave: "testimonial_1_quote",
+      valor: "O Celula Connect nos deu visibilidade diária do avanço das células sem planilhas manuais.",
+    },
+    {
+      id: "seed-landing-testimonial-2-name",
+      secao: "testimonials",
+      chave: "testimonial_2_name",
+      valor: "Missionária Ana Ribeiro",
+    },
+    {
+      id: "seed-landing-testimonial-2-role",
+      secao: "testimonials",
+      chave: "testimonial_2_role",
+      valor: "Supervisora de rede, Igreja Central",
+    },
+    {
+      id: "seed-landing-testimonial-2-quote",
+      secao: "testimonials",
+      chave: "testimonial_2_quote",
+      valor: "Automatizamos trilhas e notificações, liberando tempo para cuidar das pessoas.",
+    },
+  ];
+
+  for (const entry of testimonialSeedEntries) {
+    await prisma.landingPageConfig.upsert({
+      where: { id: entry.id },
+      update: {
+        valor: entry.valor,
+      },
+      create: {
+        id: entry.id,
+        secao: entry.secao,
+        chave: entry.chave,
+        valor: entry.valor,
+        tipo: "text",
+      },
+    });
+  }
 
   await prisma.configuracaoSistema.upsert({
     where: { chave: "trial_dias" },

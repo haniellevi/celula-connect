@@ -15,10 +15,18 @@ jest.mock('@/lib/queries/settings', () => ({
   deleteLandingPageConfigEntry: jest.fn(),
 }))
 
+jest.mock('@/lib/cache/revalidate-marketing', () => ({
+  revalidateMarketingSnapshots: jest.fn(),
+}))
+
 const { requireDomainUser, hasRole, unauthorizedResponse } = require('@/lib/domain-auth') as {
   requireDomainUser: jest.Mock
   hasRole: jest.Mock
   unauthorizedResponse: jest.Mock
+}
+
+const { revalidateMarketingSnapshots } = require('@/lib/cache/revalidate-marketing') as {
+  revalidateMarketingSnapshots: jest.Mock
 }
 
 describe('GET /api/admin/landing-config', () => {
@@ -68,6 +76,8 @@ describe('PUT /api/admin/landing-config', () => {
     requireDomainUser.mockReset()
     hasRole.mockReset()
     ;(upsertLandingPageConfigEntry as jest.Mock).mockReset()
+    revalidateMarketingSnapshots.mockReset()
+    revalidateMarketingSnapshots.mockResolvedValue(undefined)
     unauthorizedResponse.mockImplementation(() =>
       NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
     )
@@ -103,6 +113,7 @@ describe('PUT /api/admin/landing-config', () => {
       valor: 'Atualizado',
       tipo: undefined,
     })
+    expect(revalidateMarketingSnapshots).toHaveBeenCalledTimes(1)
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload.success).toBe(true)

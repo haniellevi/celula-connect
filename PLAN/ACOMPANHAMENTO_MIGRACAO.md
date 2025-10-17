@@ -55,6 +55,16 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
   - Produto: definir copy padrão e guidelines de agendamento para devocionais e avisos urgentes.
 
 -### ✅ Últimas Tarefas Concluídas
+- **Data**: 17 de outubro de 2025 (manhã) — Testes de convites e avisos consolidados.  
+  **Resultado**: cobertura unitária e de integração para `registerConviteView` e `/api/avisos`, validando incrementos de métricas e filtros de segmentação. Execuções locais registradas: `pnpm test -- convites`, `pnpm test -- avisos`.
+- **Data**: 17 de outubro de 2025 (manhã) — Smoke de devocionais publicado.  
+  **Resultado**: `/api/devocionais` coberto com cenários de autenticação, filtros de data e criação (incluindo conflitos P2002). Testes executados: `pnpm test -- avisos`, `pnpm test -- devocionais`.
+- **Data**: 16 de outubro de 2025 (noite) — Analytics completos para convites.
+  **Resultado**: convites registram visualizações totais, acessos válidos e última visualização; a página pública incrementa os contadores e dashboards exibem taxa de conversão, apoiando decisões pastorais.
+- **Data**: 16 de outubro de 2025 (noite) — Compartilhamento de convites com QR code.
+  **Resultado**: dashboards de líder, supervisor e pastor agora oferecem QR code e link direto para cada convite pendente via componente dedicado (`InvitationShareDialog`), facilitando divulgação presencial; documentação do plano marcada com a etapa concluída.
+- **Data**: 16 de outubro de 2025 (noite) — Página pública de convites liberada.  
+  **Resultado**: rota `/convites/[token]` apresenta validação instantânea do token (válido, expirado, utilizado ou inválido), compartilha detalhes da célula convidante e direciona o visitante para criação/login com o convite anexado; `PLAN/rotas.md` e checklist da Fase 5 atualizados.
 - **Data**: 16 de outubro de 2025 (tarde) — Landing page pública com cache incremental e builder revalidando automaticamente.  
   **Resultado**: rota `/` passa a usar ISR (`revalidate=300`) e toda atualização via `/api/admin/landing-config` invalida o cache com `revalidatePath('/')`, garantindo que hero, benefícios e depoimentos publicados no builder apareçam imediatamente; documentação de API permanece em sincronia. 
 - **Data**: 16 de outubro de 2025 (manhã) — Painel administrativo migrado para métricas do domínio.  
