@@ -32,15 +32,17 @@ Out of scope for this document: Clerk/Stripe webhook flows (covered by backend i
 All specs run via `npm run test:e2e`. Configuration sits in `playwright.config.ts` with `trace` on first retry and Chromium as the default project.
 
 ## 4. Manual QA Checklist
-Run these when validating new admin functionality or before major releases:
-1. **Metrics sanity** – confirm dashboard numbers align with seeded DB data and chart fallbacks render when series are empty.
+Execute estas etapas quando validando nova funcionalidade admin ou antes de releases:
+1. **Metrics sanity** – confirmar que cartões do dashboard batem com os seeds (`seed-trilha-*`, `seed-convite-*`, `seed-config-*`) e que os gráficos renderizam fallback quando a série está vazia.
 2. **Sincronização manual Clerk** – no painel `/admin/users`, abrir “Sincronizar do Clerk”, marcar “Sincronizar planos/assinaturas” e executar; capturar screenshot/log do toast com o resumo da operação e anexar ao checklist do sprint. Manter o webhook desligado até a fase de produção.
 3. **Invite lifecycle** – verify resend/revoke on actual Clerk invitations (requires email delivery setup).
 4. **Exports** – download the Usage CSV and inspect content for correct delimiter/quoting.
 5. **Storage deletion** – confirm blobs disappear from the storage provider (Verel Blob/S3) and are soft-deleted in DB.
 6. **Feature flags** – alternar `ENABLE_DOMAIN_MUTATIONS` em `/admin/settings/feature-flags`, validar aviso nos dashboards e confirmar que mutações de igreja/célula/usuário retornam `423 Locked` enquanto desabilitadas.
-7. **Settings persistence** – tweak feature costs and plan mappings, verify data in the database and via API responses.
-8. **Access control** – ensure non-admin accounts hit redirects from `/admin` routes when `E2E_AUTH_BYPASS` is disabled.
+7. **Landing dinâmica** – em `/dashboard/pastor/landing-config`, validar que hero/features/testimonials carregam os valores seed e que o preview reflete alterações salvas (abrir público em aba separada).
+8. **Trilha/aprovação** – exercitar `POST /api/trilhas/[id]/solicitacoes` e `PATCH /api/trilhas/solicitacoes/[id]` via UI (`/trilha`, `/trilha/aprovacao`), garantindo que os seeds exibem solicitações pendentes e o status muda para aprovado/reprovado.
+9. **Settings persistence** – tweak feature costs e plan mappings, verificar dados no banco e via API responses.
+10. **Access control** – ensure non-admin accounts hit redirects from `/admin` routes when `E2E_AUTH_BYPASS` is disabled.
 
 ## 5. Running the Playwright Suite
 ```bash
@@ -59,4 +61,4 @@ Outputs (screenshots/traces) appear in `playwright-report/` when failures occur.
 ## 7. Next Steps
 1. Introduce repeatable Prisma seeds focused on admin data to support both manual regression and automated mocks.
 2. Wire `npm run test:e2e` into CI, publishing Playwright HTML reports and traces on failure.
-2. **Sincronizacao manual de creditos** — no painel `/admin/users`, usar a acao “Sincronizar do Clerk” apenas para importar dados quando necessario; registrar toast/log no checklist e manter os webhooks/billing desligados ate a etapa de producao.
+3. **Sincronização manual de créditos** — no painel `/admin/users`, usar a ação “Sincronizar do Clerk” apenas para importar dados quando necessário; registrar toast/log no checklist e manter webhooks/billing desligados até a etapa de produção.

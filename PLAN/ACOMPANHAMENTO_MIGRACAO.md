@@ -46,6 +46,7 @@
 ### Ultimas tarefas concluidas
 - **18/10/2025** — Cobertura adicional do módulo de créditos: `tests/integration/api/admin-user-credits-route.test.ts` valida ajustes absolutos/relativos com fallback `metadataSynced=false`; `tests/integration/api/credits-me-route.test.ts` confirma que `/api/credits/me` responde 200 sem saldo prévio; `tests/unit/credits/refresh-user-credits.test.ts` garante sync opcional com Clerk (`skipClerkUpdate`) e propagação de erros.
 - **18/10/2025** — Dashboards por perfil cobertos: `tests/integration/api/dashboard-perfil-route.test.ts` garante agregados de pastor/supervisor e checa guarda de função (`403` para discípulos), servindo como evidência da validação das métricas de metas e trilha exibidas nos painéis protegidos.
+- **18/10/2025** — Suites Playwright rodando end-to-end (`npm run test:e2e`) após alinhar textos do dashboard admin; logs `ECONNRESET` confirmados como falsos positivos (rota mock abortada) sem impacto no resultado.
 - **17/10/2025** — Fluxo manual de créditos consolidado: ajustes em `/api/admin/credits/*` e `/api/admin/users/[id]/credits` sincronizam Clerk (`metadataSynced`), `refreshUserCredits` atualiza `publicMetadata` e documentação `docs/credits.md` foi revisada.
 - **16/10/2025** — Migrao completa das APIs (67 rotas) com autenticacao Clerk, wrapper withApiLogging, validacoes Zod e 20 testes de integracao cobrindo trilhas, avisos, devocionais, convites, landing preview e webhooks.
 - **16/10/2025** — Dashboards e paginas protegidas (29 paginas App Router) entregues para todos os perfis, incluindo landing dinamica do pastor, trilha/aprovacao, modulos de avisos/devocionais e convites publicos.
@@ -475,6 +476,10 @@ Tempo Gasto: ~4.2 horas
 - ✅ `tests/integration/api/dashboard-perfil-route.test.ts` cobre agregados de pastor (igrejas, células, trilha, convites) e supervisor (membros ativos, média de presença, solicitações).
 - ✅ Verificação automática de guardas de acesso (`PerfilUsuario`) com cenário 403 para discípulos.
 - 📝 Registar no playbook de QA que as métricas dos dashboards utilizam seeds `seed-trilha-*`/`seed-convite-*`.
+
+#### 13:30 - Suíte Playwright consolidada
+- ✅ `npm run test:e2e` executado com sucesso; ajuste no spec `admin-dashboard` garante compatibilidade com os textos reais do card (“Usuários cadastrados”, “Usuários ativos (30 dias)”).
+- 📝 Alertas `ECONNRESET` rastreados para intercepts abortados pelo Playwright; documentados como benignos.
 
 ### 10 de Outubro de 2025
 
