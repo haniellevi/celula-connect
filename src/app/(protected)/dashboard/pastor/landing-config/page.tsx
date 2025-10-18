@@ -13,7 +13,7 @@ import { useAdminSystemConfig, useUpsertSystemConfigEntry } from '@/hooks/admin/
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useFieldArray, useForm, type Resolver } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useToast } from '@/hooks/use-toast'
@@ -175,7 +175,7 @@ export default function LandingConfigPage() {
   })
 
   const systemForm = useForm<SystemFormValues>({
-    resolver: zodResolver(systemSchema),
+    resolver: zodResolver(systemSchema) as Resolver<SystemFormValues>,
     defaultValues: {
       trialDias: 30,
       suporteEmail: '',

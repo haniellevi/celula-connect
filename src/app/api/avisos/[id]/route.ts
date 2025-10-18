@@ -12,7 +12,7 @@ import {
   PrioridadeAviso,
   TipoAviso,
   Prisma,
-} from '../../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,

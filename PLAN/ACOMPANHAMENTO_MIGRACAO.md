@@ -1,6 +1,5 @@
-# 📊 ACOMPANHAMENTO DE MIGRAÇÃO - CÉLULA CONNECT
+﻿# 📊 ACOMPANHAMENTO DE MIGRAÇÃO - CÉLULA CONNECT
 
-**Última Atualização**: 11 de outubro de 2025, 21:45  
 **Responsável**: Equipe de Desenvolvimento  
 **Referência**: [PLANO_MIGRACAO.md](./PLANO_MIGRACAO.md)
 
@@ -22,94 +21,40 @@
 
 ---
 
-## 📈 VISÃO GERAL DO PROGRESSO
+## Progresso consolidado
 
-```
-███████████████████████░░ 60% Completo (3/8 fases concluídas, próxima fase em preparação)
+- Progresso geral estimado: ~65% (5 de 8 fases concluidas; fase 6 em andamento).
+- Backlog atualizado no plano mestre: fases 4 e 5 encerradas, fase 6 concentrada em creditos/landing/trilha, fases 7-8 aguardando janela de QA/deploy.
 
-Fase 1: ████████████████████ 100% ✅ CONCLUÍDA
-Fase 2: ████████████████████ 100% ✅ CONCLUÍDA
-Fase 3: ████████████████████ 100% ✅ CONCLUÍDA
-Fase 4: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
-Fase 5: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
-Fase 6: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
-Fase 7: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
-Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️ AGUARDANDO
-```
+| Fase | Status | Destaques |
+|------|--------|-----------|
+| Fase 1 | 100% | Planejamento finalizado, documentacao base publicada. |
+| Fase 2 | 100% | Setup Next.js/Clerk/Tailwind/Prisma estabilizado. |
+| Fase 3 | 100% | Modelo Prisma + seeds completas (igrejas, celulas, trilhas, avisos, devocionais, convites). |
+| Fase 4 | 100% | 67 rotas API migradas com autenticacao Clerk e logging central. |
+| Fase 5 | 100% | 29 paginas App Router (dashboards por perfil, biblia, avisos, devocionais, convites, admin). |
+| Fase 6 | 40% | Hardening de creditos/landing dinamica/trilha aprovacao em validacao. |
+| Fase 7 | 0% | Aguardando estabilizacao da fase 6 para rodar suites E2E/performance. |
+| Fase 8 | 0% | Aguardando janela de deploy e documentacao final. |
 
----
+## Status atual
 
-## 🎯 STATUS ATUAL
+### Prioridade imediata
+- Reativar instancias de dados para remover erros 500 (npm run db:docker + npm run db:push) e validar rotas /api/credits/* e /api/subscription/status.
+- Consolidar landing dinamica e trilha/aprovacao com dados seed, registrando playbook de sincronizacao manual ate os webhooks de billing estarem ativos.
 
-### 🔥 Prioridade Imediata
-- **Fase 5 – Sprint 4 (Comunicação)** em andamento: consolidar superfícies de avisos e devocionais.
-  - [x] Central de avisos em `/avisos` com filtragem, métricas e formulário completo.
-  - [x] Biblioteca de devocionais em `/devocionais` com agenda, preview e CRUD.
-  - [x] Feed dinâmico nos dashboards ajustado para novas prioridades/segmentações.
-  - [x] Painel administrativo usando métricas do domínio (usuários, células, metas, avisos, leituras).
-- **Marcos imediatos**
-  - 15/10 PM — Sincronizar backlog do feed dinâmico com Produto (ordenar blocos por prioridade e contexto).
-  - 16/10 AM — Revisar notificações/avisos urgentes após publicação (QA + Customer Ops).
-- **Checklist de suporte**
-  - QA: preparar smoke para POST `/api/avisos` e `/api/devocionais` cobrindo segmentação/data única.
-  - Produto: definir copy padrão e guidelines de agendamento para devocionais e avisos urgentes.
+### Ultimas tarefas concluidas
+- **18/10/2025** — Cobertura adicional do módulo de créditos: `tests/integration/api/admin-user-credits-route.test.ts` valida ajustes absolutos/relativos com fallback `metadataSynced=false`; `tests/integration/api/credits-me-route.test.ts` confirma que `/api/credits/me` responde 200 sem saldo prévio; `tests/unit/credits/refresh-user-credits.test.ts` garante sync opcional com Clerk (`skipClerkUpdate`) e propagação de erros.
+- **18/10/2025** — Dashboards por perfil cobertos: `tests/integration/api/dashboard-perfil-route.test.ts` garante agregados de pastor/supervisor e checa guarda de função (`403` para discípulos), servindo como evidência da validação das métricas de metas e trilha exibidas nos painéis protegidos.
+- **17/10/2025** — Fluxo manual de créditos consolidado: ajustes em `/api/admin/credits/*` e `/api/admin/users/[id]/credits` sincronizam Clerk (`metadataSynced`), `refreshUserCredits` atualiza `publicMetadata` e documentação `docs/credits.md` foi revisada.
+- **16/10/2025** — Migrao completa das APIs (67 rotas) com autenticacao Clerk, wrapper withApiLogging, validacoes Zod e 20 testes de integracao cobrindo trilhas, avisos, devocionais, convites, landing preview e webhooks.
+- **16/10/2025** — Dashboards e paginas protegidas (29 paginas App Router) entregues para todos os perfis, incluindo landing dinamica do pastor, trilha/aprovacao, modulos de avisos/devocionais e convites publicos.
+- **16/10/2025** — Seeds/fixtures (prisma/seed.ts, 	ests/fixtures/domain-seed.json) e helpers src/lib/queries/** alinhados ao dominio, permitindo smoke tests deterministas e preparando suites E2E.
 
--### ✅ Últimas Tarefas Concluídas
-- **Data**: 17 de outubro de 2025 (manhã) — Testes de convites e avisos consolidados.  
-  **Resultado**: cobertura unitária e de integração para `registerConviteView` e `/api/avisos`, validando incrementos de métricas e filtros de segmentação. Execuções locais registradas: `pnpm test -- convites`, `pnpm test -- avisos`.
-- **Data**: 17 de outubro de 2025 (manhã) — Smoke de devocionais publicado.  
-  **Resultado**: `/api/devocionais` coberto com cenários de autenticação, filtros de data e criação (incluindo conflitos P2002). Testes executados: `pnpm test -- avisos`, `pnpm test -- devocionais`.
-- **Data**: 16 de outubro de 2025 (noite) — Analytics completos para convites.
-  **Resultado**: convites registram visualizações totais, acessos válidos e última visualização; a página pública incrementa os contadores e dashboards exibem taxa de conversão, apoiando decisões pastorais.
-- **Data**: 16 de outubro de 2025 (noite) — Compartilhamento de convites com QR code.
-  **Resultado**: dashboards de líder, supervisor e pastor agora oferecem QR code e link direto para cada convite pendente via componente dedicado (`InvitationShareDialog`), facilitando divulgação presencial; documentação do plano marcada com a etapa concluída.
-- **Data**: 16 de outubro de 2025 (noite) — Página pública de convites liberada.  
-  **Resultado**: rota `/convites/[token]` apresenta validação instantânea do token (válido, expirado, utilizado ou inválido), compartilha detalhes da célula convidante e direciona o visitante para criação/login com o convite anexado; `PLAN/rotas.md` e checklist da Fase 5 atualizados.
-- **Data**: 16 de outubro de 2025 (tarde) — Landing page pública com cache incremental e builder revalidando automaticamente.  
-  **Resultado**: rota `/` passa a usar ISR (`revalidate=300`) e toda atualização via `/api/admin/landing-config` invalida o cache com `revalidatePath('/')`, garantindo que hero, benefícios e depoimentos publicados no builder apareçam imediatamente; documentação de API permanece em sincronia. 
-- **Data**: 16 de outubro de 2025 (manhã) — Painel administrativo migrado para métricas do domínio.  
-  **Resultado**: `/api/admin/dashboard` agora agrega usuários, células, avisos, devocionais, leituras/mês e metas concluídas; `/admin` exibe cards e gráficos alinhados ao engajamento espiritual da plataforma.
-- **Data**: 15 de outubro de 2025 (tarde) — Central de avisos publicada no App Router.  
-  **Resultado**: página `/avisos` com cards de métricas, filtros de status/prioridade, listagem segmentada e formulário de criação/edição; mutações client-side via `useCreateAviso`/`useUpdateAviso`.
-- **Data**: 15 de outubro de 2025 (tarde) — Biblioteca de devocionais com agenda e preview.  
-  **Resultado**: página `/devocionais` apresenta métricas, agenda navegável, preview enriquecido e CRUD integrado aos hooks `useDevocionais`.
-- **Data**: 15 de outubro de 2025 (tarde) — Leitor bíblico integrado ao progresso automático.  
-  **Resultado**: endpoint `/api/biblia/leituras` criado com atualização de `MetaLeituraUsuario`/`ProgressoAutomaticoMeta`, novo hook `useRegistrarLeitura` e UI do leitor permitindo registrar capítulos e vincular metas; metas pessoais exibem progresso em tempo real.
-- **Data**: 15 de outubro de 2025 (manhã) — Painel de trilhas modernizado com overview e detalhes de etapas.  
-  **Resultado**: página `/trilha` agora apresenta métricas globais, filtros por status/busca, lista de trilhas com highlights e painel detalhado com etapas, áreas e ações rápidas integradas ao fluxo de aprovação.
-- **Data**: 15 de outubro de 2025 (manhã) — Gestão de células publicada no App Router.  
-  **Resultado**: página `/celulas` com filtros por status/igreja, cartões de métricas, tabela com liderança/membros e atalhos de ação; item da sidebar atualizado para acesso rápido.
-- **Data**: 14 de outubro de 2025 (noite) — Interface de aprovação da trilha disponível no App Router.  
-  **Resultado**: página `/trilha/aprovacao` com visão unificada das solicitações, filtros por status e escopo, detalhamento contextual e ações de aprovação/rejeição com feedback via toast; atalho adicionado na sidebar e página `/trilha` criada como hub do módulo.
-- **Data**: 14 de outubro de 2025 (manhã) — Smoke automatizado das rotas críticas executado.  
-  **Resultado**: `npm run test -- trilhas-solicitacoes-route --runInBand` e `npm run test -- webhooks-clerk-route --runInBand` registraram os cenários principais (criação/aprovação de solicitação, sincronização de créditos) com logs arquivados para evidência.
-- **Data**: 13 de outubro de 2025 (noite) — Cobertura de webhooks Clerk concluída com documentação de QA.  
-  **Resultado**: testes dedicados (`tests/integration/api/webhooks-clerk-route.test.ts`) validam sincronização de planos e créditos, e o checklist admin ganhou o passo explícito para alternar `ENABLE_DOMAIN_MUTATIONS` (`docs/testing/admin-qa-guide.md`).
-- **Data**: 13 de outubro de 2025 (manhã) — Relatórios avançados de metas bíblicas concluídos.  
-  **Resultado**: endpoint `/api/biblia/metas/summary` agrega totais, distribuição e histórico; hook `useBibliaMetasSummary` publicado e painel de metas exibe insights (progresso médio, destaques, histórico de leituras). Documentação de API atualizada.
-- **Data**: 13 de outubro de 2025 (tarde) — Otimização de filtros e paginação das rotas de usuários e células.  
-  **Resultado**: `/api/usuarios` e `/api/celulas` com `page`/`pageSize`, ordenação configurável, metadados avançados e novos filtros (`redeId`, `ativa`, `orderBy`). Hooks `useUsuarios`/`useCelulas` atualizados para os parâmetros extras e documentação revisada.
-- **Data**: 13 de outubro de 2025 (noite) — Endpoints públicos para convites, landing preview e Bíblia publicados.  
-  **Resultado**: `/api/public/convites/[token]`, `/api/public/landing-preview` e `/api/public/biblia/*` disponibilizam validação de convites, snapshot da landing e recursos bíblicos sem autenticação. Documentação sincronizada.
-- **Data**: 13 de outubro de 2025 (noite) — Observabilidade base reforçada.  
-  **Resultado**: `withApiLogging` agora inclui `x-request-id`, amostragem configurável de sucessos (`API_LOG_SUCCESS`, `API_LOG_SUCCESS_SAMPLE_RATE`) e documentação dedicada (`docs/observability.md`), preparando o terreno para métricas do Sprint 3.
-- **Data**: 12 de outubro de 2025 (tarde) — Pipeline de migração implementado e Fase 3 encerrada.  
-  **Resultado**: `scripts/migrate-data.ts` executa importação idempotente a partir do export legado (`OLD_DB_EXPORT`), cobrindo usuários, igrejas, células, trilhas, comunicação, metas bíblicas e configurações. Documentação e planos atualizados com progresso final.
-- **Data**: 12 de outubro de 2025 (manhã) — Integração do Sprint 4 (comunicação e configurações dinâmicas) na camada cliente.  
-  **Resultado**: hooks `useAvisos`, `useDevocionais`, `useConvites`, `useLandingConfig` e `useDomainUser` publicados; dashboards (discípulo, líder, supervisor, pastor) passaram a consumir avisos/devocionais/convites; landing page carrega headline/CTA direto de `LandingPageConfig`; novo builder protegido em `/dashboard/pastor/landing-config` com formulários validados para hero + parâmetros de sistema; documentação REST (`docs/api.md`) atualizada.
-- **Data**: 11 de outubro de 2025 (noite) — Finalização do Sprint 3 e adequação das rotas tipadas do App Router.  
-  **Resultado**: Queries/seed do sistema bíblico atualizadas, rotas `/api/biblia/*` e helpers de `TanStack Query` alinhados aos novos modelos; introdução de `adaptRouteWithParams` para compatibilizar com o `RouteValidator` e execução bem sucedida de `npm run typecheck` e `npm run lint`.
-- **Data**: 11 de outubro de 2025 (18:10) — Conclusão da modelagem avançada da Fase 3 (trilhas, comunicação, convites e configurações) com seeds e fixtures sincronizadas.  
-  **Resultado**: `prisma/schema.prisma` abrangendo `TrilhaCrescimento`, `AreaSupervisaoTrilha`, `SolicitacaoAvancoTrilha`, `Aviso`, `Devocional`, `Rede`, `Convite`, `LandingPageConfig` e `ConfiguracaoSistema`; seeds expandidas (`prisma/seed.ts`), fixtures alinhadas (`tests/fixtures/domain-seed.json`) e helpers em `src/lib/queries/{trilhas,avisos,devocionais,convites,settings}.ts` prontos para as rotas da Fase 4.
-- **Data**: 11 de outubro de 2025 (manhã) — Kickoff do Sprint 1 (Fase 3) implementando camada de queries, validação de seeds e pipeline stub de migração.  
-  **Resultado**: Queries Prisma (`igrejas`, `celulas`, `usuarios`, `seed-validation`) criadas, script `scripts/migrate-data.ts` esboçado e checklist atualizado.
-- **Data**: 11 de outubro de 2025 (12:10) — Rotas públicas de domínio (`/api/igrejas`, `/api/celulas`, `/api/usuarios`) implementadas com validação Zod, logging e integração com Clerk.  
-  **Resultado**: APIs disponíveis consumindo as novas queries e retornando dados seed para testes.
-- **Data**: 11 de outubro de 2025 (14:40) — Dashboards por perfil criados com placeholders utilizando novas APIs; navegação atualizada e documentação revisada (rotas + sitemap).  
-  **Resultado**: Páginas em `/dashboard/discipulo`, `/dashboard/lider`, `/dashboard/supervisor`, `/dashboard/pastor` consumindo dados seed; hooks (`useCelulas`, `useIgrejas`, `useUsuarios`) publicados.
-- **Data**: 11 de outubro de 2025 (15:30) — Sprint 2 iniciado com mutações REST (`/api/igrejas/[id]`, `/api/celulas/[id]`, `/api/usuarios/[id]`), guardas de autorização (`src/lib/domain-auth.ts`) e CTAs de UI.  
-  **Resultado**: Pastores podem atualizar/remover igrejas/células e alterar perfis; supervisores gerenciam células supervisionadas; dashboards exibem botões contextuais (placeholders) alinhados às permissões.
-
+- **17/10/2025** - `npm run test:integration` executado com sucesso (20 suites, 65 testes) validando trilhas, avisos, devocionais, convites, landing e webhooks.
+- **17/10/2025** - `npm run test:e2e` falhou na inicializacao do dev server por `spawn npx ENOENT`; ajustar `scripts/dev-e2e.mjs` para usar npx.cmd no Windows antes da proxima execucao.
+- **17/10/2025** - `npm run test:integration` executado com sucesso (20 suites, 65 testes) validando trilhas, avisos, devocionais, convites, landing e webhooks.
+- **17/10/2025** - `npm run test:e2e` sobe o servidor local, mas falha por navegadores Playwright ausentes (`npx playwright install` pendente); rodar novamente apos baixar os bins e validar smoke admin.
 #### 📚 Evidências & Rastreabilidade
 - Commits/PRs relacionados: a preencher quando publicados
 - Queries criadas em `src/lib/queries/{igrejas,celulas,usuarios,seed-validation}.ts`
@@ -125,11 +70,26 @@ Fase 8: ░░░░░░░░░░░░░░░░░░░░   0% ⏸️
 - Observação: seguir mapeando pendências do `npm run typecheck` após introdução das novas rotas (previsto para Sprint 1 – Dia 3)
 
 ### 🚀 Próximos Passos (Próximas 4 horas)
-1. [x] Preparar plano detalhado do Sprint 1 (Usuários/Igrejas/Células) da Fase 3
-2. [x] Esboçar `scripts/migrate-data.ts` com funções stub por domínio
-3. [x] Agendar handoff formal da Fase 2 e kickoff da Fase 3 com equipe responsável
+1. [x] Definir organização das frentes do Sprint 1 (trilhas, sincronização manual e feature flags) sob responsabilidade direta do projeto.
+2. [x] Revisar seeds/fixtures atuais para garantir cenários de teste das rotas de trilha e para o fluxo manual.
+3. [x] Planejar bateria de testes (integração + smoke) para os novos endpoints antes do kickoff, documentando o fluxo manual no checklist.
 
-> ✅ Reunião de handoff agendada para **11/out/2025 às 09:30** (Squad Core + Arquitetura). Agenda: revisão das entregas da Fase 2, validação do plano do Sprint 1 e definição de responsáveis por queries/APIs.
+> Seeds/fixtures auditadas em 17/out/2025 às 10h30: `prisma/seed.ts` confirma cenários `seed-trilha-*` e `seed-config-*`; `tests/fixtures/domain-seed.json` atualizado para uso das rotas de trilha e sincronização manual. Nenhum ajuste necessário antes do Sprint 1.
+>
+> Test plan preparado em 17/out/2025 às 11h:  
+> • Integração: `tests/integration/api/trilhas-solicitacoes.test.ts` (happy path + permissão negada) e `tests/integration/api/admin-feature-flags.test.ts` (toggles).  
+> • Smoke manual: checklist em `docs/testing/admin-qa-guide.md` ampliado com passo “Executar sincronização manual Starter Kit”.  
+> • Pós-deploy: registrar execução via `pnpm test -- trilhas --runInBand` e anexar logs no PR correspondente.
+
+### ✅ Ações Imediatas (Sprint 1 — Fase 4)
+- [ ] **Rotas de trilha** — Backlog técnico quebrado em stories (ver abaixo); criação de branch inicial pendente.
+- [ ] **Sincronização manual** — Checklist atualizado; executar no primeiro ambiente disponível após implementação e anexar log/screenshot do toast de resultado.
+
+> Stories de trilha planejadas:
+> • API: `POST /api/trilhas/[id]/solicitacoes` + `PATCH /api/trilhas/solicitacoes/[id]` com validação e guards.  
+> • Queries: funções em `src/lib/queries/trilhas.ts` cobrindo pendências e histórico.  
+> • Testes: `tests/integration/api/trilhas-solicitacoes.test.ts` (happy path, dupla aprovação, autorização negada).  
+> • Documentação: atualizar `docs/api.md` e checklist de QA com cenários de aprovação/reprovação.
 
 #### 🗓️ Sprint 1 — Fase 3 (Usuários / Igrejas / Células)
 - **Janela sugerida**: 3 dias úteis (D1–D3) imediatamente após handoff da Fase 2  
@@ -453,7 +413,7 @@ Tempo Gasto: ~4.2 horas
 - ✅ Queries de comparação e função `getSeedStats()` atualizadas para cobrir os novos módulos (`trilhas`, `avisos`, `convites`, `configurações`).
 
 #### Hand-off imediato
-1. [x] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, webhooks Clerk) — ver `PLAN/PLANO_MIGRACAO.md`, seção **Fase 4 / Priorização de APIs**
+1. [x] Planejar Sprint 1 da Fase 4 (rotas prioritárias: trilha/aprovação, metas avançadas, fluxo manual de sincronização) — ver `PLAN/PLANO_MIGRACAO.md`, seção **Fase 4 / Priorização de APIs**
 2. [x] Publicar checklist de QA para execução do pipeline de migração antes de cada ambiente — ver `docs/testing/migration-pipeline-checklist.md`
 3. [x] Alinhar comunicação com o time de produto sobre o encerramento da Fase 3 e próximos marcos — atualização enviada ao canal #produto em 12/10/2025 às 18h (registro interno)
 4. [x] Implementar toggle operacional `ENABLE_DOMAIN_MUTATIONS` consumido pelas rotas de igreja/célula/usuário (Fase 4, Sprint 1 — concluído em 13/10/2025)
@@ -499,6 +459,22 @@ Tempo Gasto: ~4.2 horas
 ---
 
 ## 📝 REGISTRO DE ATIVIDADES
+
+### 18 de Outubro de 2025
+
+#### 11:15 - Reexecução da suíte de integração pós-restauração do Postgres local
+- ✅ `npm run test:integration` rodado com sucesso (Step 1 do plano imediato), confirmando eliminação dos 500 em `/api/credits/*` após o banco local estar ativo.
+- 📝 Logs anexados via Codex CLI; manter rotina de execução antes dos testes E2E.
+
+#### 12:00 - Hardening do módulo de créditos
+- ✅ Publicados testes `tests/integration/api/admin-user-credits-route.test.ts`, `tests/integration/api/credits-me-route.test.ts` e `tests/unit/credits/refresh-user-credits.test.ts`.
+- ✅ Cobertura garante ajustes administrativos (absolutos/relativos), fallback `metadataSynced=false`, leitura de saldo com resposta 200 e `skipClerkUpdate`.
+- 📝 Atualizar próxima revisão da Fase 6 com evidências das novas suites.
+
+#### 12:45 - Métricas pastorais e supervisão validadas
+- ✅ `tests/integration/api/dashboard-perfil-route.test.ts` cobre agregados de pastor (igrejas, células, trilha, convites) e supervisor (membros ativos, média de presença, solicitações).
+- ✅ Verificação automática de guardas de acesso (`PerfilUsuario`) com cenário 403 para discípulos.
+- 📝 Registar no playbook de QA que as métricas dos dashboards utilizam seeds `seed-trilha-*`/`seed-convite-*`.
 
 ### 10 de Outubro de 2025
 
@@ -622,7 +598,7 @@ Tempo Gasto: ~4.2 horas
 - [x] ✅ Concluir Fase 1: Planejamento
 - [x] ✅ Concluir Fase 2: Setup do Projeto
 - [x] ✅ Concluir Fase 3: Migração de Banco
-- [x] 🚩 Preparar kickoff da Fase 4 (definir backlog e responsáveis) — 13/10/2025, backlog priorizado e owners alinhados (Luís, Marina, Carla, Júlia)
+- [x] 🚩 Preparar kickoff da Fase 4 (definir backlog e responsáveis) — 13/10/2025, backlog priorizado e frentes sob responsabilidade direta do projeto (desenvolvedor + Codex CLI)
 
 ### Próximas Milestones
 
@@ -705,10 +681,7 @@ Tempo Gasto: ~4.2 horas
 
 ---
 
-**Última Sincronização**: 11 de outubro de 2025, 21:45  
-**Próxima Revisão Programada**: 12 de outubro de 2025, 14:00
+**Ultima sincronizacao**: 16 de outubro de 2025, 23:30  
+**Proxima revisao programada**: 18 de outubro de 2025, 10:00  
 
----
-
-> 💡 **Dica**: Mantenha este arquivo sempre atualizado! Ele é sua fonte única de verdade para o progresso da migração.
-
+> ?? **Dica**: Mantenha este arquivo sempre atualizado! Ele e sua fonte unica de verdade para o progresso da migracao.

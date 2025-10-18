@@ -1,6 +1,7 @@
 import { getUserFromClerkId } from '@/lib/auth-utils';
 import { db } from '@/lib/db';
 import { FeatureKey } from "@/lib/credits/feature-config";
+import { syncClerkCreditsMetadata } from '@/lib/clerk/credit-metadata';
 import { getFeatureCost } from "@/lib/credits/settings";
 import { InsufficientCreditsError } from "@/lib/credits/errors";
 
@@ -75,24 +76,50 @@ export async function deductCredits(
 }
 
 // Simple credit refresh (can be expanded with subscription logic later)
+export interface RefreshCreditsOptions {
+  creditsTotal?: number
+  planId?: string
+  lastSyncedAt?: Date
+  skipClerkUpdate?: boolean
+}
+
 export async function refreshUserCredits(
-  clerkUserId: string, 
-  newCredits: number
+  clerkUserId: string,
+  newCredits: number,
+  options: RefreshCreditsOptions = {},
 ): Promise<void> {
-  const { user } = await getUserCredits(clerkUserId);
-  
-  await db.creditBalance.upsert({
+  const { user } = await getUserCredits(clerkUserId)
+  const normalizedCredits = Math.max(0, Math.floor(newCredits))
+  const lastSyncedAt = options.lastSyncedAt ?? new Date()
+
+  const updated = await db.creditBalance.upsert({
     where: { userId: user.id },
     update: {
-      creditsRemaining: newCredits,
-      lastSyncedAt: new Date(),
+      creditsRemaining: normalizedCredits,
+      lastSyncedAt,
     },
     create: {
       userId: user.id,
-      clerkUserId: clerkUserId,
-      creditsRemaining: newCredits,
-    }
-  });
+      clerkUserId,
+      creditsRemaining: normalizedCredits,
+      lastSyncedAt,
+    },
+  })
+
+  if (options.skipClerkUpdate) {
+    return
+  }
+
+  try {
+    await syncClerkCreditsMetadata(clerkUserId, updated.creditsRemaining, {
+      creditsTotal: options.creditsTotal,
+      planId: options.planId,
+      lastSyncedAt,
+    })
+  } catch (error) {
+    console.error('refreshUserCredits: failed to sync Clerk metadata', error)
+    throw error
+  }
 }
 
 // Increment user's credits by a positive amount

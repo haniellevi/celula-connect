@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { listLivrosBiblia } from '@/lib/queries/biblia'
-import { Testamento } from '../../../../../../prisma/generated/client'
+import { Testamento } from '@/lib/prisma-client'
 
 const querySchema = z.object({
   testamento: z

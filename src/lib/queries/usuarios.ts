@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
-import { PerfilUsuario } from '../../../prisma/generated/client'
-import type { Prisma } from '../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
+import type { Prisma } from '@/lib/prisma-client'
 
 export type UsuarioOrderField = 'nome' | 'createdAt' | 'ultimoAcesso' | 'perfil'
 

@@ -1,4 +1,4 @@
-# Admin Panel
+﻿# Admin Panel
 
 Administrative routes and features of the app.
 

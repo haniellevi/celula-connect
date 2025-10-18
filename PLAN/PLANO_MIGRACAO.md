@@ -1,8 +1,8 @@
-# 📋 PLANO DE MIGRAÇÃO: IGREJA-12 → CÉLULA CONNECT (STARTER-KIT-V2)
+﻿# 📋 PLANO DE MIGRAÇÃO: IGREJA-12 → CÉLULA CONNECT (STARTER-KIT-V2)
 
 **Data de Criação**: 8 de outubro de 2025  
-**Versão**: 1.0  
-**Status**: 🚀 Em execução (Fase 3 em preparação)
+**Versão**: 1.1  
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
 ---
 
@@ -46,6 +46,14 @@ Migrar todas as funcionalidades do **Igreja-12** (React 19 + Vite + Cloudflare W
 6. **Gestão de células** mais completa do segmento
 7. **Dashboards personalizáveis** por perfil
 8. **Sistema de convites** com QR codes e tracking
+
+### Atualização — 16 de outubro de 2025
+- Cobertura completa das rotas de domínio: 67 handlers em `src/app/api/**/route.ts` migrados para Next.js com autenticação Clerk, `withApiLogging` e validações Zod para trilhas, avisos, devocionais, convites, dashboards, landing config, créditos e sincronização administrativa.
+- App Router consolidado com 29 páginas (`(public)`, `(protected)`, `admin`) entregando dashboards por perfil, módulos de trilha/aprovação, leituras bíblicas, gestão de avisos/devocionais, convites públicos e consoles administrativos.
+- Seeds e fixtures alinhadas ao novo domínio (`prisma/seed.ts`, `tests/fixtures/domain-seed.json`) garantindo que igrejas, células, convites, trilhas, metas e configurações dinâmicas sejam provisionadas para QA e smoke tests.
+- Suite de testes atualizada: 20 testes de integração para trilhas, avisos, devocionais, convites, landing preview, dashboard e webhooks; unit tests dos helpers de queries e specs E2E migradas aguardando execução com banco ativo.
+- Fluxo manual de creditos consolidado em 17/10/2025: ajustes admin sincronizam Clerk (`syncClerkCreditsMetadata`) e `refreshUserCredits` atualiza o `publicMetadata` sem loops.
+- Pendencias priorizadas para a Fase 6+: publicar assets publicos (favicons/logos), definir `metadataBase` e restabelecer o pipeline Postgres local (`npm run db:docker`/`npm run db:push`) para encerrar os 500 em `/api/credits/*`.
 
 ### Atualização — 11 de outubro de 2025 (tarde)
 - Modelagem Prisma ampliada com os módulos de trilha (`TrilhaCrescimento`, `UsuarioTrilha`, `AreaSupervisaoTrilha`, `SolicitacaoAvancoTrilha`), comunicação (`Aviso`, `Devocional`), convites, rede e configurações dinâmicas (`LandingPageConfig`, `ConfiguracaoSistema`).
@@ -774,9 +782,11 @@ model Convite {
 **Ações Necessárias:**
 1. Substituir `useAuth` do Mocha → `useAuth` do Clerk
 2. Atualizar middleware de autenticação
-3. Criar webhooks para sincronizar usuários
+3. Configurar sincronização manual de usuários/planos (webhook adiado para produção)
 4. Mapear `mocha_user_id` → `clerk_user_id`
 5. Manter sistema de perfis (discipulo, lider, supervisor, pastor)
+
+> Enquanto estivermos em desenvolvimento e homologação, seguiremos com a sincronização manual provida pelo starter-kit; o webhook do Clerk será configurado somente próximo ao deploy final.
 
 ---
 
@@ -913,7 +923,7 @@ model Convite {
 ### FASE 1: PLANEJAMENTO E ANÁLISE (✅ CONCLUÍDA)
 
 **Duração**: 1 dia  
-**Status**: ✅ 100% Completo
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
 - [x] Análise completa da documentação
 - [x] Mapeamento de schema de banco
@@ -1088,378 +1098,80 @@ async function main() {
 
 ---
 
-### FASE 4: MIGRAÇÃO DE BACKEND (APIs) (5-6 dias)
+### FASE 4: MIGRACAO DE BACKEND (APIs) (5-6 dias)
 
-**Objetivo**: Migrar 15+ APIs de Hono/Workers para Next.js API Routes
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
-#### 4.1 Estrutura de APIs
+**Resumo da entrega**
+- 67 rotas Next.js API convertidas cobrindo administracao, dominio publico e fluxos autenticados (trilhas, biblia, avisos, devocionais, convites, celulas, dashboards, creditos, landing config, webhooks Clerk).
+- Autenticacao e observabilidade centralizadas com withApiLogging, domain-auth e pi-auth, oferecendo respostas padronizadas e logs estruturados.
+- Consultas Prisma encapsuladas em src/lib/queries/** e dados de referencia alinhados (prisma/seed.ts, 	ests/fixtures/domain-seed.json) para smoke tests repetiveis.
+- 20 testes de integracao em 	ests/integration/api cobrindo aprovacao de trilhas, filtros biblicos, avisos segmentados, convites, landing preview, painel admin e webhooks.
 
-```
-src/app/api/
-├── auth/
-│   └── [...nextauth]/route.ts
-├── usuarios/
-│   ├── route.ts              # GET, POST
-│   └── [id]/route.ts         # GET, PUT, DELETE
-├── igrejas/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── celulas/
-│   ├── route.ts
-│   └── [id]/route.ts
-├── trilha/
-│   ├── route.ts
-│   ├── solicitacoes/route.ts
-│   └── aprovacao/route.ts
-├── biblia/
-│   ├── livros/route.ts
-│   ├── capitulos/route.ts
-│   └── metas/route.ts
-├── avisos/
-│   ├── route.ts
-│   └── [id]/route.ts
-└── admin/
-    ├── landing/route.ts
-    └── config/route.ts
-```
-
-#### 4.2 Padrão de API Route
-
-```typescript
-// src/app/api/celulas/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { db } from '@/lib/db';
-import { z } from 'zod';
-
-const createCelulaSchema = z.object({
-  nome: z.string().min(1),
-  liderId: z.string(),
-  diaSemana: z.string(),
-  horario: z.string(),
-  // ... resto dos campos
-});
-
-export async function GET(request: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const celulas = await db.celula.findMany({
-      where: { /* filtros */ },
-      include: { /* relacionamentos */ }
-    });
-
-    return NextResponse.json(celulas);
-  } catch (error) {
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
-  }
-}
-
-export async function POST(request: NextRequest) {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const validatedData = createCelulaSchema.parse(body);
-
-    const celula = await db.celula.create({
-      data: validatedData
-    });
-
-    return NextResponse.json(celula, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
-    }
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
-  }
-}
-```
-
-#### 4.3 Priorização de APIs
-
-> **Contexto atual**: durante a Fase 3 já migramos o núcleo administrativo (`/api/igrejas`, `/api/celulas`, `/api/usuarios`, `/api/devocionais`, `/api/convites`, `/api/avisos`, `/api/public/landing-config`, `/api/admin/landing-config`, `/api/admin/configuracoes`). A Fase 4 foca no restante do domínio e nos fluxos avançados (trilhas/aprovação, webhooks, créditos).
-
-**Sprint 1 (Dias 1-2):**
-1. **Trilha de Crescimento**
-   - `POST /api/trilhas/[id]/solicitacoes` (abrir avanço)
-   - `PATCH /api/trilhas/solicitacoes/[id]` (aprovar/rejeitar)
-   - Queries `src/lib/queries/trilhas.ts` (listar pendências, histórico)
-   - Testes de integração cobrindo pastores/supervisores
-2. **Webhooks Clerk / Billing**
-   - Revisar `src/app/api/webhooks/clerk/route.ts`
-   - Implementar dedução de créditos e sincronização de planos migrados
-   - Cobertura com fixtures de eventos (`tests/integration/api/webhooks-clerk-route.test.ts`)
-3. **Domínio de Configuração Dinâmica**
-   - `GET /api/admin/feature-flags` (mapear toggles como `ENABLE_DOMAIN_MUTATIONS`)
-   - Documentar toggle no checklist de QA
-
-**Sprint 2 (Dias 3-4):**
-1. Metas de leitura avançadas (relatórios agregados, histórico de progresso)
-2. API de dashboards (endpoint consolidado `/api/dashboard/[perfil]`)
-3. Otimização de filtros (paginadores e ordenação em `/api/usuarios`, `/api/celulas`)
-
-**Sprint 3 (Dias 5-6):**
-1. Public endpoints (convites, landing preview, biblia)
-2. Integridade do sistema bíblico (carga incremental de livros/capítulos)
-3. Observabilidade (logs estruturados, métricas, tracing opcional)
-
-**Entregáveis da Fase 4:**
-- ✅ Cobrir 100% das rotas planejadas com validação Zod e autenticação Clerk.
-- ✅ Testes de integração para os fluxos críticos (trilhas, webhooks, dashboards).
-- ✅ Documentação atualizada (`docs/api.md`, `PLAN/ACOMPANHAMENTO_MIGRACAO.md`).
+**Follow-up**
+- Registar explicitamente que, durante o desenvolvimento, os fluxos de créditos ficam restritos à sincronização manual no painel admin (webhooks e Clerk Billing desativados).
+- Configurar alertas de observabilidade para acompanhar latencia/erros na fase de deploy.
 
 ---
 
-### FASE 5: MIGRAÇÃO DE FRONTEND (10-12 dias)
+### FASE 5: MIGRACAO DE FRONTEND (10-12 dias)
 
-**Objetivo**: Migrar 80+ páginas React/Vite para Next.js App Router
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
-#### 5.1 Estrutura de Páginas
+**Resumo da entrega**
+- 29 paginas App Router cobrindo landing publica, fluxo Clerk, dashboards por perfil, modulos de celulas, trilha e aprovacao, biblia (leitor e metas), avisos, devocionais, convites publicos e consoles administrativos.
+- Layouts compartilhados (src/app/(protected)/layout.tsx e src/app/admin/layout.tsx) com Topbar/Sidebar integrados ao sistema de creditos e navegacao por perfil.
+- Hooks de dados migrados para TanStack Query (src/hooks/**) com estrategias de cache, invalidacao e skeletons alinhados aos endpoints Prisma.
+- Componentes reutilizaveis adaptados do starter-kit (tabelas, cards, graficos) modernizados para Tailwind v4 e Radix UI.
 
-```
-src/app/
-├── (public)/
-│   ├── page.tsx                    # Landing Page
-│   ├── sign-in/[[...sign-in]]/     # Clerk Sign-in
-│   └── sign-up/[[...sign-up]]/     # Clerk Sign-up
-├── (protected)/
-│   ├── dashboard/
-│   │   ├── discipulo/page.tsx
-│   │   ├── lider/page.tsx
-│   │   ├── supervisor/page.tsx
-│   │   └── pastor/page.tsx
-│   ├── celula/
-│   │   ├── page.tsx
-│   │   ├── [id]/page.tsx
-│   │   └── nova/page.tsx
-│   ├── trilha/
-│   │   ├── page.tsx
-│   │   └── aprovacao/page.tsx
-│   ├── biblia/
-│   │   ├── leitor/page.tsx
-│   │   └── metas/page.tsx
-│   └── avisos/
-│       └── page.tsx
-└── admin/
-    ├── landing/page.tsx
-    ├── usuarios/page.tsx
-    └── config/page.tsx
-```
-
-#### 5.2 Conversão de Componentes
-
-**ANTES (React Context):**
-```tsx
-// src/react-app/pages/dashboard/Discipulo.tsx
-import { useAuth } from '@/contexts/AuthContext';
-
-export function DashboardDiscipulo() {
-  const { user } = useAuth();
-  // ...
-}
-```
-
-**DEPOIS (Next.js + Clerk):**
-```tsx
-// src/app/(protected)/dashboard/discipulo/page.tsx
-"use client";
-
-import { useUser } from '@clerk/nextjs';
-import { usePageConfig } from '@/hooks/use-page-config';
-import { useDashboardData } from '@/hooks/use-dashboard-data';
-
-export default function DashboardDiscipuloPage() {
-  const { user } = useUser();
-  const { data, isLoading } = useDashboardData();
-  
-  usePageConfig("Dashboard", "Bem-vindo ao seu painel");
-  
-  if (isLoading) return <Loading />;
-  
-  return <DashboardContent data={data} />;
-}
-```
-
-#### 5.3 Hooks Customizados
-
-Criar hooks para substituir Context API:
-
-```typescript
-// src/hooks/use-dashboard-data.ts
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api-client';
-
-export function useDashboardData() {
-  return useQuery({
-    queryKey: ['dashboard'],
-    queryFn: () => api.get('/api/dashboard/me'),
-    staleTime: 5 * 60 * 1000,
-  });
-}
-
-// src/hooks/use-celulas.ts
-export function useCelulas() {
-  return useQuery({
-    queryKey: ['celulas'],
-    queryFn: () => api.get('/api/celulas'),
-  });
-}
-
-export function useCreateCelula() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (data) => api.post('/api/celulas', data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['celulas'] });
-    },
-  });
-}
-```
-
-#### 5.4 Priorização de Páginas
-
-**Sprint 1 - Core (Dias 1-2):**
-- Landing Page configurável
-- Sign-in/Sign-up (Clerk)
-- Dashboard Discípulo
-- Dashboard Líder
-
-**Sprint 2 - Dashboards (Dias 3-4):**
-- Dashboard Supervisor
-- Dashboard Pastor
-- Navegação e layout
-
-**Sprint 3 - Funcionalidades Críticas (Dias 5-6):**
-- Gestão de Células
-- Trilha de Crescimento
-- Sistema de Aprovação (PRIORIDADE)
-
-**Sprint 4 - Sistema Bíblico (Dias 7-8):**
-- Leitor de Bíblia
-- Gestão de Metas
-- Progresso Automático
-
-**Sprint 5 - Comunicação (Dias 9-10):**
-- Sistema de Avisos
-- Devocionais
-- Feed dinâmico
-
-**Sprint 6 - Admin e Polimento (Dias 11-12):**
-- Painel administrativo
-- Landing page editor
-- Configurações
-- Ajustes finais
-
-**Entregáveis (planejados):**
-- ⏳ 80+ páginas migradas
-- ⏳ Todos os dashboards funcionais
-- ⏳ Funcionalidades exclusivas preservadas
-- ⏳ UI moderna com Radix + Tailwind v4
+**Follow-up**
+- Revisar responsividade completa (mobile-first) e acessibilidade nos dashboards durante a fase 6.
+- Publicar assets finais (favicons, logos definitivas) para eliminar 404 registrados no navegador.
 
 ---
 
 ### FASE 6: FUNCIONALIDADES EXCLUSIVAS (3-4 dias)
 
-**Foco TOTAL nas funcionalidades que diferenciam o produto:**
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
-#### 6.1 Trilha com Aprovação (Dia 1-2)
-- Dashboard de supervisores
-- Workflow de solicitações
-- Sistema de notificações
-- Timeline de progresso
-- Testes completos
+**Objetivo imediato**: Consolidar os diferenciais competitivos e ajustes de UX.
 
-#### 6.2 Avisos Dinâmicos (Dia 2-3)
-- Sistema de segmentação
-- Feed personalizado
-- Priorização automática
-- Analytics de visualização
+- Documentar e exercitar a rotina de sincronizacao manual de creditos (sem Clerk Billing nem webhooks) e garantir que o painel admin reflita os saldos ajustados.
+- Finalizar a landing dinamica do painel pastoral (/dashboard/pastor/landing-config) com preview e assets reais.
+- Revisar o fluxo completo da trilha de crescimento (solicitacao, aprovacao, historico) com seeds e notificacoes internas.
+- Validar progresso automatico das metas biblicas e relatorios agregados exibidos nos dashboards.
+- Formalizar correcoes de branding (favicons/logos em public/, definicao de metadataBase, textos de marketing).
 
-#### 6.3 Landing Page Configurável (Dia 3)
-- Editor visual
-- Preview real-time
-- Sistema de configurações
-- SSG otimizado
-
-#### 6.4 Progresso Automático de Metas (Dia 4)
-- Tracking automático
-- Cálculo de progresso
-- Notificações de conquistas
-- Gamificação
-
-**Entregáveis (planejados):**
-- ⏳ Todas funcionalidades exclusivas 100% funcionais
-- ⏳ Testes completos
-- ⏳ Documentação atualizada
+**Pendencias recentes**
+- Restaurar acesso ao banco Postgres local via 
+pm run db:docker seguido de 
+pm run db:push para remover respostas 500 em creditos/assinaturas.
+- Registrar playbook de sincronizacao manual enquanto os webhooks de billing nao estiverem ativos.
 
 ---
 
 ### FASE 7: TESTES E QUALIDADE (2-3 dias)
 
-#### 7.1 Testes Automatizados
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
 
-```typescript
-// __tests__/api/celulas.test.ts
-import { GET, POST } from '@/app/api/celulas/route';
+**Progresso atual**
+- Jest configurado com 20 testes de integracao e 5 unitarios de queries (convites, biblia, celulas, usuarios, igrejas).
+- Fixtures deterministicas e helpers de seed alinhados ao dominio (	ests/fixtures/domain-seed.json).
+- Suites E2E do starter-kit migradas (	ests/e2e/*.spec.ts) aguardando conexao Postgres e ajustes de dados seed.
 
-describe('/api/celulas', () => {
-  it('retorna lista de células autenticado', async () => {
-    // ... teste
-  });
-  
-  it('cria célula com dados válidos', async () => {
-    // ... teste
-  });
-});
+**Plano de execucao**
+1. Reativar banco local e ajustar comandos de seed para permitir 
+pm run test:integration e 
+pm run test:e2e.
+2. Atualizar testes E2E com fluxos reais (trilha, landing-config, convites) e executar em ambiente local/CI.
+3. Rodar Lighthouse e auditorias de acessibilidade/mobile apos os ajustes de assets.
 
-// __tests__/components/Dashboard.test.tsx
-import { render, screen } from '@testing-library/react';
-
-describe('Dashboard Discípulo', () => {
-  it('renderiza dados do usuário', () => {
-    // ... teste
-  });
-});
-```
-
-#### 7.2 Testes E2E com Playwright
-
-```typescript
-// e2e/trilha-aprovacao.spec.ts
-import { test, expect } from '@playwright/test';
-
-test('fluxo completo de aprovação de trilha', async ({ page }) => {
-  // 1. Login como líder
-  // 2. Solicitar avanço
-  // 3. Login como supervisor
-  // 4. Aprovar solicitação
-  // 5. Verificar atualização
-});
-```
-
-#### 7.3 Checklist de Qualidade
-
-- [ ] Todos os testes passando
-- [ ] Zero erros no console
-- [ ] Performance < 2s loading
-- [ ] Mobile responsive 100%
-- [ ] Acessibilidade WCAG AA
-- [ ] SEO otimizado
-- [ ] Lighthouse score > 90
-
-**Entregáveis (planejados):**
-- ⏳ Suite de testes completa
-- ⏳ Cobertura > 70%
-- ⏳ Sem bugs críticos
-- ⏳ Performance otimizada
+**Checklist de qualidade**
+- [ ] Todos os testes (unit, integration, e2e) passando e documentados.
+- [ ] Console do browser e logs de servidor sem erros.
+- [ ] Performance < 2s nos principais paineis protegidos.
+- [ ] Layout responsivo auditado em 375px, 768px e 1280px.
+- [ ] Checklist de acessibilidade (WCAG AA) e SEO, incluindo metadataBase, concluido.
 
 ---
 
@@ -1587,39 +1299,21 @@ Celula-Connect/
 
 ---
 
-## 📝 PRÓXIMOS PASSOS IMEDIATOS
+##  PRXIMOS PASSOS IMEDIATOS
 
-### 1. Aprovação do Plano ✅
-- Revisar este documento
-- Aprovar arquitetura proposta
-- Confirmar prioridades
+### 1. Restabelecer infraestrutura de dados (✅ 18/10/2025)
+- Subir o Postgres local com o comando npm run db:docker (ou apontar para Supabase) e executar npm run db:push em seguida.
+- Validar os artefatos prisma/seed.ts e tests/fixtures/domain-seed.json para garantir consistencia entre ambiente e testes.
+- Reexecutar rotas sensiveis (/api/credits/me, /api/credits/settings, /api/subscription/status) confirmando que os retornos 500 desapareceram.
 
-### 2. Setup Inicial (Próximas 4 horas)
-```bash
-# 1. Replicar estrutura base do starter-kit
-cp -R starter-kit-v2/. Celula-Connect/
-# (Se necessário, remova cópias de arquivos específicos já existentes como estes documentos de migração)
+### 2. Concluir escopo da fase 6 (hardening)
+- Publicar favicons e logos em public/ e definir metadataBase para remover warnings e atender SEO.
+- Validar landing dinamica, trilha/aprovacao e metas automaticas com dados seed e registrar passos no acompanhamento (✅ 18/10/2025 — evidências: `tests/integration/api/landing-config-*.test.ts`, `tests/integration/api/trilhas-solicitacoes-route.test.ts`, `tests/integration/api/dashboard-perfil-route.test.ts`).
 
-# 2. Atualizar dependências e scripts
-cd Celula-Connect
-npm install
-npm install @clerk/nextjs @tanstack/react-query @radix-ui/react-dialog @radix-ui/react-dropdown-menu
-
-# 3. Inicializar Prisma (novo schema e .env.example)
-npx prisma init --datasource-provider postgresql
-
-# 4. Configurar Clerk (variáveis dummy para desenvolvimento)
-cp .env.example .env.local
-```
-
-#### Validações rápidas
-- Executar `npm run lint && npm run build` e registrar evidências (logs resumidos) no PR
-
-### 3. Primeira Sprint (Próximos 2 dias)
-- Provisionar banco PostgreSQL local ou em container e validar conexão (`npx prisma db push`)
-- Implementar autenticação Clerk (middleware + componentes de layout)
-- Criar primeiros 3 modelos Prisma (Usuário, Igreja, Plano) com seeds mínimas
-- Entregar primeira rota API (status/healthcheck) e página pública (Landing)
+### 3. Preparar a fase 7
+- Atualizar e executar npm run test:integration e npm run test:e2e apos a restauracao do banco (lembrar de rodar `npx playwright install` para provisionar os navegadores).
+- Documentar playbook de QA (smoke/manual) e metas de performance/monitoramento.
+- Planejar janela para auditorias de acessibilidade, Lighthouse e observabilidade antes da fase 8.
 
 ---
 
@@ -1690,12 +1384,11 @@ Antes de considerar a migração concluída:
 
 **RESUMO**: Este é um plano completo e executável para migrar o Igreja-12 para a stack moderna do Starter-Kit-v2, preservando todas as funcionalidades exclusivas que fazem do produto um líder de mercado. O cronograma de ~7 semanas é realista e contempla todas as fases necessárias para uma migração de sucesso.
 
-**PRÓXIMO PASSO**: Elaborar plano do Sprint 1 da Fase 3 (Usuários/Igrejas/Células) com base nas seeds e queries catalogadas.
+**PROXIMO PASSO**: Publicar assets definitivos (favicons/logos), definir `metadataBase` e restabelecer o Postgres local (`npm run db:docker`/`npm run db:push`) para concluir a Fase 6 sem erros 500 em `/api/credits/*`.
 
 ---
 
 **Data**: 8 de outubro de 2025  
-**Última atualização**: 10 de outubro de 2025  
-**Versão**: 1.0  
-**Status**: 🚀 Em execução (Fase 3 em preparação)
-
+**Ultima atualizacao**: 16 de outubro de 2025  
+**Versao**: 1.1  
+**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)

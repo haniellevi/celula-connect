@@ -24,7 +24,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api-client'
-import { TipoMeta, UnidadeTempo } from '../../../../../prisma/generated/client'
+import { TipoMeta, UnidadeTempo } from '@/lib/prisma-client'
 
 type MetaFormValues = {
   titulo: string

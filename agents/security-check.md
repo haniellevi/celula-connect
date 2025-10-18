@@ -1,4 +1,4 @@
-# Security Check – Prompt
+﻿# Security Check – Prompt
 
 Objective
 - Perform a focused security review for new/changed code before merge.

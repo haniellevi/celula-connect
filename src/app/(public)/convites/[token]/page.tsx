@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { getConviteByToken, registerConviteView } from '@/lib/queries/convites'
 import { getCelulaById } from '@/lib/queries/celulas'
-import { CargoCelula } from '../../../../../prisma/generated/client'
+import { CargoCelula } from '@/lib/prisma-client'
 
 type InvitationStatus =
   | { status: 'not_found' }
@@ -94,12 +94,13 @@ async function loadInvitationStatus(token: string): Promise<InvitationStatus> {
   return { status: 'valid', data: snapshot }
 }
 
-const cargoLabels: Record<CargoCelula, string> = {
-  [CargoCelula.MEMBRO]: 'Membro',
-  [CargoCelula.CO_LIDER]: 'Co-líder',
-  [CargoCelula.APOIO]: 'Equipe de apoio',
-  [CargoCelula.LIDER]: 'Líder de célula',
-  [CargoCelula.SUPERVISOR]: 'Supervisor',
+const cargoLabels: Record<string, string> = {
+  MEMBRO: 'Membro',
+  LIDER: 'Líder de célula',
+  AUXILIAR: 'Auxiliar',
+  CO_LIDER: 'Co-líder',
+  APOIO: 'Equipe de apoio',
+  SUPERVISOR: 'Supervisor',
 }
 
 function formatCargo(cargo: CargoCelula | null) {
@@ -123,13 +124,14 @@ function formatDateTime(date: Date | null) {
 }
 
 interface PageProps {
-  params: {
+  params: Promise<{
     token: string
-  }
+  }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const invitation = await loadInvitationStatus(params.token)
+  const { token } = await params
+  const invitation = await loadInvitationStatus(token)
 
   if (invitation.status === 'valid') {
     const celulaNome = invitation.data.celula?.nome
@@ -163,7 +165,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function ConvitePublicPage({ params }: PageProps) {
-  const invitation = await loadInvitationStatus(params.token)
+  const { token } = await params
+  const invitation = await loadInvitationStatus(token)
 
   const statusConfig = {
     valid: {
@@ -205,7 +208,7 @@ export default async function ConvitePublicPage({ params }: PageProps) {
           ? statusConfig.used
           : statusConfig.not_found
 
-  const queryFragment = `?convite=${encodeURIComponent(params.token)}`
+  const queryFragment = `?convite=${encodeURIComponent(token)}`
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-16">

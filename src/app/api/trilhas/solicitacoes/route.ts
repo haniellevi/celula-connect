@@ -3,7 +3,7 @@ import { z } from 'zod'
 import {
   PerfilUsuario,
   StatusSolicitacao,
-} from '../../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import {
   requireDomainUser,

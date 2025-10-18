@@ -2,7 +2,7 @@ import { db } from '@/lib/db'
 import type {
   Prisma,
   StatusSolicitacao,
-} from '../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 
 export interface ListTrilhasOptions {
   ativa?: boolean

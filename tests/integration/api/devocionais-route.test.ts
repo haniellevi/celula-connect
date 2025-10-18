@@ -88,7 +88,7 @@ describe('/api/devocionais', () => {
       })
     })
 
-    it('retorna 400 quando as datas são inválidas', async () => {
+    it('retorna 400 quando dataInicial é inválida', async () => {
       auth.mockResolvedValue({ userId: 'usr_seed_pastor' })
 
       const response = await GET(
@@ -102,6 +102,25 @@ describe('/api/devocionais', () => {
           error: 'Parâmetros inválidos',
         }),
       )
+      expect(body.details?.fieldErrors?.dataInicial).toEqual(['Data inicial inválida'])
+      expect(listDevocionais).not.toHaveBeenCalled()
+    })
+
+    it('retorna 400 quando dataFinal é inválida', async () => {
+      auth.mockResolvedValue({ userId: 'usr_seed_pastor' })
+
+      const response = await GET(
+        new Request('http://localhost/api/devocionais?dataFinal=invalida'),
+      )
+
+      expect(response.status).toBe(400)
+      const body = await response.json()
+      expect(body).toEqual(
+        expect.objectContaining({
+          error: 'Parâmetros inválidos',
+        }),
+      )
+      expect(body.details?.fieldErrors?.dataFinal).toEqual(['Data final inválida'])
       expect(listDevocionais).not.toHaveBeenCalled()
     })
   })

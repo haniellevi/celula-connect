@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { headers } from 'next/headers';
 import { WebhookEvent } from '@clerk/nextjs/server';
-import { Prisma, PerfilUsuario } from '../../../../../prisma/generated/client'
+import { Prisma, PerfilUsuario } from '@/lib/prisma-client'
 import { db } from "@/lib/db";
 import { refreshUserCredits, addUserCredits } from "@/lib/credits/validate-credits";
 import { SUBSCRIPTION_PLANS } from "@/lib/clerk/subscription-utils";
@@ -147,7 +147,7 @@ async function handleClerkWebhook(req: Request) {
           }
           
           if (newCredits !== undefined) {
-            await refreshUserCredits(id, newCredits as number);
+            await refreshUserCredits(id, newCredits as number, { skipClerkUpdate: true });
             console.log(`Updated ${id} credits to ${newCredits}`);
           }
         }
@@ -205,7 +205,7 @@ async function handleClerkWebhook(req: Request) {
         const planIdentifier = subscription.plan_id as string
         if (planIdentifier) {
           const credits = await getPlanCredits(planIdentifier)
-          await refreshUserCredits(userId, credits)
+          await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
           console.log(`Subscription created: User ${userId} set to ${planIdentifier} with ${credits} credits`)
         } else {
           console.log(`Subscription created: missing plan_id for user ${userId}; skipping credit refresh`)
@@ -245,14 +245,14 @@ async function handleClerkWebhook(req: Request) {
           const planIdentifier = subscription.plan_id as string
           if (planIdentifier) {
             const credits = await getPlanCredits(planIdentifier)
-            await refreshUserCredits(userId, credits)
+            await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
             console.log(`Subscription updated: User ${userId} refreshed with ${credits} credits for plan ${planIdentifier}`)
           } else {
             console.log(`Subscription updated: missing plan_id for user ${userId}; skipping credit refresh`)
           }
         } else if (subscription.status as string === 'canceled' || subscription.status as string === 'past_due') {
           // Handle cancellation or payment failure — set to 0 if no free tier configured
-          await refreshUserCredits(userId, 0);
+          await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
           console.log(`Subscription ${subscription.status as string}: User ${userId} set to 0 credits (no active plan)`);
         }
       } catch (error) {
@@ -287,7 +287,7 @@ async function handleClerkWebhook(req: Request) {
           console.error('Failed to persist subscription.deleted event', err)
         }
         // No active plan → set to 0 unless admin configured otherwise externally
-        await refreshUserCredits(userId, 0);
+        await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
         console.log(`Subscription deleted: User ${userId} set to 0 credits (no active plan)`);
       } catch (error) {
         console.error('Error handling subscription deletion:', error);
@@ -322,7 +322,7 @@ async function handleClerkWebhook(req: Request) {
         }
         if (planIdentifier) {
           const credits = await getPlanCredits(planIdentifier)
-          await refreshUserCredits(userId, credits)
+          await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
           console.log(`Subscription item ${eventType}: User ${userId} set to ${planIdentifier} with ${credits} credits`)
         } else {
           console.log(`Subscription item ${eventType}: missing plan id for user ${userId}; skipping credit refresh`)

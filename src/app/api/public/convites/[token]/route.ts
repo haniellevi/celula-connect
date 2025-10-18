@@ -97,7 +97,7 @@ async function handleGet(request: Request, params: { token: string }) {
 }
 
 export const GET = withApiLogging(
-  (_request, ctx) => handleGet(_request, ctx.params as { token: string }),
+  async (_request, ctx) => handleGet(_request, ctx.params as { token: string }),
   {
     method: 'GET',
     route: '/api/public/convites/[token]',

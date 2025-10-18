@@ -11,7 +11,7 @@ import {
   hasRole,
   unauthorizedResponse,
 } from '@/lib/domain-auth'
-import { PerfilUsuario } from '../../../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
 
 const querySchema = z.object({

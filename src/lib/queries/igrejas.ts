@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
-import { StatusAssinatura } from '../../../prisma/generated/client'
-import type { Prisma } from '../../../prisma/generated/client'
+import { StatusAssinatura } from '@/lib/prisma-client'
+import type { Prisma } from '@/lib/prisma-client'
 
 type IgrejaIncludeRelations = {
   plano?: boolean

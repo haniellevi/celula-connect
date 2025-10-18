@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   PerfilUsuario,
   StatusSolicitacao,
-} from '../../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import { useTrilhaSolicitacoes, useUpdateSolicitacaoTrilha } from '@/hooks/use-trilha-solicitacoes'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { useSetPageMetadata } from '@/contexts/page-metadata'

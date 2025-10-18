@@ -3,20 +3,9 @@
 import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type {
-  Prisma,
-  TipoAviso,
-  PrioridadeAviso,
-} from '../../prisma/generated/client'
+import type { AvisoWithRelations, TipoAviso, PrioridadeAviso } from '@/types/avisos'
+export type { AvisoWithRelations } from '@/types/avisos'
 import { useToast } from '@/hooks/use-toast'
-
-export type AvisoWithRelations = Prisma.AvisoGetPayload<{
-  include: {
-    igreja: true
-    celula: true
-    usuario: true
-  }
-}>
 
 export interface UseAvisosOptions {
   igrejaId?: string | null
@@ -234,8 +223,6 @@ export function useAvisosFeed(
         const dataFim = aviso.dataFim ? new Date(aviso.dataFim) : null
         const ativo = aviso.ativo && dataInicio <= now && (!dataFim || dataFim >= now)
         const agendado = aviso.ativo && dataInicio > now
-        const expirado = !aviso.ativo || (!!dataFim && dataFim < now)
-
         let scope: AvisoScope = 'geral'
         let scopeLabel = 'Comunicado geral'
         let scopeRank = 3
@@ -257,10 +244,6 @@ export function useAvisosFeed(
           scopeRank = matchIgreja ? 2 : 3
         }
 
-        const priorityRank = PRIORIDADE_ORDER[aviso.prioridade]
-        const statusRank = ativo ? 0 : agendado ? 1 : 2
-        const timeRank = agendado ? dataInicio.getTime() : -dataInicio.getTime()
-
         return {
           aviso,
           status: ativo ? 'ATIVO' : agendado ? 'AGENDADO' : 'EXPIRADO',
@@ -268,23 +251,35 @@ export function useAvisosFeed(
           scopeLabel,
           dataInicio,
           dataFim,
-          isUrgente: aviso.prioridade === PrioridadeAviso.URGENTE,
+          isUrgente: aviso.prioridade === 'URGENTE',
           isAgendado: agendado,
-          _priorityRank: priorityRank,
-          _statusRank: statusRank,
-          _scopeRank: scopeRank,
-          _timeRank: timeRank,
+          sortMeta: {
+            priorityRank: PRIORIDADE_ORDER[aviso.prioridade],
+            statusRank: ativo ? 0 : agendado ? 1 : 2,
+            scopeRank,
+            timeRank: agendado ? dataInicio.getTime() : -dataInicio.getTime(),
+          },
         }
       })
       .filter((item) => item.status !== 'EXPIRADO')
       .sort((a, b) => {
-        if (a._statusRank !== b._statusRank) return a._statusRank - b._statusRank
-        if (a._priorityRank !== b._priorityRank) return a._priorityRank - b._priorityRank
-        if (a._scopeRank !== b._scopeRank) return a._scopeRank - b._scopeRank
-        return a._timeRank - b._timeRank
+        if (a.sortMeta.statusRank !== b.sortMeta.statusRank) {
+          return a.sortMeta.statusRank - b.sortMeta.statusRank
+        }
+        if (a.sortMeta.priorityRank !== b.sortMeta.priorityRank) {
+          return a.sortMeta.priorityRank - b.sortMeta.priorityRank
+        }
+        if (a.sortMeta.scopeRank !== b.sortMeta.scopeRank) {
+          return a.sortMeta.scopeRank - b.sortMeta.scopeRank
+        }
+        return a.sortMeta.timeRank - b.sortMeta.timeRank
       })
       .slice(0, options.take ?? 5)
-      .map(({ _priorityRank, _statusRank, _scopeRank, _timeRank, ...rest }) => rest)
+      .map((item) => {
+        const { sortMeta, ...rest } = item
+        void sortMeta
+        return rest
+      })
   }, [context.celulaIds, context.igrejaId, context.usuarioId, options.take, query.data?.data])
 
   const urgentCount = useMemo(

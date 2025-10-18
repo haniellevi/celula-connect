@@ -1,4 +1,4 @@
-# API Documentation
+﻿# API Documentation
 
 ## Overview
 
@@ -376,6 +376,7 @@ Request Body (partial; defaults shown):
 Behavior:
 - Users: creates/updates `User` and ensures a `CreditBalance` row exists (0 credits default)
 - Plans: queries Clerk Billing `GET /v1/users/{user_id}/billing/subscription` and resolves plan ID
+- Nota (desenvolvimento): Clerk Billing e webhooks ficam desativados; use esta rota apenas para sincronizacao manual durante o dev.
 - Credits: when `setCredits` is true and plan is mapped in `Plan`, sets credits to plan credits (or `overrideCredits` if provided)
 
 Response (success):

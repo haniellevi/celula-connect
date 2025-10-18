@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { PerfilUsuario } from '../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { db } from '@/lib/db'
 import { getConfiguracaoSistema } from '@/lib/queries/settings'
 

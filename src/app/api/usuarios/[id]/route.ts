@@ -8,7 +8,7 @@ import {
   assertDomainMutationsEnabled,
 } from '@/lib/domain-auth'
 import { getUsuarioById, updateUsuario } from '@/lib/queries/usuarios'
-import { PerfilUsuario } from '../../../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 const updateSchema = z.object({

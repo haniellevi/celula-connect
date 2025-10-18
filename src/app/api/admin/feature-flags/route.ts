@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { PerfilUsuario } from '../../../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import { requireDomainUser, hasRole, unauthorizedResponse } from '@/lib/domain-auth'
 import {

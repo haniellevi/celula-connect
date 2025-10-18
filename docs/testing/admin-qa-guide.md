@@ -1,4 +1,4 @@
-# Admin QA Guide
+﻿# Admin QA Guide
 
 This document describes how to validate the admin surface end to end. It combines environment prerequisites, dataset expectations, automated coverage and manual checkpoints so the team can run consistent regression passes before every release.
 
@@ -34,7 +34,7 @@ All specs run via `npm run test:e2e`. Configuration sits in `playwright.config.t
 ## 4. Manual QA Checklist
 Run these when validating new admin functionality or before major releases:
 1. **Metrics sanity** – confirm dashboard numbers align with seeded DB data and chart fallbacks render when series are empty.
-2. **Bulk Clerk sync** – in a real environment, exercise the sync modal with and without override credits to ensure webhooks update balances.
+2. **Sincronização manual Clerk** – no painel `/admin/users`, abrir “Sincronizar do Clerk”, marcar “Sincronizar planos/assinaturas” e executar; capturar screenshot/log do toast com o resumo da operação e anexar ao checklist do sprint. Manter o webhook desligado até a fase de produção.
 3. **Invite lifecycle** – verify resend/revoke on actual Clerk invitations (requires email delivery setup).
 4. **Exports** – download the Usage CSV and inspect content for correct delimiter/quoting.
 5. **Storage deletion** – confirm blobs disappear from the storage provider (Verel Blob/S3) and are soft-deleted in DB.
@@ -59,4 +59,4 @@ Outputs (screenshots/traces) appear in `playwright-report/` when failures occur.
 ## 7. Next Steps
 1. Introduce repeatable Prisma seeds focused on admin data to support both manual regression and automated mocks.
 2. Wire `npm run test:e2e` into CI, publishing Playwright HTML reports and traces on failure.
-3. Expand automated coverage to credit usage reports and plan management API endpoints once stabilized.
+2. **Sincronizacao manual de creditos** — no painel `/admin/users`, usar a acao “Sincronizar do Clerk” apenas para importar dados quando necessario; registrar toast/log no checklist e manter os webhooks/billing desligados ate a etapa de producao.

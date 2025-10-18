@@ -2,10 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import {
-  TipoAviso,
-  PrioridadeAviso,
-} from '../../../../../prisma/generated/client'
+import type { TipoAviso, PrioridadeAviso } from '@/types/avisos'
+import { TIPO_AVISO_VALUES, PRIORIDADE_AVISO_VALUES } from '@/types/avisos'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import {
   useAvisos,
@@ -47,8 +45,8 @@ function defaultFormValues(): AvisoFormValues {
   return {
     titulo: '',
     conteudo: '',
-    tipo: TipoAviso.GERAL,
-    prioridade: PrioridadeAviso.NORMAL,
+    tipo: 'GERAL' as TipoAviso,
+    prioridade: 'NORMAL' as PrioridadeAviso,
     dataInicio: hoje,
     dataFim: '',
     igrejaId: '',
@@ -59,8 +57,8 @@ function defaultFormValues(): AvisoFormValues {
 }
 
 const STATUS_FILTERS = ['ativas', 'agendadas', 'expiradas', 'todas'] as const
-const PRIORIDADE_FILTERS = ['todas', ...Object.values(PrioridadeAviso).map((value) => value.toLowerCase())] as const
-const TIPO_FILTERS = ['todos', ...Object.values(TipoAviso).map((value) => value.toLowerCase())] as const
+const PRIORIDADE_FILTERS = ['todas', ...PRIORIDADE_AVISO_VALUES.map((value) => value.toLowerCase() as Lowercase<PrioridadeAviso>)] as const
+const TIPO_FILTERS = ['todos', ...TIPO_AVISO_VALUES.map((value) => value.toLowerCase() as Lowercase<TipoAviso>)] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]
 type PrioridadeFilter = (typeof PRIORIDADE_FILTERS)[number]
@@ -68,14 +66,12 @@ type TipoFilter = (typeof TIPO_FILTERS)[number]
 
 function resolvePrioridade(filter: PrioridadeFilter): PrioridadeAviso | undefined {
   if (filter === 'todas') return undefined
-  const key = filter.toUpperCase() as keyof typeof PrioridadeAviso
-  return PrioridadeAviso[key]
+  return filter.toUpperCase() as PrioridadeAviso
 }
 
 function resolveTipo(filter: TipoFilter): TipoAviso | undefined {
   if (filter === 'todos') return undefined
-  const key = filter.toUpperCase() as keyof typeof TipoAviso
-  return TipoAviso[key]
+  return filter.toUpperCase() as TipoAviso
 }
 
 export default function AvisosPage() {
@@ -220,7 +216,7 @@ export default function AvisosPage() {
         ativas += 1
       }
     })
-    const urgentes = avisos.filter((aviso) => aviso.prioridade === PrioridadeAviso.URGENTE).length
+    const urgentes = avisos.filter((aviso) => aviso.prioridade === 'URGENTE').length
     return { total, ativas, agendadas, expiradas, urgentes }
   }, [avisos])
 
@@ -311,7 +307,7 @@ export default function AvisosPage() {
                 className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register('tipo', { required: true })}
               >
-                {Object.values(TipoAviso).map((value) => (
+                {TIPO_AVISO_VALUES.map((value) => (
                   <option key={value} value={value}>
                     {value.toLowerCase()}
                   </option>
@@ -326,7 +322,7 @@ export default function AvisosPage() {
                 className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register('prioridade', { required: true })}
               >
-                {Object.values(PrioridadeAviso).map((value) => (
+                {PRIORIDADE_AVISO_VALUES.map((value) => (
                   <option key={value} value={value}>
                     {value.toLowerCase()}
                   </option>
@@ -524,6 +520,7 @@ export default function AvisosPage() {
                 {filteredAvisos.map((aviso) => {
                   const inicio = new Date(aviso.dataInicio)
                   const fim = aviso.dataFim ? new Date(aviso.dataFim) : null
+                  const agora = new Date()
                   const statusBadge = (() => {
                     if (!aviso.ativo || (fim && fim < agora)) {
                       return <Badge variant="outline" className="border-border/50 text-muted-foreground">Expirado</Badge>
@@ -543,9 +540,9 @@ export default function AvisosPage() {
                             <Badge variant="outline">{aviso.tipo.toLowerCase()}</Badge>
                             <Badge
                               variant={
-                                aviso.prioridade === PrioridadeAviso.URGENTE
+                                aviso.prioridade === 'URGENTE'
                                   ? 'destructive'
-                                  : aviso.prioridade === PrioridadeAviso.ALTA
+                                  : aviso.prioridade === 'ALTA'
                                   ? 'secondary'
                                   : 'outline'
                               }

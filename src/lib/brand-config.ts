@@ -17,29 +17,56 @@ export type AnalyticsConfig = {
   facebookPixelId?: string
 }
 
+const rawSiteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://celulaconnect.com'
+
+const metadataBase = (() => {
+  try {
+    return new URL(rawSiteUrl)
+  } catch {
+    return new URL('https://celulaconnect.com')
+  }
+})()
+
+const toAbsoluteUrl = (path?: string) => {
+  if (!path) return undefined
+  try {
+    return new URL(path, metadataBase).toString()
+  } catch {
+    return path
+  }
+}
+
 export const site = {
-  name: 'AI Coders Academy – Next.js SaaS Template',
-  shortName: 'AI Coders SaaS',
+  name: 'Célula Connect',
+  shortName: 'Célula Connect',
   description:
-    'Template Next.js pronto para produção pela AI Coders Academy: autenticação, banco de dados, pagamentos e sistema de créditos incluídos.',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  author: 'AI Coders Academy (Vinicius Lana)',
-  keywords: ['SaaS', 'Next.js', 'TypeScript', 'Clerk', 'Prisma', 'Tailwind CSS', 'AI Coders Academy', 'Template', 'Microsaas'],
+    'Plataforma moderna para gestão de células, trilhas de discipulado, avisos e automações pastorais.',
+  url: rawSiteUrl,
+  author: 'Equipe Célula Connect',
+  keywords: [
+    'células',
+    'discipulado',
+    'igreja',
+    'gestão pastoral',
+    'Next.js',
+    'SaaS',
+    'Clerk',
+  ],
   ogImage: '/og-image.png',
   logo: {
     light: '/logo-light.svg',
     dark: '/logo-dark.svg',
   } as LogoPaths,
   icons: {
-    favicon: '/favicon.ico',
+    favicon: '/favicon-32x32.png',
     apple: '/apple-touch-icon.png',
     shortcut: '/favicon-16x16.png',
   } as IconPaths,
   socials: {
-    twitter: '@aicodersacademy',
+    twitter: '@celulaconnect',
   },
   support: {
-    email: 'suporte@aicoders.academy',
+    email: 'suporte@celulaconnect.com',
   },
   analytics: {
     gtmId: process.env.NEXT_PUBLIC_GTM_ID,
@@ -48,8 +75,14 @@ export const site = {
   } as AnalyticsConfig,
 } as const
 
+const ogImageUrl = toAbsoluteUrl(site.ogImage)
+
 export const siteMetadata: Metadata = {
-  title: site.name,
+  metadataBase,
+  title: {
+    default: site.name,
+    template: `%s | ${site.shortName}`,
+  },
   description: site.description,
   keywords: [...site.keywords],
   authors: [{ name: site.author }],
@@ -58,13 +91,14 @@ export const siteMetadata: Metadata = {
     description: site.description,
     url: site.url,
     siteName: site.name,
-    images: site.ogImage ? [{ url: site.ogImage }] : undefined,
+    images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: site.name,
     description: site.description,
+    images: ogImageUrl ? [ogImageUrl] : undefined,
   },
   icons: {
     icon: site.icons.favicon,

@@ -1,0 +1,20 @@
+<svg width="240" height="64" viewBox="0 0 240 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="cc-gradient" x1="8" y1="8" x2="52" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563EB" />
+      <stop offset="1" stop-color="#22C55E" />
+    </linearGradient>
+  </defs>
+  <rect width="240" height="64" rx="16" fill="none" />
+  <g>
+    <circle cx="32" cy="32" r="18" fill="url(#cc-gradient)" />
+    <circle cx="16" cy="20" r="6" fill="#1D4ED8" opacity="0.85" />
+    <circle cx="48" cy="18" r="5" fill="#38BDF8" opacity="0.9" />
+    <circle cx="50" cy="44" r="7" fill="#16A34A" opacity="0.85" />
+    <path d="M16 20L32 32" stroke="#E0F2FE" stroke-width="2" stroke-linecap="round" />
+    <path d="M48 18L32 32" stroke="#DCFCE7" stroke-width="2" stroke-linecap="round" />
+    <path d="M50 44L32 32" stroke="#DCFCE7" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <text x="74" y="38" fill="#0F172A" font-family="'Inter', 'Segoe UI', sans-serif" font-size="26" font-weight="600" letter-spacing="0.02em">Célula Connect</text>
+  <text x="74" y="52" fill="#64748B" font-family="'Inter', 'Segoe UI', sans-serif" font-size="13" letter-spacing="0.08em">DISCIPULADO • REDES • AUTOMAÇÃO</text>
+</svg>

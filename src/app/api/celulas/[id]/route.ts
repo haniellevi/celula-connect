@@ -7,7 +7,7 @@ import {
   unauthorizedResponse,
   assertDomainMutationsEnabled,
 } from '@/lib/domain-auth'
-import { Prisma, PerfilUsuario } from '../../../../../prisma/generated/client'
+import { Prisma, PerfilUsuario } from '@/lib/prisma-client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 const updateSchema = z.object({

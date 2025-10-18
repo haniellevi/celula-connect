@@ -9,9 +9,12 @@ const env = {
   PORT: '3100',
 }
 
-const prisma = spawn('npx', ['prisma', 'generate'], {
+const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
+
+const prisma = spawn(npmCommand, ['exec', '--', 'prisma', 'generate'], {
   stdio: 'inherit',
   env,
+  shell: process.platform === 'win32',
 })
 
 prisma.on('exit', (code, signal) => {
@@ -23,9 +26,19 @@ prisma.on('exit', (code, signal) => {
     process.exit(code)
   }
 
-  const dev = spawn('npx', ['next', 'dev', '--hostname', '127.0.0.1', '--port', env.PORT], {
+  const dev = spawn(npmCommand, [
+    'exec',
+    '--',
+    'next',
+    'dev',
+    '--hostname',
+    '127.0.0.1',
+    '--port',
+    env.PORT,
+  ], {
     stdio: 'inherit',
     env,
+    shell: process.platform === 'win32',
   })
 
   dev.on('exit', (devCode, devSignal) => {

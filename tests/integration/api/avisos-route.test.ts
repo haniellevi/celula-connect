@@ -101,7 +101,7 @@ describe('/api/avisos', () => {
       })
     })
 
-    it('retorna 400 quando parâmetros são inválidos', async () => {
+    it('retorna 400 quando tipo é desconhecido', async () => {
       auth.mockResolvedValue({ userId: 'usr_seed_pastor' })
 
       const response = await GET(new Request('http://localhost/api/avisos?tipo=desconhecido'))
@@ -113,6 +113,43 @@ describe('/api/avisos', () => {
           error: 'Parâmetros inválidos',
         }),
       )
+      expect(body.details?.fieldErrors?.tipo).toEqual(['Tipo de aviso inválido'])
+      expect(listAvisos).not.toHaveBeenCalled()
+    })
+
+    it('retorna 400 quando prioridade é desconhecida', async () => {
+      auth.mockResolvedValue({ userId: 'usr_seed_pastor' })
+
+      const response = await GET(
+        new Request('http://localhost/api/avisos?prioridade=desconhecida'),
+      )
+
+      expect(response.status).toBe(400)
+      const body = await response.json()
+      expect(body).toEqual(
+        expect.objectContaining({
+          error: 'Parâmetros inválidos',
+        }),
+      )
+      expect(body.details?.fieldErrors?.prioridade).toEqual(['Prioridade inválida'])
+      expect(listAvisos).not.toHaveBeenCalled()
+    })
+
+    it('retorna 400 quando referencia não é uma data válida', async () => {
+      auth.mockResolvedValue({ userId: 'usr_seed_pastor' })
+
+      const response = await GET(
+        new Request('http://localhost/api/avisos?referencia=nao-e-data'),
+      )
+
+      expect(response.status).toBe(400)
+      const body = await response.json()
+      expect(body).toEqual(
+        expect.objectContaining({
+          error: 'Parâmetros inválidos',
+        }),
+      )
+      expect(body.details?.fieldErrors?.referencia).toEqual(['Data de referência inválida'])
       expect(listAvisos).not.toHaveBeenCalled()
     })
   })

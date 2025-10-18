@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { requireDomainUser, hasRole } from '@/lib/domain-auth'
 import { db } from '@/lib/db'
-import { PerfilUsuario, TipoMeta, UnidadeTempo } from '../../../../../../prisma/generated/client'
+import { PerfilUsuario, TipoMeta, UnidadeTempo } from '@/lib/prisma-client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 const metaIdParamSchema = z.object({

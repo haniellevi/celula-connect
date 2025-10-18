@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { listIgrejas } from '@/lib/queries/igrejas'
-import { StatusAssinatura } from '../../../../prisma/generated/client'
+import { StatusAssinatura } from '@/lib/prisma-client'
 
 const querySchema = z.object({
   status: z

@@ -34,15 +34,13 @@ test.describe('Admin Dashboard', () => {
 
     await expect(page.getByRole('heading', { name: 'Painel do Administrador' })).toBeVisible()
 
-    const totalUsersCard = page.locator('div').filter({ hasText: 'Total de Usuários' })
+    const totalUsersCard = page.locator('div').filter({ hasText: 'Usuários cadastrados' })
     await expect(totalUsersCard.getByText('150')).toBeVisible()
 
-    const activeUsersCard = page.locator('div').filter({ hasText: 'Usuários Ativos' })
+    const activeUsersCard = page.locator('div').filter({ hasText: 'Usuários ativos (30 dias)' })
     await expect(activeUsersCard.getByText('120')).toBeVisible()
 
-    await expect(page.getByText('+16.7 MoM')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'MRR' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'ARR' })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Churn' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Receita recorrente mensal (MRR)' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Taxa de churn mensal' })).toBeVisible()
   })
 })

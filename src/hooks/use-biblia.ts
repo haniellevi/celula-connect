@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
 import type { MetasLeituraSummary } from '@/lib/queries/biblia'
-import type { Prisma, Testamento, TipoMeta, UnidadeTempo } from '../../prisma/generated/client'
+import type { Prisma, Testamento, TipoMeta, UnidadeTempo } from '@/lib/prisma-client'
 
 type PaginatedResponse<T> = {
   data: T[]

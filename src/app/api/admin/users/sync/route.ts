@@ -323,7 +323,10 @@ async function handleAdminUsersSync(request: Request) {
                     activeSubscriptions++
                     if (setCredits) {
                       const credits = overrideAmount != null ? overrideAmount : Math.max(0, Math.floor(plan.credits))
-                      await refreshUserCredits(clerkId, credits)
+                      await refreshUserCredits(clerkId, credits, {
+                        creditsTotal: credits,
+                        planId: plan.clerkId ?? undefined,
+                      })
                       creditsRefreshed++
                       dlog('refreshed credits', { clerkId, planId, credits, override: overrideAmount != null })
                     } else {

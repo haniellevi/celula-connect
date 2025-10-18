@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { listLeiturasPorUsuario } from '@/lib/queries/biblia'
 import { hasRole, requireDomainUser } from '@/lib/domain-auth'
-import { PerfilUsuario } from '../../../../../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 const querySchema = z.object({

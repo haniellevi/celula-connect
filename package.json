@@ -10,6 +10,7 @@
     "tunnel:ngrok": "ngrok http 3000",
     "tunnel:cf": "cloudflared tunnel --url http://localhost:3000",
     "env:pull": "vercel env pull .env.local",
+    "prebuild": "node scripts/ensure-esbuild-access.mjs",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -25,7 +26,9 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "fonts:setup": "node scripts/setup-local-fonts.mjs",
+    "fonts:download": "node scripts/download-geist-fonts.mjs"
   },
   "dependencies": {
     "@ai-sdk/react": "^2.0.55",

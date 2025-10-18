@@ -9,7 +9,7 @@ import {
   listCelulas,
   type CelulaOrderField,
 } from '@/lib/queries/celulas'
-import type { Prisma } from '../../../../prisma/generated/client'
+import type { Prisma } from '@/lib/prisma-client'
 
 const celulaOrderableFields = ['nome', 'createdAt', 'proximaReuniao', 'metaMembros'] as const
 

@@ -34,6 +34,12 @@ UI consumption
 - `useCredits()` now fetches `GET /api/credits/settings` and exposes `getCost(operation)` and `canPerformOperation(operation)` using the dynamic values.
 - AI Chat displays the current dynamic cost for text/image, and disables actions if balance < cost.
 
+## Manual Admin Sync
+- `/api/admin/credits/[id]` e `/api/admin/users/[id]/credits` sincronizam o saldo com o Clerk via `syncClerkCreditsMetadata`, atualizando `creditsRemaining`, `creditsTotal` e `lastCreditsSyncAt` no `publicMetadata`.
+- As respostas retornam `metadataSynced` para sinalizar quando a chamada ao Clerk falha (o saldo ainda é persistido no banco).
+- `refreshUserCredits` agora atualiza o Clerk por padrão; passe `{ skipClerkUpdate: true }` em webhooks do Clerk para evitar loops recursivos.
+- Helper compartilhado: `src/lib/clerk/credit-metadata.ts` concentra a atualização de `publicMetadata` e é usado pelas rotas admin e pelo `refreshUserCredits`.
+
 ## Refund Policy (AI Chat and Image)
 - If a provider error occurs after credits are deducted, the system reimburses the user automatically:
   - Text (`POST /api/ai/chat`): refunds on provider errors before the response is returned.

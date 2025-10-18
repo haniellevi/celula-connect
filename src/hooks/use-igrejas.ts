@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type { Prisma, StatusAssinatura } from '../../prisma/generated/client'
+import type { Prisma, StatusAssinatura } from '@/lib/prisma-client'
 
 export type IgrejaWithRelations = Prisma.IgrejaGetPayload<{
   include: {

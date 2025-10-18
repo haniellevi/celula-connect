@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import type { Prisma, Testamento } from '../../../prisma/generated/client'
+import type { Prisma, Testamento } from '@/lib/prisma-client'
 
 export interface ListLivrosBibliaOptions {
   testamento?: Testamento

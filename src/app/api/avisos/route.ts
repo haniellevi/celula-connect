@@ -8,7 +8,7 @@ import {
   PrioridadeAviso,
   PerfilUsuario,
   Prisma,
-} from '../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -32,24 +32,38 @@ const listQuerySchema = z.object({
     .string()
     .optional()
     .transform((value) => {
-      if (!value) return undefined
-      const normalized = value.trim().toUpperCase()
-      if (!(normalized in TipoAviso)) {
-        throw new Error('Tipo de aviso inválido')
+      const trimmed = value?.trim()
+      if (!trimmed) return undefined
+      return trimmed.toUpperCase()
+    })
+    .superRefine((value, ctx) => {
+      if (value && !(value in TipoAviso)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tipo de aviso inválido',
+        })
       }
-      return TipoAviso[normalized as keyof typeof TipoAviso]
-    }),
+    })
+    .transform((value) => (value ? TipoAviso[value as keyof typeof TipoAviso] : undefined)),
   prioridade: z
     .string()
     .optional()
     .transform((value) => {
-      if (!value) return undefined
-      const normalized = value.trim().toUpperCase()
-      if (!(normalized in PrioridadeAviso)) {
-        throw new Error('Prioridade inválida')
+      const trimmed = value?.trim()
+      if (!trimmed) return undefined
+      return trimmed.toUpperCase()
+    })
+    .superRefine((value, ctx) => {
+      if (value && !(value in PrioridadeAviso)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Prioridade inválida',
+        })
       }
-      return PrioridadeAviso[normalized as keyof typeof PrioridadeAviso]
-    }),
+    })
+    .transform((value) =>
+      value ? PrioridadeAviso[value as keyof typeof PrioridadeAviso] : undefined,
+    ),
   ativos: z
     .string()
     .optional()
@@ -58,12 +72,17 @@ const listQuerySchema = z.object({
     .string()
     .optional()
     .transform((value) => {
-      if (!value) return undefined
-      const parsed = new Date(value)
-      if (Number.isNaN(parsed.getTime())) {
-        throw new Error('Data de referência inválida')
+      const trimmed = value?.trim()
+      if (!trimmed) return undefined
+      return new Date(trimmed)
+    })
+    .superRefine((value, ctx) => {
+      if (value && Number.isNaN(value.getTime())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Data de referência inválida',
+        })
       }
-      return parsed
     }),
   take: z
     .string()

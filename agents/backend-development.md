@@ -74,6 +74,7 @@ Credits & Billing
 - Never trust client-provided amounts; only award credits for whitelisted price IDs.
 - If extending webhooks, consider idempotency with invoice IDs to avoid double-crediting on retries.
  - If using Clerk Billing plans, map `cplan_*` IDs to internal plan keys in `src/lib/clerk/plan-mapping.ts`.
+- Durante o desenvolvimento mantemos Clerk Billing e webhooks desativados; use apenas a rotina manual descrita no plano (`/admin/users` → “Sincronizar do Clerk”) para ajustar saldos quando necessário.
 
 ## Frontend Integration Considerations
 

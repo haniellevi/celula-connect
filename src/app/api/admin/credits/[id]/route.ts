@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { OperationType } from "@/lib/prisma-types";
+import { syncClerkCreditsMetadata } from "@/lib/clerk/credit-metadata";
 import { isAdmin } from "@/lib/admin-utils";
 import { withApiLogging } from "@/lib/logging/api";
 import { adaptRouteWithParams } from "@/lib/api/params";
@@ -44,6 +45,16 @@ async function handleAdminCreditUpdate(request: Request, id: string) {
       },
     });
 
+    let metadataSynced = true
+    try {
+      await syncClerkCreditsMetadata(creditBalance.clerkUserId, updated.creditsRemaining, {
+        lastSyncedAt: updated.lastSyncedAt,
+      })
+    } catch (error) {
+      metadataSynced = false
+      console.error('Failed to sync Clerk credits metadata for admin adjustment', error)
+    }
+
     if (adjustment !== 0) {
       await db.usageHistory.create({
         data: {
@@ -61,7 +72,7 @@ async function handleAdminCreditUpdate(request: Request, id: string) {
       });
     }
 
-    return NextResponse.json(updated);
+    return NextResponse.json({ ...updated, metadataSynced });
   } catch (error) {
     console.error("Failed to adjust credits:", error);
     return NextResponse.json(

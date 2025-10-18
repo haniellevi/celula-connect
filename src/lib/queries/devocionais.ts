@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import type { Prisma } from '../../../prisma/generated/client'
+import type { Prisma } from '@/lib/prisma-client'
 
 export interface ListDevocionaisOptions {
   ativos?: boolean

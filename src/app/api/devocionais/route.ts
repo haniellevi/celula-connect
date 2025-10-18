@@ -9,7 +9,7 @@ import {
 import {
   PerfilUsuario,
   Prisma,
-} from '../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -25,23 +25,33 @@ const listQuerySchema = z.object({
     .string()
     .optional()
     .transform((value) => {
-      if (!value) return undefined
-      const parsed = new Date(value)
-      if (Number.isNaN(parsed.getTime())) {
-        throw new Error('Data inicial inválida')
+      const trimmed = value?.trim()
+      if (!trimmed) return undefined
+      return new Date(trimmed)
+    })
+    .superRefine((value, ctx) => {
+      if (value && Number.isNaN(value.getTime())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Data inicial inválida',
+        })
       }
-      return parsed
     }),
   dataFinal: z
     .string()
     .optional()
     .transform((value) => {
-      if (!value) return undefined
-      const parsed = new Date(value)
-      if (Number.isNaN(parsed.getTime())) {
-        throw new Error('Data final inválida')
+      const trimmed = value?.trim()
+      if (!trimmed) return undefined
+      return new Date(trimmed)
+    })
+    .superRefine((value, ctx) => {
+      if (value && Number.isNaN(value.getTime())) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Data final inválida',
+        })
       }
-      return parsed
     }),
   take: z
     .string()
@@ -77,19 +87,7 @@ async function handleGet(request: Request) {
   const { searchParams } = new URL(request.url)
   const rawParams = Object.fromEntries(searchParams.entries())
 
-  let parseResult
-  try {
-    parseResult = listQuerySchema.safeParse(rawParams)
-  } catch (error) {
-    return NextResponse.json(
-      {
-        error: 'Parâmetros inválidos',
-        details: error instanceof Error ? error.message : 'Falha ao validar filtros enviados.',
-      },
-      { status: 400 },
-    )
-  }
-
+  const parseResult = listQuerySchema.safeParse(rawParams)
   if (!parseResult.success) {
     return NextResponse.json(
       { error: 'Parâmetros inválidos', details: parseResult.error.flatten() },

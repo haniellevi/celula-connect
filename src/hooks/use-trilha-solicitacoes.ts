@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type { Prisma, StatusSolicitacao } from '../../prisma/generated/client'
+import type { Prisma, StatusSolicitacao } from '@/lib/prisma-client'
 import { useToast } from '@/hooks/use-toast'
 
 export type SolicitacaoTrilhaWithRelations = Prisma.SolicitacaoAvancoTrilhaGetPayload<{

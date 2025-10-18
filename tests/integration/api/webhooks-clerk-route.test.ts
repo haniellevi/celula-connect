@@ -125,7 +125,7 @@ describe('/api/webhooks/clerk', () => {
 
     expect(response.status).toBe(200)
     expect(getPlanCredits).toHaveBeenCalledWith('cplan_pro')
-    expect(refreshUserCredits).toHaveBeenCalledWith('user_123', 250)
+    expect(refreshUserCredits).toHaveBeenCalledWith('user_123', 250, { skipClerkUpdate: true })
   })
 
   it('acumula créditos adicionais em compras one-off', async () => {

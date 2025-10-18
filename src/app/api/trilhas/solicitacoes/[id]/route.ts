@@ -4,7 +4,7 @@ import {
   PerfilUsuario,
   StatusSolicitacao,
   Prisma,
-} from '../../../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import {
   requireDomainUser,

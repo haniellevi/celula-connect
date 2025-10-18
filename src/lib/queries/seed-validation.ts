@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { PerfilUsuario } from '../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 
 export interface SeedStats {
   usuarios: number

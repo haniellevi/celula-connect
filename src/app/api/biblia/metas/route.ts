@@ -4,7 +4,7 @@ import { withApiLogging } from '@/lib/logging/api'
 import { listMetasLeitura } from '@/lib/queries/biblia'
 import { requireDomainUser, hasRole } from '@/lib/domain-auth'
 import { db } from '@/lib/db'
-import { PerfilUsuario, TipoMeta, UnidadeTempo } from '../../../../../prisma/generated/client'
+import { PerfilUsuario, TipoMeta, UnidadeTempo } from '@/lib/prisma-client'
 
 const querySchema = z.object({
   igrejaId: z.string().optional(),

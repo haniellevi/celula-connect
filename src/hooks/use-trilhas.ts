@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type { Prisma } from '../../prisma/generated/client'
+import type { Prisma } from '@/lib/prisma-client'
 
 export type TrilhaWithRelations = Prisma.TrilhaCrescimentoGetPayload<{
   include: {

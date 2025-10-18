@@ -3,7 +3,7 @@ import type {
   Prisma,
   PrioridadeAviso,
   TipoAviso,
-} from '../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 
 type AvisoIncludeRelations = {
   igreja?: boolean

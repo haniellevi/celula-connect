@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { countUsuarios, listUsuarios, type UsuarioOrderField } from '@/lib/queries/usuarios'
-import { PerfilUsuario } from '../../../../prisma/generated/client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 
 const usuarioOrderableFields = ['nome', 'createdAt', 'ultimoAcesso', 'perfil'] as const
 

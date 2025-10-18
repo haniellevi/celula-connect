@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
-import { Prisma } from '../../../../../../prisma/generated/client'
+import { Prisma } from '@/lib/prisma-client'
 import { isAdmin } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { fetchCommercePlans } from '@/lib/clerk/commerce-plans'

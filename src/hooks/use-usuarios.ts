@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type { Prisma, PerfilUsuario } from '../../prisma/generated/client'
+import type { Prisma, PerfilUsuario } from '@/lib/prisma-client'
 
 export type UsuarioWithRelations = Prisma.UsuarioGetPayload<{
   include: {

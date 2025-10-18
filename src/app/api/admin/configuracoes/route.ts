@@ -6,12 +6,8 @@ import {
   upsertConfiguracaoSistemaEntry,
   deleteConfiguracaoSistemaEntry,
 } from '@/lib/queries/settings'
-import {
-  requireDomainUser,
-  hasRole,
-  unauthorizedResponse,
-} from '@/lib/domain-auth'
-import { PerfilUsuario } from '../../../../../prisma/generated/client'
+import { requireDomainUser, hasRole, unauthorizedResponse, type DomainUser } from '@/lib/domain-auth'
+import { PerfilUsuario } from '@/lib/prisma-client'
 
 const querySchema = z.object({
   categoria: z
@@ -34,13 +30,17 @@ const deleteSchema = z.object({
 
 const MANAGE_SYSTEM_CONFIG_ROLES: PerfilUsuario[] = [PerfilUsuario.PASTOR]
 
-async function ensureAuthorized() {
+type EnsureAuthorizedResult =
+  | { user: NonNullable<DomainUser> }
+  | { response: NextResponse }
+
+async function ensureAuthorized(): Promise<EnsureAuthorizedResult> {
   const authResult = await requireDomainUser()
   if (!authResult.user) {
     return { response: authResult.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
   }
 
-  const { user } = authResult
+  const user = authResult.user as NonNullable<DomainUser>
   if (!hasRole(user, MANAGE_SYSTEM_CONFIG_ROLES)) {
     return { response: unauthorizedResponse() }
   }
@@ -48,7 +48,7 @@ async function ensureAuthorized() {
   return { user }
 }
 
-async function handleGet(request: Request) {
+async function handleGet(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 
@@ -70,7 +70,7 @@ async function handleGet(request: Request) {
   })
 }
 
-async function handlePut(request: Request) {
+async function handlePut(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 
@@ -95,7 +95,7 @@ async function handlePut(request: Request) {
   return NextResponse.json({ success: true, data: entry })
 }
 
-async function handleDelete(request: Request) {
+async function handleDelete(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 

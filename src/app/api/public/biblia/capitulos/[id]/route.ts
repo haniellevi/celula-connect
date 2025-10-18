@@ -38,7 +38,7 @@ async function handleGet(_request: Request, params: { id: string }) {
 }
 
 export const GET = withApiLogging(
-  adaptRouteWithParams<{ id: string }>(({ request, params }) => handleGet(request, params)),
+  adaptRouteWithParams<{ id: string }>(async ({ request, params }) => handleGet(request, params)),
   {
     method: 'GET',
     route: '/api/public/biblia/capitulos/[id]',

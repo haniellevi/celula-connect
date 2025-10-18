@@ -12,7 +12,7 @@ import {
   PerfilUsuario,
   CargoCelula,
   Prisma,
-} from '../../../../prisma/generated/client'
+} from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
