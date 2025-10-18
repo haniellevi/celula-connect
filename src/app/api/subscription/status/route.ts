@@ -3,6 +3,9 @@ import { auth } from '@clerk/nextjs/server'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 
+const E2E_BYPASS = process.env.E2E_AUTH_BYPASS === '1'
+const FALLBACK_PLAN_KEY = process.env.E2E_BYPASS_PLAN_KEY ?? 'seed-plano-basico'
+
 type ClerkSubscriptionItem = { plan_id?: unknown; plan?: { id?: unknown } }
 type ClerkSubscription = {
   status?: unknown
@@ -24,6 +27,10 @@ function getSafe(obj: unknown, path: (string | number)[]): unknown {
 
 async function handleSubscriptionStatus() {
   try {
+    if (E2E_BYPASS) {
+      return NextResponse.json({ isActive: true, plan: FALLBACK_PLAN_KEY, bypass: true })
+    }
+
     const { userId } = await auth()
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

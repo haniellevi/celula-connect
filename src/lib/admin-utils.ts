@@ -2,9 +2,14 @@ import { currentUser } from "@clerk/nextjs/server";
 
 const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];
 const ADMIN_USER_IDS = process.env.ADMIN_USER_IDS?.split(",") || [];
+const E2E_BYPASS = process.env.E2E_AUTH_BYPASS === '1'
 
 export async function isAdmin(userId: string): Promise<boolean> {
   try {
+    if (E2E_BYPASS) {
+      return true
+    }
+
     if (ADMIN_USER_IDS.includes(userId)) return true;
 
     const user = await currentUser();

@@ -15,7 +15,10 @@ Out of scope for this document: Clerk/Stripe webhook flows (covered by backend i
 
 ## 2. Environment & Dependencies
 - Start the app with `npm run dev` ou, para Playwright, `npm run dev:e2e` (habilita `E2E_AUTH_BYPASS=1` e fixa o servidor em `127.0.0.1:3100`).
-- Variáveis mínimas `.env`: `DATABASE_URL`, `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY` e `ADMIN_EMAILS` ou `ADMIN_USER_IDS`. Para o bypass de E2E, defina `E2E_AUTH_BYPASS=1`, `ADMIN_USER_IDS=e2e-admin` e, opcionalmente, `E2E_BYPASS_DOMAIN_USER_ID=seed-user-pastor` (ou outro usuário seed) para carregar automaticamente um perfil eclesiástico durante os testes.
+- Variáveis mínimas `.env`: `DATABASE_URL`, `CLERK_SECRET_KEY`, `CLERK_PUBLISHABLE_KEY` e `ADMIN_EMAILS` ou `ADMIN_USER_IDS`. Para o bypass de E2E, defina `E2E_AUTH_BYPASS=1`, `ADMIN_USER_IDS=e2e-admin` e, opcionalmente:
+  - `E2E_BYPASS_DOMAIN_USER_ID=seed-user-pastor` (ou outro usuário seed) para carregar automaticamente um perfil eclesiástico durante os testes.
+  - `E2E_BYPASS_CLERK_USER_ID=usr_seed_pastor` e `E2E_BYPASS_CLERK_EMAIL=pastor.seed@celula-connect.dev` para simular o retorno do Clerk em rotas admin.
+  - `E2E_BYPASS_PLAN_KEY=seed-plano-basico` para que `/api/subscription/status` retorne assinatura ativa e evite redirecionamentos para `/subscribe`.
 - Database: SQLite is fine locally; prefer Postgres when running shared QA. Ensure `prisma migrate deploy` (or `db:migrate`) succeeded before tests.
 - Seed data: provide sample users with mixed credit balances, pending invitations, uploaded files and usage records. Automated specs stub most APIs but manual sweeps benefit from realistic seed data.
 
