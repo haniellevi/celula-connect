@@ -1,9 +1,8 @@
-import { auth } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { OperationType } from "@/lib/prisma-types"
 import { syncClerkCreditsMetadata } from "@/lib/clerk/credit-metadata"
-import { isAdmin } from "@/lib/admin-utils"
+import { requireAdminAccess } from "@/lib/admin-utils"
 import { withApiLogging } from "@/lib/logging/api"
 import { adaptRouteWithParams } from "@/lib/api/params"
 
@@ -12,10 +11,9 @@ async function handleAdminUserCredits(
   params: { id: string }
 ) {
   try {
-    const { userId } = await auth()
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const access = await requireAdminAccess()
+    if (access.response) return access.response
+    const adminUserId = access.userId
 
     const body = await request.json().catch(() => ({}))
     const { credits, adjustment } = body as { credits?: number; adjustment?: number }
@@ -64,7 +62,7 @@ async function handleAdminUserCredits(
           // Reuse existing enum, mark as admin adjustment in details
           operationType: OperationType.AI_TEXT_CHAT,
           creditsUsed: Math.abs(delta),
-          details: { type: "admin_adjustment", delta, adminId: userId, reason: "Manual set/adjust by admin" },
+          details: { type: "admin_adjustment", delta, adminId: adminUserId, reason: "Manual set/adjust by admin" },
         },
       })
     }

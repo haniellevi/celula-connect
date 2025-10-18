@@ -1,21 +1,20 @@
+import { NextResponse } from 'next/server'
 import { GET } from '@/app/api/admin/dashboard/route'
 import { db } from '@/lib/db'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
-
-jest.mock('@clerk/nextjs/server', () => ({
-  auth: jest.fn(),
-}))
+import { requireAdminAccess } from '@/lib/admin-utils'
 
 jest.mock('@/lib/admin-utils', () => ({
-  isAdmin: jest.fn(),
+  requireAdminAccess: jest.fn(),
 }))
+
+const adminUtilsMock = require('@/lib/admin-utils') as {
+  requireAdminAccess: jest.MockedFunction<typeof requireAdminAccess>
+}
 
 describe('GET /api/admin/dashboard', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    ;(auth as jest.Mock).mockResolvedValue({ userId: 'admin-id' })
-    ;(isAdmin as jest.Mock).mockResolvedValue(true)
+    adminUtilsMock.requireAdminAccess.mockResolvedValue({ userId: 'admin-id', response: null })
   })
 
   it('retorna métricas agregadas do domínio', async () => {
@@ -42,5 +41,15 @@ describe('GET /api/admin/dashboard', () => {
     expect(json.devocionaisAtivos).toBe(3)
     expect(json.metasAtivas).toBe(12)
     expect(Array.isArray(json.leiturasPorMes)).toBe(true)
+  })
+
+  it('retorna 401 quando o acesso é negado', async () => {
+    adminUtilsMock.requireAdminAccess.mockResolvedValueOnce({
+      userId: null,
+      response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+    })
+
+    const response = await GET()
+    expect(response.status).toBe(401)
   })
 })

@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 
 async function handleAdminStorageGet(req: Request) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const { searchParams } = new URL(req.url)
   const q = (searchParams.get('q') || '').trim().toLowerCase()
   const type = (searchParams.get('type') || '').trim().toLowerCase()

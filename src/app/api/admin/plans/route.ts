@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { Prisma } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
@@ -52,10 +51,8 @@ function toCents(value: unknown) {
 }
 
 async function handleAdminPlansGet() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const plans = await db.plan.findMany({ orderBy: { createdAt: 'asc' } })
   return NextResponse.json({
     plans: plans.map(p => ({
@@ -87,10 +84,8 @@ function isValidClerkPlanId(clerkId: string) {
 }
 
 async function handleAdminPlansPost(req: Request) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   try {
     const body = await req.json().catch(() => ({})) as {
       clerkId?: string | null
@@ -190,10 +185,8 @@ async function findPlanByIdentifier(identifier: string) {
 }
 
 async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
   try {
     const body = await _req.json().catch(() => ({})) as {
@@ -267,10 +260,8 @@ async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }) 
 }
 
 async function handleAdminPlansDelete(_req: Request, params: { clerkId?: string }) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
   try {
     const plan = await findPlanByIdentifier(identifier)

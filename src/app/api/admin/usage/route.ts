@@ -1,17 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/admin-utils";
+import { requireAdminAccess } from "@/lib/admin-utils";
 import { OperationType } from "@/lib/prisma-types";
 import type { Prisma } from "@/lib/prisma-client";
 import { withApiLogging } from "@/lib/logging/api";
 
 async function handleAdminUsageGet(request: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const access = await requireAdminAccess()
+    if (access.response) return access.response;
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type") || "all";

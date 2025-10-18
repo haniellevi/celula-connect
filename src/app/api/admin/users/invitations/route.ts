@@ -1,6 +1,6 @@
-import { auth, createClerkClient } from "@clerk/nextjs/server"
+import { createClerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { isAdmin } from "@/lib/admin-utils"
+import { requireAdminAccess } from "@/lib/admin-utils"
 import { withApiLogging } from "@/lib/logging/api"
 
 const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY as string })
@@ -8,10 +8,8 @@ export const runtime = 'nodejs'
 
 async function handleAdminInvitationsGet() {
   try {
-    const { userId } = await auth()
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const access = await requireAdminAccess()
+    if (access.response) return access.response
 
     // Fetch invitations; filter to pending/unaccepted
     const list = await clerk.invitations.getInvitationList({}) as unknown as {

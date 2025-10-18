@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { fetchCommercePlans } from '@/lib/clerk/commerce-plans'
 import { withApiLogging } from '@/lib/logging/api'
 
 async function handleAdminClerkPlans() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   try {
     const plans = await fetchCommercePlans()

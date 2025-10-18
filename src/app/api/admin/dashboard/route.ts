@@ -1,7 +1,6 @@
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { withApiLogging } from '@/lib/logging/api'
 
 interface DashboardMetricPoint {
@@ -25,10 +24,8 @@ function buildMonthlyBuckets(monthsBack: number): { label: string; start: Date; 
 }
 
 async function handleAdminDashboard() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   try {
     const now = new Date()

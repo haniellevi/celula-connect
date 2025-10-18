@@ -1,6 +1,5 @@
-import { auth } from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { toPrismaOperationType } from '@/lib/credits/feature-config'
 import { OperationType } from '@/lib/prisma-types'
 import { withApiLogging } from '@/lib/logging/api'
@@ -8,10 +7,8 @@ import { withApiLogging } from '@/lib/logging/api'
 export const runtime = 'nodejs'
 
 async function handleCreditsEnumHealth() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   try {
     // Validate enum mapping and presence

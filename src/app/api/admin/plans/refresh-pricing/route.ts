@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
 import { Prisma } from '@/lib/prisma-client'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { fetchCommercePlans } from '@/lib/clerk/commerce-plans'
 import { withApiLogging } from '@/lib/logging/api'
@@ -9,10 +8,8 @@ import { withApiLogging } from '@/lib/logging/api'
 export const runtime = 'nodejs'
 
 async function handlePlansRefresh() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   try {
     const plans = await fetchCommercePlans()

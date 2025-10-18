@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 import { adaptRouteWithParams } from '@/lib/api/params'
@@ -65,10 +64,8 @@ async function handleAdminPlanUpdate(
   _req: Request,
   params: { clerkId: string },
 ) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
   try {
     const body = await _req.json().catch(() => ({})) as {
@@ -140,10 +137,8 @@ async function handleAdminPlanDelete(
   _req: Request,
   params: { clerkId: string },
 ) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
   try {
     const plan = await findPlanByIdentifier(identifier)

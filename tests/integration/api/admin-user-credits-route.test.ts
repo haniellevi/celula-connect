@@ -1,14 +1,10 @@
+import { NextResponse } from 'next/server'
 import { PUT } from '@/app/api/admin/users/[id]/credits/route'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { syncClerkCreditsMetadata } from '@/lib/clerk/credit-metadata'
 
-jest.mock('@clerk/nextjs/server', () => ({
-  auth: jest.fn(),
-}))
-
 jest.mock('@/lib/admin-utils', () => ({
-  isAdmin: jest.fn(),
+  requireAdminAccess: jest.fn(),
 }))
 
 jest.mock('@/lib/clerk/credit-metadata', () => ({
@@ -33,6 +29,9 @@ const { db } = require('@/lib/db') as {
     usageHistory: { create: jest.Mock }
   }
 }
+const adminUtilsMock = require('@/lib/admin-utils') as {
+  requireAdminAccess: jest.MockedFunction<typeof requireAdminAccess>
+}
 
 describe('PUT /api/admin/users/[id]/credits', () => {
   const request = (payload: unknown) =>
@@ -44,8 +43,7 @@ describe('PUT /api/admin/users/[id]/credits', () => {
 
   beforeEach(() => {
     jest.resetAllMocks()
-    ;(auth as jest.Mock).mockResolvedValue({ userId: 'admin-user' })
-    ;(isAdmin as jest.Mock).mockResolvedValue(true)
+    adminUtilsMock.requireAdminAccess.mockResolvedValue({ userId: 'admin-user', response: null })
   })
 
   it('ajusta o saldo com base em adjustment e sincroniza metadata', async () => {
@@ -140,7 +138,10 @@ describe('PUT /api/admin/users/[id]/credits', () => {
   })
 
   it('bloqueia acesso de usuários não autorizados', async () => {
-    ;(auth as jest.Mock).mockResolvedValue({ userId: null })
+    adminUtilsMock.requireAdminAccess.mockResolvedValueOnce({
+      userId: null,
+      response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
+    })
 
     const response = await PUT(request({ credits: 10 }), { params: { id: 'user-1' } })
     expect(response.status).toBe(401)

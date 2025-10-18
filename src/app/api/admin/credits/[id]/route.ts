@@ -1,19 +1,16 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { OperationType } from "@/lib/prisma-types";
 import { syncClerkCreditsMetadata } from "@/lib/clerk/credit-metadata";
-import { isAdmin } from "@/lib/admin-utils";
+import { requireAdminAccess } from "@/lib/admin-utils";
 import { withApiLogging } from "@/lib/logging/api";
 import { adaptRouteWithParams } from "@/lib/api/params";
 
 async function handleAdminCreditUpdate(request: Request, id: string) {
   try {
-    const { userId } = await auth();
-
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const access = await requireAdminAccess()
+    if (access.response) return access.response;
+    const adminUserId = access.userId;
 
     const { adjustment } = await request.json();
 
@@ -65,7 +62,7 @@ async function handleAdminCreditUpdate(request: Request, id: string) {
           details: {
             type: "admin_adjustment",
             adjustment,
-            adminId: userId,
+            adminId: adminUserId,
             reason: "Manual adjustment by admin",
           },
         },

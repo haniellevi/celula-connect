@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
-import { isAdmin } from '@/lib/admin-utils'
+import { requireAdminAccess } from '@/lib/admin-utils'
 import { FEATURE_CREDIT_COSTS, FeatureKey } from '@/lib/credits/feature-config'
 import { getEffectiveFeatureCosts, getEffectivePlanCredits, upsertAdminSettings } from '@/lib/credits/settings'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 
 async function handleAdminSettingsGet() {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   const featureCosts = await getEffectiveFeatureCosts()
   const planCredits = await getEffectivePlanCredits()
@@ -25,10 +22,8 @@ async function handleAdminSettingsGet() {
 }
 
 async function handleAdminSettingsPut(req: Request) {
-  const { userId } = await auth()
-  if (!userId || !(await isAdmin(userId))) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-  }
+  const access = await requireAdminAccess()
+  if (access.response) return access.response
 
   try {
     const body = await req.json().catch(() => ({}))

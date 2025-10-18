@@ -1,6 +1,6 @@
-import { auth, createClerkClient } from "@clerk/nextjs/server"
+import { createClerkClient } from "@clerk/nextjs/server"
 import { NextResponse } from "next/server"
-import { isAdmin } from "@/lib/admin-utils"
+import { requireAdminAccess } from "@/lib/admin-utils"
 import { db } from "@/lib/db"
 import { refreshUserCredits } from "@/lib/credits/validate-credits"
 import { withApiLogging } from "@/lib/logging/api"
@@ -180,10 +180,8 @@ export const maxDuration = 300 // 5 minutes
 
 async function handleAdminUsersSync(request: Request) {
   try {
-    const { userId } = await auth()
-    if (!userId || !(await isAdmin(userId))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    const access = await requireAdminAccess()
+    if (access.response) return access.response
 
     const rawBody = await request.json().catch(() => null) as unknown
     const body = isPlainObject(rawBody) ? rawBody : {}
