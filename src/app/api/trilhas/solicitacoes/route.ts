@@ -124,7 +124,12 @@ async function handleGet(request: Request) {
       filters.liderSolicitanteId = user.id
       break
     case PerfilUsuario.SUPERVISOR:
-      if (!filters.areaSupervisaoId && !filters.supervisorResponsavelId && scope !== 'all') {
+      if (
+        !filters.areaSupervisaoId &&
+        !filters.supervisorResponsavelId &&
+        scope !== 'all' &&
+        scope !== 'pendentes'
+      ) {
         filters.supervisorResponsavelId = user.id
       }
       break

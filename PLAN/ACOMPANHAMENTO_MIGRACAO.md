@@ -40,10 +40,12 @@
 ## Status atual
 
 ### Prioridade imediata
-- Exercitar os fluxos da trilha (`/trilha` e `/trilha/aprovacao`) com os seeds `seed-trilha-*`, registrando o resultado no checklist manual.
+- Exercitar os fluxos da trilha (`/trilha` e `/trilha/aprovacao`) com os seeds `seed-trilha-*`, registrando o resultado no checklist manual (feito).
 - Registrar no checklist os resultados da landing dinâmica (feito) e anexar prints/logs relevantes antes de abrir PR.
 
 ### Ultimas tarefas concluidas
+- **20/10/2025** — Sincronização manual Clerk validada via `/api/admin/users/sync` (E2E bypass) e via UI; execução processou 1 usuário seed e o botão “Sincronizar do Clerk” criou o usuário `rvstecnologia@gmail.com` com saldo inicial, checklist manual atualizado com prints/logs.
+- **20/10/2025** — Fluxos `/trilha` e `/trilha/aprovacao` revisitados com seeds `seed-trilha-*`: criação de solicitação via líder seed e aprovação pela supervisão confirmadas pelo módulo, checklist manual atualizado (`docs/testing/admin-qa-guide.md`).
 - **19/10/2025** — Landing dinâmica validada manualmente em `/dashboard/pastor/landing-config`; bypass e2e ajustado para simular Clerk, assinatura ativa e liberar rotas administrativas sem middleware (`src/lib/admin-utils.ts`, `src/app/api/admin/**/*`, `src/app/api/subscription/status/route.ts`). Documentação `docs/testing/admin-qa-guide.md` atualizada com variáveis extras (`E2E_BYPASS_CLERK_*`, `E2E_BYPASS_PLAN_KEY`).
 - **18/10/2025** — Cobertura adicional do módulo de créditos: `tests/integration/api/admin-user-credits-route.test.ts` valida ajustes absolutos/relativos com fallback `metadataSynced=false`; `tests/integration/api/credits-me-route.test.ts` confirma que `/api/credits/me` responde 200 sem saldo prévio; `tests/unit/credits/refresh-user-credits.test.ts` garante sync opcional com Clerk (`skipClerkUpdate`) e propagação de erros.
 - **18/10/2025** — Dashboards por perfil cobertos: `tests/integration/api/dashboard-perfil-route.test.ts` garante agregados de pastor/supervisor e checa guarda de função (`403` para discípulos), servindo como evidência da validação das métricas de metas e trilha exibidas nos painéis protegidos.
@@ -85,8 +87,8 @@
 > • Pós-deploy: registrar execução via `pnpm test -- trilhas --runInBand` e anexar logs no PR correspondente.
 
 ### ✅ Ações Imediatas (Sprint 1 — Fase 4)
-- [ ] **Rotas de trilha** — Backlog técnico quebrado em stories (ver abaixo); criação de branch inicial pendente.
-- [ ] **Sincronização manual** — Checklist atualizado; executar no primeiro ambiente disponível após implementação e anexar log/screenshot do toast de resultado.
+- [x] **Rotas de trilha** — Rotas `POST /api/trilhas/[id]/solicitacoes`, `GET /api/trilhas/solicitacoes` e `PATCH /api/trilhas/solicitacoes/[id]` implementadas com guards, queries em `src/lib/queries/trilhas.ts`, testes em `tests/integration/api/trilhas-solicitacoes-route.test.ts` e documentação `docs/api.md`/`docs/testing/trilha-api-validation.md` alinhadas.
+- [x] **Sincronização manual** — Executada em 20/10/2025 10:05 via `/api/admin/users/sync`; log do processamento (processed=1) registrado no checklist.
 
 > Stories de trilha planejadas:
 > • API: `POST /api/trilhas/[id]/solicitacoes` + `PATCH /api/trilhas/solicitacoes/[id]` com validação e guards.  
