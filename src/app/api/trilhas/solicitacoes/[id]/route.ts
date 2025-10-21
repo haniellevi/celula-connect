@@ -16,6 +16,7 @@ import {
   getSolicitacaoTrilhaById,
   updateSolicitacaoTrilha,
 } from '@/lib/queries/trilhas'
+import { notifyTrilhaSolicitacaoStatusChanged } from '@/lib/services/trilha-notifications'
 
 const updateSchema = z.object({
   status: z.nativeEnum(StatusSolicitacao).optional(),
@@ -96,6 +97,9 @@ async function handlePatch(request: Request, params: { id: string }) {
     data.areaSupervisaoId = payload.areaSupervisaoId
   }
 
+  const statusChanged =
+    payload.status !== undefined && payload.status !== current.status
+
   if (Object.keys(data).length === 0) {
     return NextResponse.json(
       { error: 'Nenhum campo válido informado para atualização' },
@@ -110,6 +114,10 @@ async function handlePatch(request: Request, params: { id: string }) {
     area: true,
     supervisorResponsavel: true,
   })
+
+  if (statusChanged) {
+    void notifyTrilhaSolicitacaoStatusChanged(updated)
+  }
 
   return NextResponse.json({ success: true, data: updated })
 }

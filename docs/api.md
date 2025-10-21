@@ -291,18 +291,18 @@ Remove definitivamente o registro (Pastor/Supervisor/Líder).
 - **Perfis autorizados:** Discípulo (para si mesmo), Líder de célula, Supervisor, Pastor.
 - **Body:** `areaSupervisaoId` (string obrigatória), `motivo` (1–500 caracteres), `liderSolicitanteId?`, `usuarioId?`, `observacoesLider?` (≤ 500).
 - **Regras:** discípulo não pode enviar `usuarioId` diferente do próprio; `liderSolicitanteId` é preenchido automaticamente para líderes/pastores.
-- **Comportamento:** cria solicitação com status `PENDENTE`, define `dataSolicitacao=now` e inclui relacionamentos (`usuario`, `trilha`, `lider`, `area`).
+- **Comportamento:** cria solicitação com status `PENDENTE`, define `dataSolicitacao=now`, inclui relacionamentos (`usuario`, `trilha`, `lider`, `area`) e gera avisos internos (`Tipo=SISTEMA`) para supervisor e líder.
 
 #### GET /api/trilhas/solicitacoes
 - **Perfis autorizados:** Discípulo, Líder, Supervisor, Pastor (com filtros automáticos conforme o perfil).
-- **Query params:** `scope=mine|lider|pendentes|all`, `status` (normalizado para `StatusSolicitacao` via uppercase), `take` (1–100), `skip` (>=0), `areaSupervisaoId`, `usuarioId`, `includeUsuario|Trilha|Area|Lider|Supervisor`.
+- **Query params:** `scope=mine|lider|pendentes|all`, `status` (normalizado para `StatusSolicitacao` via uppercase), `take` (1–100), `skip` (>=0), `trilhaId`, `areaSupervisaoId`, `usuarioId`, `includeUsuario|Trilha|Area|Lider|Supervisor`.
 - **Retorno:** lista com `usuario`, `trilha`, `area`, `liderSolicitante` (por padrão `true`) e metadados (`count`, `hasMore`).
-- **Observação:** supervisores recebem filtragem automática por área/cargo quando `scope` não é `all`.
+- **Observação:** supervisores recebem filtragem automática por área/cargo quando `scope` não é `all`; `trilhaId` suporta o histórico detalhado por trilha.
 
 #### PATCH /api/trilhas/solicitacoes/[id]
 - **Perfis autorizados:** Supervisor, Pastor.
 - **Body:** `status?` (`APROVADA`/`REJEITADA`/`PENDENTE`), `observacoesSupervisor?` (≤ 500), `observacoesLider?` (≤ 500), `motivo?`, `areaSupervisaoId?`, `supervisorResponsavelId?`.
-- **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta` e atribui automaticamente o supervisor responsável (caso não informado).
+- **Comportamento:** ao definir `status` diferente de `PENDENTE`, registra `dataResposta`, atribui automaticamente o supervisor responsável (caso não informado) e notifica líder/discipulador envolvidos.
 - **Erros comuns:** `404` para IDs inexistentes, `400` quando nenhum campo válido é enviado.
 
 ### Feature Flags (Admin)

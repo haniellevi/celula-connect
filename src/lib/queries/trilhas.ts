@@ -158,6 +158,7 @@ export interface ListSolicitacoesTrilhaOptions {
   liderSolicitanteId?: string
   supervisorResponsavelId?: string
   status?: StatusSolicitacao
+  trilhaId?: string
   take?: number
   skip?: number
   include?: {
@@ -175,6 +176,7 @@ export async function listSolicitacoesTrilha({
   liderSolicitanteId,
   supervisorResponsavelId,
   status,
+  trilhaId,
   take,
   skip,
   include,
@@ -186,6 +188,7 @@ export async function listSolicitacoesTrilha({
   if (liderSolicitanteId) where.liderSolicitanteId = liderSolicitanteId
   if (supervisorResponsavelId) where.supervisorResponsavelId = supervisorResponsavelId
   if (status) where.status = status
+  if (trilhaId) where.trilhaId = trilhaId
 
   return db.solicitacaoAvancoTrilha.findMany({
     where,

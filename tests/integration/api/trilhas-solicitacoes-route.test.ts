@@ -9,6 +9,10 @@ import {
   getSolicitacaoTrilhaById,
   listSolicitacoesTrilha,
 } from '@/lib/queries/trilhas'
+import {
+  notifyTrilhaSolicitacaoCreated,
+  notifyTrilhaSolicitacaoStatusChanged,
+} from '@/lib/services/trilha-notifications'
 
 jest.mock('@/lib/domain-auth', () => ({
   requireDomainUser: jest.fn(),
@@ -23,6 +27,11 @@ jest.mock('@/lib/queries/trilhas', () => ({
   listSolicitacoesTrilha: jest.fn(),
 }))
 
+jest.mock('@/lib/services/trilha-notifications', () => ({
+  notifyTrilhaSolicitacaoCreated: jest.fn(),
+  notifyTrilhaSolicitacaoStatusChanged: jest.fn(),
+}))
+
 const { requireDomainUser, unauthorizedResponse, hasRole } = require('@/lib/domain-auth') as {
   requireDomainUser: jest.Mock
   unauthorizedResponse: jest.Mock
@@ -31,6 +40,11 @@ const { requireDomainUser, unauthorizedResponse, hasRole } = require('@/lib/doma
 const { listSolicitacoesTrilha: listSolicitacoesTrilhaMock } = require('@/lib/queries/trilhas') as {
   listSolicitacoesTrilha: jest.Mock
 }
+const { notifyTrilhaSolicitacaoCreated: notifyCreatedMock, notifyTrilhaSolicitacaoStatusChanged: notifyStatusMock } =
+  require('@/lib/services/trilha-notifications') as {
+    notifyTrilhaSolicitacaoCreated: jest.Mock
+    notifyTrilhaSolicitacaoStatusChanged: jest.Mock
+  }
 
 describe('/api/trilhas/[trilhaId]/solicitacoes', () => {
   beforeEach(() => {
@@ -38,6 +52,7 @@ describe('/api/trilhas/[trilhaId]/solicitacoes', () => {
     unauthorizedResponse.mockReset()
     hasRole.mockReset()
     ;(createSolicitacaoTrilha as jest.Mock).mockReset()
+    notifyCreatedMock.mockReset()
     unauthorizedResponse.mockImplementation(() =>
       NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
     )
@@ -52,6 +67,16 @@ describe('/api/trilhas/[trilhaId]/solicitacoes', () => {
     ;(createSolicitacaoTrilha as jest.Mock).mockResolvedValue({
       id: 'nova-solicitacao',
       status: StatusSolicitacao.PENDENTE,
+      usuarioId: 'seed-user-lider',
+      trilhaId: 'seed-trilha',
+      liderSolicitanteId: 'seed-user-lider',
+      areaSupervisaoId: 'area-01',
+      usuario: { nome: 'Lucas Líder Seed' },
+      trilha: { titulo: 'Formação de Líderes' },
+      liderSolicitante: { nome: 'Lucas Líder Seed' },
+      area: { nome: 'Área Central', supervisorId: 'seed-user-supervisor', igrejaId: 'seed-igreja-central' },
+      supervisorResponsavel: null,
+      motivo: 'Pronto para avançar',
     })
 
     const response = await createSolicitacaoRoute(
@@ -81,10 +106,15 @@ describe('/api/trilhas/[trilhaId]/solicitacoes', () => {
     expect(response.status).toBe(201)
     const payload = await response.json()
     expect(payload.success).toBe(true)
-    expect(payload.data).toEqual({
-      id: 'nova-solicitacao',
-      status: StatusSolicitacao.PENDENTE,
-    })
+    expect(payload.data).toEqual(
+      expect.objectContaining({
+        id: 'nova-solicitacao',
+        status: StatusSolicitacao.PENDENTE,
+      }),
+    )
+    expect(notifyCreatedMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'nova-solicitacao', status: StatusSolicitacao.PENDENTE }),
+    )
   })
 
   it('bloqueia discípulo ao enviar solicitação para outro usuário', async () => {
@@ -122,6 +152,7 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     ;(updateSolicitacaoTrilha as jest.Mock).mockReset()
     ;(getSolicitacaoTrilhaById as jest.Mock).mockReset()
     listSolicitacoesTrilhaMock.mockReset()
+    notifyStatusMock.mockReset()
 
     unauthorizedResponse.mockImplementation(() =>
       NextResponse.json({ error: 'Acesso não permitido' }, { status: 403 }),
@@ -136,10 +167,20 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     hasRole.mockReturnValue(true)
     ;(getSolicitacaoTrilhaById as jest.Mock).mockResolvedValue({
       id: 'seed-solicitacao',
+      status: StatusSolicitacao.PENDENTE,
     })
     ;(updateSolicitacaoTrilha as jest.Mock).mockResolvedValue({
       id: 'seed-solicitacao',
       status: StatusSolicitacao.APROVADA,
+      usuarioId: 'seed-user-discipulo',
+      liderSolicitanteId: 'seed-user-lider',
+      areaSupervisaoId: 'seed-area-trilha-central',
+      usuario: { nome: 'Daniela Discípula Seed' },
+      trilha: { titulo: 'Fundamentos da Fé' },
+      liderSolicitante: { nome: 'Fernanda Líder Seed' },
+      area: { igrejaId: 'seed-igreja-central', supervisorId: 'seed-user-supervisor' },
+      supervisorResponsavel: { nome: 'Sara Supervisora Seed' },
+      observacoesSupervisor: 'Aprovado com sucesso',
     })
 
     const response = await updateSolicitacaoRoute(
@@ -167,10 +208,15 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     expect(response.status).toBe(200)
     const payload = await response.json()
     expect(payload.success).toBe(true)
-    expect(payload.data).toEqual({
-      id: 'seed-solicitacao',
-      status: StatusSolicitacao.APROVADA,
-    })
+    expect(payload.data).toEqual(
+      expect.objectContaining({
+        id: 'seed-solicitacao',
+        status: StatusSolicitacao.APROVADA,
+      }),
+    )
+    expect(notifyStatusMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'seed-solicitacao', status: StatusSolicitacao.APROVADA }),
+    )
   })
 
   it('nega atualização para perfis sem permissão', async () => {
@@ -179,6 +225,7 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
       response: null,
     })
     hasRole.mockReturnValue(false)
+    notifyStatusMock.mockReset()
 
     const response = await updateSolicitacaoRoute(
       new Request('http://localhost/api/trilhas/solicitacoes/seed-solicitacao', {
@@ -192,6 +239,7 @@ describe('/api/trilhas/solicitacoes/[id]', () => {
     expect(response.status).toBe(403)
     expect(unauthorizedResponse).toHaveBeenCalled()
     expect(updateSolicitacaoTrilha).not.toHaveBeenCalled()
+    expect(notifyStatusMock).not.toHaveBeenCalled()
   })
 })
 
@@ -230,6 +278,23 @@ describe('/api/trilhas/solicitacoes (GET)', () => {
     expect(payload.data).toEqual([
       { id: 'sol-1', status: StatusSolicitacao.PENDENTE },
     ])
+  })
+
+  it('aplica filtro por trilha quando informado', async () => {
+    requireDomainUser.mockResolvedValue({
+      user: { id: 'seed-user-supervisor', perfil: PerfilUsuario.SUPERVISOR },
+      response: null,
+    })
+    hasRole.mockReturnValue(true)
+    listSolicitacoesTrilhaMock.mockResolvedValue([])
+
+    await listSolicitacoesRoute(
+      new Request('http://localhost/api/trilhas/solicitacoes?trilhaId=seed-trilha-fundamentos'),
+    )
+
+    expect(listSolicitacoesTrilhaMock).toHaveBeenCalledWith(
+      expect.objectContaining({ trilhaId: 'seed-trilha-fundamentos' }),
+    )
   })
 
   it('nega acesso quando perfil não autorizado', async () => {

@@ -20,7 +20,7 @@ export default async function LandingPage() {
   const testimonials = extractTestimonials(testimonialsConfig)
 
   return (
-    <div className="min-h-screen">
+    <main className="min-h-screen">
       <Hero
         headline={heroSettings.headline}
         ctaLabel={heroSettings.cta_label}
@@ -40,8 +40,8 @@ export default async function LandingPage() {
                 className="group relative overflow-hidden rounded-xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900"
               >
                 <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-900 dark:text-slate-100">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">{feature.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -85,8 +85,8 @@ export default async function LandingPage() {
                 key={`testimonial-${index}`}
                 className="group relative overflow-hidden rounded-xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900"
               >
-                <blockquote className="text-sm leading-relaxed">“{testimonial.quote}”</blockquote>
-                <figcaption className="mt-4 text-sm text-foreground/85">
+                <blockquote className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">"{testimonial.quote}"</blockquote>
+                <figcaption className="mt-4 text-sm text-slate-600 dark:text-slate-300">
                   <span className="font-medium text-slate-900 dark:text-slate-50">{testimonial.name}</span>
                   {testimonial.role ? ` · ${testimonial.role}` : ''}
                 </figcaption>
@@ -97,6 +97,6 @@ export default async function LandingPage() {
         </section>
       )}
       <FAQ />
-    </div>
+    </main>
   )
 }

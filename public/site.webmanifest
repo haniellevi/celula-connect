@@ -1,12 +1,14 @@
 {
   "name": "Célula Connect",
   "short_name": "Célula Connect",
-  "description": "Plataforma moderna para gestão de células, trilhas de discipulado, avisos e automações pastorais.",
+  "description": "Transforme sua rede de células em uma comunidade vibrante. Gestão completa de discipulado, trilhas de crescimento e automações pastorais.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#0F172A",
   "theme_color": "#2563EB",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "lifestyle", "social"],
   "icons": [
     {
       "src": "/favicon.svg",

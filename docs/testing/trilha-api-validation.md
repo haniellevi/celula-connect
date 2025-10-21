@@ -18,7 +18,7 @@ Este guia consolida os contratos e validações das rotas de **Solicitações de
 | `observacoesLider` | Não | `string` ≤ 500 | Normalizado para `null` quando vazio. |
 
 **Perfis autorizados:** Discípulo (para si), Líder de célula, Supervisor, Pastor.  
-**Efeitos:** Cria registro `SolicitacaoAvancoTrilha` com `status=PENDENTE` e `dataSolicitacao=now`.
+**Efeitos:** Cria registro `SolicitacaoAvancoTrilha` com `status=PENDENTE` e `dataSolicitacao=now`, além de publicar avisos internos (`Tipo=SISTEMA`) para supervisor e líder solicitante.
 
 ## GET `/api/trilhas/solicitacoes`
 | Query | Tipo | Normalização | Observações |
@@ -27,6 +27,7 @@ Este guia consolida os contratos e validações das rotas de **Solicitações de
 | `status` | `string` | Uppercase → `StatusSolicitacao` | Falha com `400` se valor desconhecido. |
 | `take` | `string` numérica | `1–100` | Define paginação manual (`hasMore`). |
 | `skip` | `string` numérica | `>=0` | Deslocamento dos resultados. |
+| `trilhaId` | `string` | `trim` | Limita o resultado a uma única trilha (usado pelo histórico do dashboard). |
 | `includeUsuario|Trilha|Area|Lider|Supervisor` | `boolean` (`"true"/"false"`) | `true` por padrão para `usuario`, `trilha`, `lider`. |  
 
 **Perfis autorizados:** Discípulo, Líder, Supervisor, Pastor.  
@@ -43,18 +44,18 @@ Este guia consolida os contratos e validações das rotas de **Solicitações de
 | `supervisorResponsavelId` | Condicional | `string` não vazia | Permite atribuição manual quando `status` permanece `PENDENTE`. |
 
 **Perfis autorizados:** Supervisor, Pastor.  
-**Fluxo esperado:** retorna `404` quando ID inexistente; `400` se payload vazio/inválido.
+**Fluxo esperado:** retorna `404` quando ID inexistente; `400` se payload vazio/inválido. Alterar `status` para `APROVADA` ou `REJEITADA` gera avisos internos para líder e discípulo envolvidos.
 
 ## Dicas para QA Manual
 1. **Discípulo:** tentar abrir solicitação para outro usuário deve retornar `403`.
 2. **Supervisor:** aprovar (`status=APROVADA`) precisa preencher `dataResposta` e `supervisorResponsavelId`.
-3. **Filtro de pendências:** GET com `scope=pendentes` para supervisor deve retornar apenas `StatusSolicitacao.PENDENTE`.
-4. **Paginação:** `take=1&skip=1` deve respeitar `hasMore`.
-5. **Área inexistente:** enviar `areaSupervisaoId` inválido deve resultar em erro do Prisma (500) — registrar bug se comportamento diferir.
+3. **Notificações internas:** após criar e decidir uma solicitação via UI, conferir feed de avisos (`/dashboard/*`) para supervisor, líder e discípulo garantindo a publicação dos toasts `Tipo=SISTEMA` correspondentes.
+4. **Filtro de pendências:** GET com `scope=pendentes` para supervisor deve retornar apenas `StatusSolicitacao.PENDENTE`.
+5. **Paginação:** `take=1&skip=1` deve respeitar `hasMore`.
+6. **Área inexistente:** enviar `areaSupervisaoId` inválido deve resultar em erro do Prisma (500) — registrar bug se comportamento diferir.
 
 ## Itens para a Revisão de 14/10
 - [ ] Confirmar que `docs/api.md` reflete limites e normalização descritos acima.
 - [ ] Validar que seeds cobrem pelo menos 1 solicitação pendente, 1 aprovada e 1 rejeitada para smoke test.
 - [ ] Avaliar necessidade de respostas com paginação completa (`totalCount`) para dashboards.
 - [ ] Decidir se `observacoesLider` deve permitir edição via `PATCH` após aprovação.
-

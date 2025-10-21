@@ -1,18 +1,18 @@
 const testimonials = [
   {
-    name: "Avery L.",
-    role: "Fundador, PixelForge",
-    quote: "Nós enviamos nosso MVP em dias, não em semanas. O sistema de créditos e autenticação economizou muito tempo.",
+    name: "Pastor João Silva",
+    role: "Igreja Central, São Paulo",
+    quote: "O Célula Connect transformou nossa gestão pastoral. Agora acompanhamos o crescimento espiritual de cada membro de forma organizada.",
   },
   {
-    name: "Jordan P.",
-    role: "CTO, FlowLabs",
-    quote: "Padrões limpos para APIs e banco de dados tornaram a integração de novos desenvolvedores indolor.",
+    name: "Pastora Maria Santos",
+    role: "Igreja Vida Plena, Rio de Janeiro",
+    quote: "As trilhas de crescimento automatizaram nosso discipulado. Nossos líderes estão mais engajados e os resultados são visíveis.",
   },
   {
-    name: "Sam R.",
-    role: "Indie Hacker",
-    quote: "Exatamente o que eu precisava para ir da ideia a usuários pagantes rapidamente.",
+    name: "Pastor Carlos Oliveira",
+    role: "Igreja Multiplica, Belo Horizonte",
+    quote: "A plataforma nos ajudou a escalar de 5 para 25 células em apenas 6 meses. A automação pastoral é revolucionária.",
   },
 ]
 
@@ -20,8 +20,8 @@ export function Testimonials() {
   return (
     <section className="container mx-auto px-4 mt-24">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Amado pelos construtores</h2>
-        <p className="mt-3 text-muted-foreground">Junte-se a equipes que enviam com confiança e velocidade.</p>
+        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Amado por pastores e líderes</h2>
+        <p className="mt-3 text-muted-foreground">Junte-se a igrejas que estão transformando vidas através da tecnologia.</p>
       </div>
       <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
         {testimonials.map((t) => (

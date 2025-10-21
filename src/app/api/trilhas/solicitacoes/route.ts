@@ -13,6 +13,10 @@ import {
 import { listSolicitacoesTrilha } from '@/lib/queries/trilhas'
 
 const querySchema = z.object({
+  trilhaId: z
+    .string()
+    .optional()
+    .transform((value) => (value && value.trim().length > 0 ? value.trim() : undefined)),
   areaSupervisaoId: z.string().optional(),
   usuarioId: z.string().optional(),
   liderSolicitanteId: z.string().optional(),
@@ -87,6 +91,7 @@ async function handleGet(request: Request) {
   }
 
   const {
+    trilhaId,
     areaSupervisaoId,
     usuarioId,
     liderSolicitanteId,
@@ -103,6 +108,7 @@ async function handleGet(request: Request) {
   } = parseResult.data
 
   const filters: {
+    trilhaId?: string
     areaSupervisaoId?: string
     usuarioId?: string
     liderSolicitanteId?: string
@@ -110,6 +116,7 @@ async function handleGet(request: Request) {
     status?: StatusSolicitacao
   } = {}
 
+  if (trilhaId) filters.trilhaId = trilhaId
   if (areaSupervisaoId) filters.areaSupervisaoId = areaSupervisaoId
   if (usuarioId) filters.usuarioId = usuarioId
   if (liderSolicitanteId) filters.liderSolicitanteId = liderSolicitanteId

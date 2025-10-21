@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from 'react'
-import { GraduationCap, Users, Timer, BarChart2, Search, Layers } from 'lucide-react'
+import { GraduationCap, Users, Timer, BarChart2, Search, Layers, CalendarClock } from 'lucide-react'
 import { useTrilhas } from '@/hooks/use-trilhas'
+import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { StatusSolicitacao } from '@/lib/prisma-client'
 
 type StatusFilter = 'ativas' | 'inativas' | 'todas'
 
@@ -42,6 +44,28 @@ function parseConteudo(conteudo: unknown): TrilhaConteudo {
     }
   })
   return { etapas }
+}
+
+const STATUS_BADGE_STYLES: Record<StatusSolicitacao, string> = {
+  [StatusSolicitacao.PENDENTE]: 'border-amber-200 bg-amber-100 text-amber-800',
+  [StatusSolicitacao.APROVADA]: 'border-emerald-200 bg-emerald-100 text-emerald-700',
+  [StatusSolicitacao.REJEITADA]: 'border-rose-200 bg-rose-100 text-rose-700',
+}
+
+const STATUS_LABEL: Record<StatusSolicitacao, string> = {
+  [StatusSolicitacao.PENDENTE]: 'Pendente',
+  [StatusSolicitacao.APROVADA]: 'Aprovada',
+  [StatusSolicitacao.REJEITADA]: 'Rejeitada',
+}
+
+function formatDateTime(value?: string | Date | null) {
+  if (!value) return 'Não informado'
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return 'Não informado'
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(date)
 }
 
 export default function TrilhaPage() {
@@ -86,6 +110,25 @@ export default function TrilhaPage() {
   const selectedTrilha = useMemo(
     () => filteredTrilhas.find((trilha) => trilha.id === selectedTrilhaId) ?? filteredTrilhas[0],
     [filteredTrilhas, selectedTrilhaId],
+  )
+
+  const selectedTrilhaKey = selectedTrilha?.id
+
+  const solicitacoesHistoricoQuery = useTrilhaSolicitacoes({
+    scope: 'all',
+    trilhaId: selectedTrilhaKey ?? undefined,
+    take: 10,
+    includeArea: true,
+    includeLider: true,
+    includeTrilha: true,
+    includeUsuario: true,
+    includeSupervisor: true,
+    enabled: Boolean(selectedTrilhaKey),
+  })
+
+  const solicitacoesHistorico = useMemo(
+    () => solicitacoesHistoricoQuery.data?.data ?? [],
+    [solicitacoesHistoricoQuery.data],
   )
 
   const metrics = useMemo(() => {
@@ -356,6 +399,123 @@ export default function TrilhaPage() {
                       )}
                     </TabsContent>
                   </Tabs>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Participantes e progresso
+                    </h3>
+                    <Badge variant="secondary">
+                      {selectedTrilha.usuariosTrilha?.length ?? 0} ativos
+                    </Badge>
+                  </div>
+                  {selectedTrilha.usuariosTrilha?.length ? (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {selectedTrilha.usuariosTrilha.map((registro) => (
+                        <div
+                          key={registro.id}
+                          className="rounded-lg border border-border/40 bg-background/40 p-4"
+                        >
+                          <p className="text-sm font-semibold">
+                            {registro.usuario?.nome ?? 'Participante sem nome'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Etapa atual: {registro.etapaAtual ?? 1}
+                          </p>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <Badge
+                              variant="outline"
+                              className={
+                                registro.concluido
+                                  ? 'border-emerald-200 bg-emerald-100 text-emerald-700'
+                                  : 'border-slate-200 bg-slate-100 text-slate-700'
+                              }
+                            >
+                              {registro.concluido ? 'Concluída' : 'Em andamento'}
+                            </Badge>
+                            {registro.dataInicio ? (
+                              <span>Início: {formatDateTime(registro.dataInicio)}</span>
+                            ) : null}
+                            {registro.dataConclusao ? (
+                              <span>Conclusão: {formatDateTime(registro.dataConclusao)}</span>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum participante vinculado a esta trilha.
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Histórico de solicitações
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CalendarClock className="h-4 w-4" />
+                      <span>
+                        Atualizado{' '}
+                        {solicitacoesHistoricoQuery.isLoading
+                          ? 'carregando...'
+                          : formatDateTime(new Date())}
+                      </span>
+                    </div>
+                  </div>
+                  {solicitacoesHistoricoQuery.isError ? (
+                    <p className="text-sm text-destructive">
+                      Não foi possível carregar o histórico de solicitações.
+                    </p>
+                  ) : solicitacoesHistoricoQuery.isLoading ? (
+                    <p className="text-sm text-muted-foreground">Carregando solicitações...</p>
+                  ) : solicitacoesHistorico.length ? (
+                    <div className="space-y-3">
+                      {solicitacoesHistorico.map((item) => (
+                        <div
+                          key={item.id}
+                          className="rounded-lg border border-border/40 bg-background/40 p-4"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-semibold">
+                                {item.usuario?.nome ?? 'Discípulo não identificado'}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                Enviado em {formatDateTime(item.dataSolicitacao)}
+                              </p>
+                            </div>
+                            <Badge
+                              variant="outline"
+                              className={STATUS_BADGE_STYLES[item.status]}
+                            >
+                              {STATUS_LABEL[item.status]}
+                            </Badge>
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Líder solicitante: {item.liderSolicitante?.nome ?? 'Não informado'}
+                          </p>
+                          {item.dataResposta ? (
+                            <p className="text-xs text-muted-foreground">
+                              Última atualização: {formatDateTime(item.dataResposta)}
+                            </p>
+                          ) : null}
+                          {item.observacoesSupervisor ? (
+                            <p className="mt-2 rounded-md border border-border/40 bg-muted/30 p-2 text-xs text-muted-foreground">
+                              Observações: {item.observacoesSupervisor}
+                            </p>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Nenhuma solicitação registrada para esta trilha.
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap gap-3">

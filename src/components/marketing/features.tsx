@@ -2,33 +2,33 @@ import { Shield, Zap, CreditCard, Cog, BarChart2, Lock } from "lucide-react"
 
 const features = [
   {
-    title: "Autenticação",
-    description: "Autenticação com tecnologia Clerk com login, inscrição e sessões prontas para uso.",
+    title: "Trilhas de Crescimento",
+    description: "Acompanhe o desenvolvimento espiritual com trilhas personalizadas e progresso automático.",
     icon: Lock,
   },
   {
-    title: "Sistema de Créditos",
-    description: "Chaves de recursos tipadas com auxiliares de validação e dedução.",
+    title: "Gestão de Células",
+    description: "Centralize informações de líderes, membros e reuniões em um painel unificado.",
     icon: CreditCard,
   },
   {
-    title: "API e Banco de Dados",
-    description: "Rotas validadas por Zod e Prisma com migrações prontas para uso.",
+    title: "Avisos Inteligentes",
+    description: "Sistema de notificações automáticas para manter a comunidade engajada.",
     icon: Shield,
   },
   {
-    title: "Desempenho",
-    description: "Next.js App Router, pronto para edge e padrões sensatos.",
+    title: "Relatórios Pastorais",
+    description: "Métricas detalhadas sobre crescimento, engajamento e saúde das células.",
     icon: Zap,
   },
   {
-    title: "Analytics",
-    description: "Conecte suas análises, registros e monitoramento preferidos.",
+    title: "Automação Pastoral",
+    description: "Automatize processos repetitivos e foque no que realmente importa.",
     icon: BarChart2,
   },
   {
-    title: "Configurável",
-    description: "Pastas claras, documentos úteis e padrões para iteração rápida.",
+    title: "Landing Dinâmica",
+    description: "Configure e personalize a página inicial da sua igreja sem código.",
     icon: Cog,
   },
 ]
@@ -37,8 +37,8 @@ export function Features() {
   return (
     <section id="features" className="container mx-auto px-4 mt-24">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Tudo que você precisa para começar</h2>
-        <p className="mt-3 text-muted-foreground">Padrões amigáveis para produção, padrões extensíveis e uma interface de usuário limpa.</p>
+        <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Ferramentas poderosas para sua igreja</h2>
+        <p className="mt-3 text-muted-foreground">Tecnologia moderna para transformar sua gestão pastoral e acelerar o crescimento espiritual.</p>
       </div>
       <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f) => (

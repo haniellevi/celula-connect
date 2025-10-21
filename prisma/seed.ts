@@ -830,15 +830,18 @@ async function main() {
     where: { id: "seed-usuario-trilha-lider" },
     update: {
       etapaAtual: 3,
-      concluido: false,
+      concluido: true,
+      dataInicio: new Date("2025-07-01T18:00:00Z"),
+      dataConclusao: new Date("2025-10-05T14:00:00Z"),
     },
     create: {
       id: "seed-usuario-trilha-lider",
       usuarioId: liderFamilia.id,
       trilhaId: trilhaLideranca.id,
       etapaAtual: 3,
-      concluido: false,
+      concluido: true,
       dataInicio: new Date("2025-08-01T18:00:00Z"),
+      dataConclusao: new Date("2025-10-05T14:00:00Z"),
     },
   });
 
@@ -881,6 +884,29 @@ async function main() {
       dataResposta: new Date("2025-10-05T14:00:00Z"),
       supervisorResponsavelId: supervisor.id,
       observacoesSupervisor: "Líder completa treinamento com excelência.",
+    },
+  });
+
+  await prisma.solicitacaoAvancoTrilha.upsert({
+    where: { id: "seed-solicitacao-rejeitada" },
+    update: {
+      status: StatusSolicitacao.REJEITADA,
+      supervisorResponsavelId: supervisor.id,
+      dataResposta: new Date("2025-10-12T11:45:00Z"),
+      observacoesSupervisor: "Recomendado revisar a etapa 2 antes de um novo envio.",
+    },
+    create: {
+      id: "seed-solicitacao-rejeitada",
+      usuarioId: discipuloJuvenil.id,
+      trilhaId: trilhaFundamentos.id,
+      liderSolicitanteId: liderFamilia.id,
+      areaSupervisaoId: areaCentral.id,
+      motivo: "Solicitação antecipada para avanço na etapa final.",
+      status: StatusSolicitacao.REJEITADA,
+      dataSolicitacao: new Date("2025-10-10T09:15:00Z"),
+      dataResposta: new Date("2025-10-12T11:45:00Z"),
+      supervisorResponsavelId: supervisor.id,
+      observacoesSupervisor: "Recomendado revisar a etapa 2 antes de um novo envio.",
     },
   });
 

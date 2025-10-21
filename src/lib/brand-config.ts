@@ -26,7 +26,8 @@ const metadataBase = (() => {
   try {
     return new URL(rawSiteUrl)
   } catch {
-    return new URL('https://celulaconnect.com')
+    // Fallback para desenvolvimento local
+    return new URL('http://localhost:3000')
   }
 })()
 
@@ -43,7 +44,7 @@ export const site = {
   name: 'Célula Connect',
   shortName: 'Célula Connect',
   description:
-    'Plataforma moderna para gestão de células, trilhas de discipulado, avisos e automações pastorais.',
+    'Transforme sua rede de células em uma comunidade vibrante. Gestão completa de discipulado, trilhas de crescimento e automações pastorais.',
   url: rawSiteUrl,
   metadataBase,
   author: 'Equipe Célula Connect',
@@ -52,6 +53,10 @@ export const site = {
     'discipulado',
     'igreja',
     'gestão pastoral',
+    'trilhas de crescimento',
+    'automação pastoral',
+    'comunidade cristã',
+    'liderança de células',
     'Next.js',
     'SaaS',
     'Clerk',

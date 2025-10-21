@@ -69,10 +69,11 @@ async function handleAdminDashboard() {
 
     const metasConcluidasNoMes = await Promise.all(
       buckets.map(async (bucket) => {
+        // Como não temos campo 'concluido', vamos contar metas ativas criadas no período
         const count = await db.metaLeituraUsuario.count({
           where: {
-            concluido: true,
-            updatedAt: {
+            ativa: true,
+            createdAt: {
               gte: bucket.start,
               lte: bucket.end,
             },

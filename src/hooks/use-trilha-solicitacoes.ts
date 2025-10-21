@@ -19,6 +19,7 @@ export type SolicitacaoTrilhaWithRelations = Prisma.SolicitacaoAvancoTrilhaGetPa
 export interface UseTrilhaSolicitacoesOptions {
   status?: StatusSolicitacao
   scope?: 'mine' | 'lider' | 'pendentes' | 'all'
+  trilhaId?: string
   take?: number
   skip?: number
   includeUsuario?: boolean
@@ -47,6 +48,7 @@ export function useTrilhaSolicitacoes(options: UseTrilhaSolicitacoesOptions = {}
       const params = new URLSearchParams()
       if (options.status) params.set('status', options.status)
       if (options.scope) params.set('scope', options.scope)
+      if (options.trilhaId) params.set('trilhaId', options.trilhaId)
       if (typeof options.take === 'number') params.set('take', String(options.take))
       if (typeof options.skip === 'number') params.set('skip', String(options.skip))
       if (options.includeUsuario === false) params.set('includeUsuario', 'false')

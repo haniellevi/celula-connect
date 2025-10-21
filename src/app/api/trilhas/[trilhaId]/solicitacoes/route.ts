@@ -13,6 +13,7 @@ import {
 } from '@/lib/domain-auth'
 import { adaptRouteWithParams } from '@/lib/api/params'
 import { createSolicitacaoTrilha } from '@/lib/queries/trilhas'
+import { notifyTrilhaSolicitacaoCreated } from '@/lib/services/trilha-notifications'
 
 const createSolicitacaoSchema = z.object({
   usuarioId: z.string().trim().min(1).optional(),
@@ -88,7 +89,10 @@ async function handlePost(request: Request, params: { trilhaId: string }) {
     trilha: true,
     liderSolicitante: true,
     area: true,
+    supervisorResponsavel: true,
   })
+
+  void notifyTrilhaSolicitacaoCreated(created)
 
   return NextResponse.json({ success: true, data: created }, { status: 201 })
 }

@@ -266,14 +266,17 @@
       "usuarioId": "seed-user-discipulo",
       "trilhaId": "seed-trilha-fundamentos",
       "etapaAtual": 2,
-      "concluido": false
+      "concluido": false,
+      "dataInicio": "2025-09-20T12:00:00Z"
     },
     {
       "id": "seed-usuario-trilha-lider",
       "usuarioId": "seed-user-lider-familia",
       "trilhaId": "seed-trilha-lideranca",
       "etapaAtual": 3,
-      "concluido": false
+      "concluido": true,
+      "dataInicio": "2025-07-01T18:00:00Z",
+      "dataConclusao": "2025-10-05T14:00:00Z"
     }
   ],
   "solicitacoesTrilha": [
@@ -288,6 +291,12 @@
       "usuarioId": "seed-user-lider-familia",
       "trilhaId": "seed-trilha-lideranca",
       "status": "APROVADA"
+    },
+    {
+      "id": "seed-solicitacao-rejeitada",
+      "usuarioId": "seed-user-discipulo-juvenil",
+      "trilhaId": "seed-trilha-fundamentos",
+      "status": "REJEITADA"
     }
   ],
   "landingPageConfig": [

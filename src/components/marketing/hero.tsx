@@ -1,5 +1,4 @@
 "use client";
-import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, ChevronRight } from 'lucide-react'
@@ -55,7 +54,7 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                 container: {
                   visible: {
                     transition: {
-                      delayChildren: 1,
+                      delayChildren: 0.5,
                     },
                   },
                 },
@@ -76,23 +75,20 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                 },
               }}
               className="absolute inset-0 -z-20">
-              <Image
-                src="https://images.unsplash.com/photo-1504805572947-34fad45aed93?q=80&w=1920&auto=format&fit=crop"
-                alt="background"
-                className="absolute inset-x-0 top-56 -z-20 hidden lg:top-32 dark:block"
-                width={3276}
-                height={4095}
-                priority
-              />
+              <div className="absolute inset-x-0 top-24 h-80 bg-gradient-to-b from-primary/25 via-transparent to-transparent blur-3xl" />
+              <div className="absolute -left-20 top-1/3 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+              <div className="absolute -right-16 top-1/2 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
             </AnimatedGroup>
             <div aria-hidden className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--background)_75%)]" />
             <div className="mx-auto max-w-7xl px-6">
               <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                 <AnimatedGroup variants={transitionVariants}>
                   <Link
-                    href="#link"
+                    href="#features"
                     className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-black/5 transition-all duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
-                    <span className="text-foreground text-sm">{badgeText ?? "Novo: Template com sistema de créditos"}</span>
+                    <span className="text-foreground text-sm">
+                      {badgeText ?? 'Novo: Builder da landing pastoral'}
+                    </span>
                     <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
                     <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
@@ -110,12 +106,12 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                   <h1
                     id="hero-heading"
                     className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
-                    {headline ?? "Crie seu microsaas com I.A. em um dia"}
+                    {headline ?? 'Transforme sua rede de células em uma comunidade vibrante'}
                   </h1>
                   <p
                     id="hero-summary"
                     className="mx-auto mt-8 max-w-2xl text-balance text-lg text-foreground">
-                    Autenticação (Clerk), PostgreSQL + Prisma, pagamentos (Stripe) e sistema de créditos — com UI em Tailwind + Radix. Lance mais rápido com TypeScript do frontend ao backend.
+                    Conecte líderes, acompanhe o crescimento espiritual e automatize processos pastorais. A plataforma completa para transformar sua igreja em uma rede de discipulado eficaz.
                   </p>
                 </AnimatedGroup>
 
@@ -140,7 +136,7 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                       size="lg"
                       className="rounded-xl px-5 text-base">
                       <Link href="/sign-up">
-                        <span className="text-nowrap">{ctaLabel ?? "Criar conta"}</span>
+                        <span className="text-nowrap">{ctaLabel ?? 'Solicitar demonstração'}</span>
                       </Link>
                     </Button>
                   </div>
@@ -177,18 +173,12 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                 />
                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                   <Image
-                    className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                    src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=2700&auto=format&fit=crop"
-                    alt="tela do app"
-                    width={2700}
-                    height={1440}
-                  />
-                  <Image
-                    className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2700&auto=format&fit=crop"
-                    alt="tela do app"
-                    width={2700}
-                    height={1440}
+                    className="z-2 aspect-[15/8] w-full rounded-2xl border border-border/40 object-cover shadow-sm"
+                    src="/og-image.png"
+                    alt="Painel pastoral do Célula Connect"
+                    width={1280}
+                    height={720}
+                    priority
                   />
                 </div>
               </div>
@@ -199,91 +189,53 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
           <div className="group relative m-auto max-w-5xl px-6">
             <div className="absolute inset-0 z-10 flex scale-95 items-center justify-center opacity-0 duration-500 group-hover:scale-100 group-hover:opacity-100">
               <Link
-                href="/"
+                href="#testimonials"
                 className="block text-sm duration-150 hover:opacity-75">
-                <span> Conheça nossos clientes</span>
+                <span>Conheça nossos clientes</span>
 
                 <ChevronRight className="ml-1 inline-block size-3" />
               </Link>
             </div>
-            <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14">
+            <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-2 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:grid-cols-4 sm:gap-x-16 sm:gap-y-14">
               <div className="flex">
                 <Image
-                  className="mx-auto h-5 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/nvidia.svg"
-                  alt="Nvidia Logo"
-                  width={80}
-                  height={20}
-                />
-              </div>
-
-              <div className="flex">
-                <Image
-                  className="mx-auto h-4 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/column.svg"
-                  alt="Column Logo"
-                  width={80}
-                  height={16}
+                  className="mx-auto h-9 w-fit"
+                  src="/landing/logo-vida-plena.svg"
+                  alt="Rede Vida Plena"
+                  width={128}
+                  height={36}
                 />
               </div>
               <div className="flex">
                 <Image
-                  className="mx-auto h-4 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/github.svg"
-                  alt="GitHub Logo"
-                  width={80}
-                  height={16}
+                  className="mx-auto h-9 w-fit"
+                  src="/landing/logo-igreja-central.svg"
+                  alt="Igreja Central"
+                  width={128}
+                  height={36}
                 />
               </div>
               <div className="flex">
                 <Image
-                  className="mx-auto h-5 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/nike.svg"
-                  alt="Nike Logo"
-                  width={80}
-                  height={20}
+                  className="mx-auto h-9 w-fit"
+                  src="/landing/logo-multiplica-norte.svg"
+                  alt="Multiplica Norte"
+                  width={128}
+                  height={36}
                 />
               </div>
               <div className="flex">
                 <Image
-                  className="mx-auto h-5 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/lemonsqueezy.svg"
-                  alt="Lemon Squeezy Logo"
-                  width={80}
-                  height={20}
+                  className="mx-auto h-9 w-fit"
+                  src="/landing/logo-juventude-viva.svg"
+                  alt="Juventude Viva"
+                  width={128}
+                  height={36}
                 />
               </div>
-              <div className="flex">
-                <Image
-                  className="mx-auto h-4 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/laravel.svg"
-                  alt="Laravel Logo"
-                  width={80}
-                  height={16}
-                />
-              </div>
-              <div className="flex">
-                <Image
-                  className="mx-auto h-7 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/lilly.svg"
-                  alt="Lilly Logo"
-                  width={80}
-                  height={28}
-                />
-              </div>
-
-              <div className="flex">
-                <Image
-                  className="mx-auto h-6 w-fit dark:invert"
-                  src="https://html.tailus.io/blocks/customers/openai.svg"
-                  alt="OpenAI Logo"
-                  width={80}
-                  height={24}
-                />
+            </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
       </section>
     </>
   )
