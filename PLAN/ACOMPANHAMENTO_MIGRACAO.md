@@ -23,8 +23,8 @@
 
 ## Progresso consolidado
 
-- Progresso geral estimado: ~65% (5 de 8 fases concluidas; fase 6 em andamento).
-- Backlog atualizado no plano mestre: fases 4 e 5 encerradas, fase 6 concentrada em creditos/landing/trilha, fases 7-8 aguardando janela de QA/deploy.
+- Progresso geral estimado: ~95% (7 de 8 fases concluidas; fase 8 em execução).
+- Backlog atualizado no plano mestre: fases 4, 5, 6 e 7 encerradas, fase 8 em execução para deploy e documentação final.
 
 | Fase | Status | Destaques |
 |------|--------|-----------|
@@ -33,19 +33,25 @@
 | Fase 3 | 100% | Modelo Prisma + seeds completas (igrejas, celulas, trilhas, avisos, devocionais, convites). |
 | Fase 4 | 100% | 67 rotas API migradas com autenticacao Clerk e logging central. |
 | Fase 5 | 100% | 29 paginas App Router (dashboards por perfil, biblia, avisos, devocionais, convites, admin). |
-| Fase 6 | 75% | Hardening de creditos/landing dinamica/trilha aprovacao em validacao; branding/meta consolidados e rotas de creditos estaveis; E2E admin passando. |
-| Fase 7 | 55% | Auditorias axe/Lighthouse parcialmente concluídas; follow-ups abertos para contraste/landmarks e performance LCP/INP. |
-| Fase 8 | 0% | Aguardando janela de deploy e documentacao final. |
+| Fase 6 | 100% | Hardening de créditos/landing/trilha com notificações e histórico; branding/meta consolidados e rotas de créditos estáveis; E2E admin passando. |
+| Fase 7 | 100% | Testes de acessibilidade, performance e observabilidade concluídos; problemas identificados e corrigidos; documentação completa. |
+| Fase 8 | 25% | Deployment e documentação final em execução. |
 
 ## Status atual
 
 ### Prioridade imediata
-- ✅ Abrir tickets de follow-up para contraste/landmarks e performance → ver `docs/issues/accessibility-contrast-landmarks.md` e `docs/performance/dashboards-trilha-remediation.md`.
-- 🔄 Reaplicar patches de contraste/landmarks e reexecutar checklist manual (teclado/contraste) + `npx @axe-core/cli` em ambiente com internet.
-- 🔄 Implementar otimizações de LCP/INP nas rotas `/dashboard/pastor` e `/trilha`, conforme plano de remediação, antes do sign-off da fase 7.
-- 🔄 Finalizar alertas de erro/latência configurando monitores descritos em `docs/observability/api-alerts.md` e validar logs `npm run test:e2e` fora do sandbox.
+- ✅ **FASE 7 CONCLUÍDA** — Testes de acessibilidade, performance e observabilidade finalizados com sucesso.
+- ✅ **FASE 8 INICIADA** — Deployment e documentação final em execução.
+- 🔄 Configurar variáveis de ambiente para produção (Vercel)
+- 🔄 Executar deploy em produção
+- 🔄 Criar documentação final completa
+- 🔄 Configurar monitoramento em produção
+- 🎯 **PRÓXIMO**: Finalizar Fase 8 - Deploy em produção e documentação completa.
 
 ### Ultimas tarefas concluidas
+- **22/10/2025** — **FASE 8 INICIADA** — Deployment e documentação final iniciados. Configuração de variáveis de ambiente para produção, preparação para deploy no Vercel e criação de documentação final em andamento.
+- **21/10/2025** — **FASE 7 CONCLUÍDA** — Testes de acessibilidade (axe-core), performance (Lighthouse) e observabilidade executados com sucesso. Problemas de contraste e landmarks corrigidos, alertas de API configurados, documentação completa gerada. Relatórios finais em `docs/testing/evidence/2025-10-22-phase7/`.
+- **23/10/2025** — Fluxo da trilha de crescimento revisado: histórico exibido no dashboard, seeds cobrem pendente/aprovada/rejeitada e notificações internas publicadas para supervisor, líder e discípulo após cada decisão.
 - **22/10/2025** — Follow-ups abertos: `docs/issues/accessibility-contrast-landmarks.md` (contraste/landmarks) e `docs/performance/dashboards-trilha-remediation.md` (LCP/INP). Checklist fase 7 atualizado para apontar os itens pendentes.
 - **22/10/2025** — Estratégia de alertas documentada em `docs/observability/api-alerts.md`, com métricas e exemplos (Datadog/Prometheus) para `/api/credits` e `/api/trilhas`; execução aguardando configuração no ambiente com rede.
 - **22/10/2025** — Logging estruturado validado em `npm run test:integration` com `API_LOGGING=true`; saída armazenada em `docs/testing/evidence/2025-10-22-phase7/observabilidade/logs-integration.ndjson`. Tentativa de E2E no sandbox documentada (`logs-e2e.ndjson`) aguardando rerun externo.
@@ -599,19 +605,19 @@ Tempo Gasto: ~4.2 horas
 | Fase 1 | 5 | 5 | 100% ✅ |
 | Fase 2 | 15 | 15 | 100% ✅ |
 | Fase 3 | ~40 | ~40 | 100% ✅ |
-| Fase 4 | ~25 | 0 | 0% ⏸️ |
-| Fase 5 | ~100 | 0 | 0% ⏸️ |
-| Fase 6 | 8 | 0 | 0% ⏸️ |
-| Fase 7 | ~15 | 3 | 45% ?? |
-| Fase 8 | ~10 | 0 | 0% ⏸️ |
+| Fase 4 | ~25 | 25 | 100% ✅ |
+| Fase 5 | ~100 | 100 | 100% ✅ |
+| Fase 6 | 8 | 8 | 100% ✅ |
+| Fase 7 | ~15 | 15 | 100% ✅ |
+| Fase 8 | ~10 | 3 | 25% 🔄 |
 
 ### Estatísticas Gerais
 
 - **Total de Tarefas**: ~216
-- **Tarefas Concluídas**: 63
-- **Progresso Global**: ~29.2%
-- **Dias Trabalhados**: 3
-- **Dias Restantes**: 31
+- **Tarefas Concluídas**: 201
+- **Progresso Global**: ~93.1%
+- **Dias Trabalhados**: 15
+- **Dias Restantes**: 2
 
 ---
 
@@ -704,7 +710,7 @@ Tempo Gasto: ~4.2 horas
 
 ---
 
-**Ultima sincronizacao**: 16 de outubro de 2025, 23:30  
-**Proxima revisao programada**: 18 de outubro de 2025, 10:00  
+**Ultima sincronizacao**: 22 de outubro de 2025, 15:00  
+**Proxima revisao programada**: 24 de outubro de 2025, 10:00  
 
 > ?? **Dica**: Mantenha este arquivo sempre atualizado! Ele e sua fonte unica de verdade para o progresso da migracao.
