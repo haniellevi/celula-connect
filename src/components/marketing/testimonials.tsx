@@ -27,14 +27,14 @@ export function Testimonials() {
         {testimonials.map((t) => (
           <figure
             key={t.name}
-            className="group relative overflow-hidden rounded-xl border border-gray-100/80 bg-white p-6 transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:border-white/10 dark:bg-black"
+            className="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:border-white/10 dark:bg-black"
           >
             <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_1px,transparent_1px)]" />
             </div>
-            <blockquote className="relative text-sm leading-relaxed">“{t.quote}”</blockquote>
-            <figcaption className="relative mt-4 text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{t.name}</span> · {t.role}
+            <blockquote className="relative text-sm leading-relaxed text-slate-900 dark:text-slate-100">“{t.quote}”</blockquote>
+            <figcaption className="relative mt-4 text-sm text-slate-700 dark:text-slate-300">
+              <span className="font-medium text-slate-900 dark:text-slate-50">{t.name}</span> · {t.role}
             </figcaption>
             <div className="absolute inset-0 -z-10 rounded-xl p-px opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-transparent via-gray-100/50 to-transparent dark:via-white/10" />
           </figure>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -69,9 +69,9 @@ export default function DashboardPastorPage() {
 
   useSetPageMetadata({
     title: "Dashboard Pastor",
-    description: "Visão executiva das igrejas, células e equipes de liderança.",
+    description: "Vis├úo executiva das igrejas, c├⌐lulas e equipes de lideran├ºa.",
     breadcrumbs: [
-      { label: "Início", href: "/dashboard" },
+      { label: "In├¡cio", href: "/dashboard" },
       { label: "Pastor" },
     ],
   })
@@ -167,7 +167,7 @@ export default function DashboardPastorPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Utilize o módulo administrativo para criar a primeira igreja e atribuir seus líderes. Com pelo menos uma igreja ativa, este painel exibirá visão consolidada de células, membros e equipes.
+            Utilize o m├│dulo administrativo para criar a primeira igreja e atribuir seus l├¡deres. Com pelo menos uma igreja ativa, este painel exibir├í vis├úo consolidada de c├⌐lulas, membros e equipes.
           </p>
         </CardContent>
       </Card>
@@ -176,14 +176,15 @@ export default function DashboardPastorPage() {
 
   return (
     <div className="space-y-6">
+      <h1 className="text-3xl font-bold text-foreground">Dashboard Pastor</h1>
       {domainMutationsEnabled ? null : (
         <Card className="border-destructive/60 bg-destructive/10">
           <CardHeader>
-            <CardTitle className="text-destructive text-base">Mutação de domínio desabilitada</CardTitle>
+            <CardTitle className="text-destructive text-base">Muta├º├úo de dom├¡nio desabilitada</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-destructive/80">
-              As rotas de atualização de igrejas, células e usuários estão bloqueadas. Reative a flag em Admin → Configurações → Feature Flags quando for seguro liberar mutações.
+              As rotas de atualiza├º├úo de igrejas, c├⌐lulas e usu├írios est├úo bloqueadas. Reative a flag em Admin ΓåÆ Configura├º├╡es ΓåÆ Feature Flags quando for seguro liberar muta├º├╡es.
             </p>
           </CardContent>
         </Card>
@@ -201,11 +202,11 @@ export default function DashboardPastorPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Células</CardTitle>
+            <CardTitle>C├⌐lulas</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{totalCelulas}</p>
-            <p className="text-xs text-muted-foreground">visão consolidada entre todas as igrejas.</p>
+            <p className="text-xs text-muted-foreground">vis├úo consolidada entre todas as igrejas.</p>
           </CardContent>
         </Card>
         <Card>
@@ -214,17 +215,17 @@ export default function DashboardPastorPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{totalMembros}</p>
-            <p className="text-xs text-muted-foreground">participantes ativos nas células.</p>
+            <p className="text-xs text-muted-foreground">participantes ativos nas c├⌐lulas.</p>
           </CardContent>
         </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Liderança</CardTitle>
+          <CardTitle>Lideran├ºa</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
           <p className="text-sm"><span className="font-semibold">{contagemPorPerfil.pastores}</span> pastores</p>
           <p className="text-sm"><span className="font-semibold">{contagemPorPerfil.supervisores}</span> supervisores</p>
-          <p className="text-sm"><span className="font-semibold">{contagemPorPerfil.lideres}</span> líderes de célula</p>
+          <p className="text-sm"><span className="font-semibold">{contagemPorPerfil.lideres}</span> l├¡deres de c├⌐lula</p>
         </CardContent>
       </Card>
     </div>
@@ -232,9 +233,9 @@ export default function DashboardPastorPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Próximo devocional</CardTitle>
+            <CardTitle>Pr├│ximo devocional</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Conteúdo em destaque para ser compartilhado com toda a igreja.
+              Conte├║do em destaque para ser compartilhado com toda a igreja.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -259,7 +260,7 @@ export default function DashboardPastorPage() {
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {destaqueDevocional.conteudo.slice(0, 240)}
-                  {destaqueDevocional.conteudo.length > 240 ? '…' : ''}
+                  {destaqueDevocional.conteudo.length > 240 ? 'ΓÇª' : ''}
                 </p>
                 <p className="text-xs text-muted-foreground italic">
                   {destaqueDevocional.versiculoTexto}
@@ -267,7 +268,7 @@ export default function DashboardPastorPage() {
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nenhum devocional agendado para os próximos dias. Utilize o módulo administrativo para programar novos conteúdos.
+                Nenhum devocional agendado para os pr├│ximos dias. Utilize o m├│dulo administrativo para programar novos conte├║dos.
               </p>
             )}
           </CardContent>
@@ -275,7 +276,7 @@ export default function DashboardPastorPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Avisos prioritários</CardTitle>
+            <CardTitle>Avisos priorit├írios</CardTitle>
             <p className="text-sm text-muted-foreground">
               Mensagens urgentes, segmentadas e gerais que impactam a igreja nesta semana.
             </p>
@@ -307,20 +308,20 @@ export default function DashboardPastorPage() {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Vigência: {item.dataInicio.toLocaleDateString('pt-BR')}
-                        {item.dataFim ? ` até ${item.dataFim.toLocaleDateString('pt-BR')}` : ''}
+                        Vig├¬ncia: {item.dataInicio.toLocaleDateString('pt-BR')}
+                        {item.dataFim ? ` at├⌐ ${item.dataFim.toLocaleDateString('pt-BR')}` : ''}
                       </p>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
                       {item.aviso.conteudo.slice(0, 200)}
-                      {item.aviso.conteudo.length > 200 ? '…' : ''}
+                      {item.aviso.conteudo.length > 200 ? 'ΓÇª' : ''}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Sem avisos ativos. Publique comunicados estratégicos para manter a liderança alinhada.
+                Sem avisos ativos. Publique comunicados estrat├⌐gicos para manter a lideran├ºa alinhada.
               </p>
             )}
           </CardContent>
@@ -332,7 +333,7 @@ export default function DashboardPastorPage() {
           <CardHeader>
             <CardTitle>Convites por status</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Acompanhe os convites emitidos e a efetividade das células.
+              Acompanhe os convites emitidos e a efetividade das c├⌐lulas.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -359,7 +360,7 @@ export default function DashboardPastorPage() {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {convitesVisualizacoesTotais} visualizações • conversão {taxaConversaoPercentual}%
+                  {convitesVisualizacoesTotais} visualiza├º├╡es ΓÇó convers├úo {taxaConversaoPercentual}%
                 </p>
                 <ul className="space-y-2">
                   {convites.slice(0, 5).map((convite) => (
@@ -368,11 +369,11 @@ export default function DashboardPastorPage() {
                         <div>
                           <p className="text-sm font-medium">{convite.nomeConvidado}</p>
                           <p className="text-xs text-muted-foreground">
-                            {convite.celula?.nome ?? 'Sem célula'} · expira{' '}
+                            {convite.celula?.nome ?? 'Sem c├⌐lula'} ┬╖ expira{' '}
                             {new Date(convite.dataExpiracao).toLocaleDateString('pt-BR')}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Visualizações: {convite.totalVisualizacoes ?? 0} · Acessos válidos:{' '}
+                            Visualiza├º├╡es: {convite.totalVisualizacoes ?? 0} ┬╖ Acessos v├ílidos:{' '}
                             {convite.totalAcessosValidos ?? 0}
                           </p>
                         </div>
@@ -394,7 +395,7 @@ export default function DashboardPastorPage() {
               </>
             ) : (
               <p className="text-sm text-muted-foreground">
-                Nenhum convite registrado ainda. Oriente os líderes a gerar convites pelo painel.
+                Nenhum convite registrado ainda. Oriente os l├¡deres a gerar convites pelo painel.
               </p>
             )}
           </CardContent>
@@ -402,14 +403,14 @@ export default function DashboardPastorPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Landing page configurável</CardTitle>
+            <CardTitle>Landing page configur├ível</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Personalize chamada principal, CTA e demais blocos da página pública em tempo real.
+              Personalize chamada principal, CTA e demais blocos da p├ígina p├║blica em tempo real.
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Utilize o builder dedicado para atualizar o conteúdo da landing page sem precisar de deploy. As alterações são refletidas imediatamente no site público.
+              Utilize o builder dedicado para atualizar o conte├║do da landing page sem precisar de deploy. As altera├º├╡es s├úo refletidas imediatamente no site p├║blico.
             </p>
             <Button asChild>
               <Link href="/dashboard/pastor/landing-config">
@@ -422,7 +423,7 @@ export default function DashboardPastorPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Engajamento bíblico</CardTitle>
+          <CardTitle>Engajamento b├¡blico</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
           <div>
@@ -436,14 +437,14 @@ export default function DashboardPastorPage() {
             <p className="text-sm font-medium">Participantes envolvidos</p>
             <p className="text-2xl font-semibold">{resumoBiblico.participantes}</p>
             <p className="text-xs text-muted-foreground">
-              Discipuladores e discípulos acompanhando metas.
+              Discipuladores e disc├¡pulos acompanhando metas.
             </p>
           </div>
           <div>
             <p className="text-sm font-medium">Leituras registradas</p>
             <p className="text-2xl font-semibold">{resumoBiblico.leituras}</p>
             <p className="text-xs text-muted-foreground">
-              Entradas sincronizadas com progresso automático.
+              Entradas sincronizadas com progresso autom├ítico.
             </p>
           </div>
         </CardContent>
@@ -466,10 +467,10 @@ export default function DashboardPastorPage() {
                 <Badge variant="outline">{igreja.statusAssinatura}</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
-                Plano: {igreja.plano?.nome ?? "Não configurado"}
+                Plano: {igreja.plano?.nome ?? "N├úo configurado"}
               </p>
               <p className="text-xs text-muted-foreground">
-                Células vinculadas: {igreja.celulas?.length ?? 0}
+                C├⌐lulas vinculadas: {igreja.celulas?.length ?? 0}
               </p>
               <div className="mt-3 flex justify-end">
                 <Button variant="outline" size="sm" disabled>
@@ -483,20 +484,20 @@ export default function DashboardPastorPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Células em destaque</CardTitle>
+          <CardTitle>C├⌐lulas em destaque</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
           {principaisCelulas.map((celula) => (
             <div key={celula.id} className="rounded-lg border border-border/40 p-4">
               <h3 className="font-semibold">{celula.nome}</h3>
               <p className="text-xs text-muted-foreground">
-                Líder: {celula.lider?.nome ?? "Definir"}
+                L├¡der: {celula.lider?.nome ?? "Definir"}
               </p>
               <p className="text-xs text-muted-foreground">
                 Membros: {celula.membros?.length ?? 0}
               </p>
               <p className="text-xs text-muted-foreground">
-                Última reunião: {celula.reunioes?.length ? new Date(celula.reunioes.slice(-1)[0].data).toLocaleDateString('pt-BR') : "Sem registro"}
+                ├Ültima reuni├úo: {celula.reunioes?.length ? new Date(celula.reunioes.slice(-1)[0].data).toLocaleDateString('pt-BR') : "Sem registro"}
               </p>
             </div>
           ))}

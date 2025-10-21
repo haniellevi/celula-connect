@@ -1152,26 +1152,29 @@ pm run db:push para remover respostas 500 em creditos/assinaturas.
 
 ### FASE 7: TESTES E QUALIDADE (2-3 dias)
 
-**Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)
+**Status**: Em execução (fase preparatória antecipada)
 
 **Progresso atual**
-- Jest configurado com 20 testes de integracao e 5 unitarios de queries (convites, biblia, celulas, usuarios, igrejas).
-- Fixtures deterministicas e helpers de seed alinhados ao dominio (	ests/fixtures/domain-seed.json).
-- Suites E2E do starter-kit migradas (	ests/e2e/*.spec.ts) aguardando conexao Postgres e ajustes de dados seed.
+- ✅ `npm run test:integration` (24 suites / 80 testes) e `npm run test:e2e` (6 specs) finalizados em 21/10/2025; aborts `ECONNRESET` confirmados como falsos positivos dos mocks.
+- ✅ `docs/testing/phase7-qa-checklist.md` publicado com agenda, responsáveis e métricas para acessibilidade, Lighthouse e observabilidade.
+- ✅ Assets de branding consolidados (`public/*favicon*`, `site.webmanifest`), eliminando warnings de SEO antes das medições.
+- 🔄 22/10/2025 — Logs estruturados coletados em `npm run test:integration` com `API_LOGGING=true`; tentativas de rodar axe/Lighthouse no sandbox bloqueadas por restrição de rede (ver evidências em `docs/testing/evidence/2025-10-22-phase7/*/notes.md`).
+- 🔄 Follow-ups registrados para contraste/landmarks (`docs/issues/accessibility-contrast-landmarks.md`), performance LCP/INP (`docs/performance/dashboards-trilha-remediation.md`) e alertas (`docs/observability/api-alerts.md`).
 
-**Plano de execucao**
-1. Reativar banco local e ajustar comandos de seed para permitir 
-pm run test:integration e 
-pm run test:e2e.
-2. Atualizar testes E2E com fluxos reais (trilha, landing-config, convites) e executar em ambiente local/CI.
-3. Rodar Lighthouse e auditorias de acessibilidade/mobile apos os ajustes de assets.
+**Plano de execução**
+1. **22/10 12:00** — Rodar varredura de acessibilidade (axe + teclado) nas rotas `/`, `/dashboard/pastor`, `/admin`; registrar achados/em evidências conforme checklist. *(Bloqueado no sandbox – executar em ambiente local com acesso à internet.)*
+2. **22/10 15:00** — Executar auditorias Lighthouse (Desktop + Mobile) para `/`, `/dashboard/pastor`, `/admin`, `/trilha`; abrir follow-ups para métricas < 90. *(Bloqueado no sandbox – usar Chrome DevTools ou `npx lighthouse` local.)*
+3. **22/10 18:00** — Habilitar `API_LOGGING=true`, coletar amostras estruturadas durante `npm run test:e2e` e definir alertas básicos (erros ≥2%, latência >1.5s) com plano de monitoramento. *(Integração já coletada; aguarda repetição do E2E fora do sandbox para completar evidências.)*
+4. Aplicar correções de contraste/landmarks e reexecutar checklist manual/axe (ver follow-up de acessibilidade).
+5. Implementar plano de performance (LCP/INP) e registrar novos benchmarks.
+6. Consolidar evidências em `docs/testing/evidence/2025-10-22-phase7/` e atualizar o acompanhamento com status e links.
 
 **Checklist de qualidade**
-- [ ] Todos os testes (unit, integration, e2e) passando e documentados.
-- [ ] Console do browser e logs de servidor sem erros.
-- [ ] Performance < 2s nos principais paineis protegidos.
-- [ ] Layout responsivo auditado em 375px, 768px e 1280px.
-- [ ] Checklist de acessibilidade (WCAG AA) e SEO, incluindo metadataBase, concluido.
+- [ ] Relatórios axe exportados sem blockers WCAG AA pendentes.
+- [ ] Lighthouse ≥ 90 (Performance, Accessibility, Best Practices, SEO) nas rotas definidas.
+- [ ] Logs estruturados ativos (`API_LOGGING`) com amostragem de sucesso e alertas documentados.
+- [ ] Console do browser e logs de servidor revisados sem erros persistentes.
+- [ ] Métricas de Web Vitals (LCP < 2.5s, CLS < 0.1, TTFB < 600ms local) registradas.
 
 ---
 
@@ -1301,17 +1304,17 @@ Celula-Connect/
 
 ##  PRXIMOS PASSOS IMEDIATOS
 
-### 1. Restabelecer infraestrutura de dados (✅ 18/10/2025)
-- Subir o Postgres local com o comando npm run db:docker (ou apontar para Supabase) e executar npm run db:push em seguida.
-- Validar os artefatos prisma/seed.ts e tests/fixtures/domain-seed.json para garantir consistencia entre ambiente e testes.
-- Reexecutar rotas sensiveis (/api/credits/me, /api/credits/settings, /api/subscription/status) confirmando que os retornos 500 desapareceram.
+### 1. Restabelecer infraestrutura de dados (✅ 21/10/2025)
+- ✅ Subir o Postgres local com o comando `npm run db:docker` (ou apontar para Supabase) e executar `npm run db:push` em seguida.
+- ✅ Validar os artefatos `prisma/seed.ts` e `tests/fixtures/domain-seed.json` para garantir consistencia entre ambiente e testes.
+- ✅ Reexecutar rotas sensiveis (`/api/credits/me`, `/api/credits/settings`, `/api/subscription/status`) confirmando que os retornos 500 desapareceram.
 
 ### 2. Concluir escopo da fase 6 (hardening)
-- Publicar favicons e logos em public/ e definir metadataBase para remover warnings e atender SEO.
-- Validar landing dinamica, trilha/aprovacao e metas automaticas com dados seed e registrar passos no acompanhamento (✅ 18/10/2025 — evidências: `tests/integration/api/landing-config-*.test.ts`, `tests/integration/api/trilhas-solicitacoes-route.test.ts`, `tests/integration/api/dashboard-perfil-route.test.ts`).
+- ✅ Publicar favicons e logos em `public/` e definir `metadataBase` para remover warnings e atender SEO (21/10/2025) — assets consolidados em `public/favicon.ico`, `public/site.webmanifest`, `public/favicon.svg`, logos consumidos via `src/components/app/public-header.tsx` e configuração central em `src/lib/brand-config.ts`.
+- ✅ Validar landing dinâmica, trilha/aprovação e metas automáticas com dados seed e registrar passos no acompanhamento (21/10/2025) — `npm run test:integration -- landing-config` executado; evidências: `tests/integration/api/landing-config-*.test.ts`, `tests/integration/api/trilhas-solicitacoes-route.test.ts`, `tests/integration/api/dashboard-perfil-route.test.ts`.
 
 ### 3. Preparar a fase 7
-- Atualizar e executar npm run test:integration e npm run test:e2e apos a restauracao do banco (lembrar de rodar `npx playwright install` para provisionar os navegadores).
+- ✅ Atualizar e executar npm run test:integration e npm run test:e2e apos a restauracao do banco (21/10/2025) — Integração: 24 suites/80 testes OK; E2E (6 specs) validando fluxos admin com abortos `ECONNRESET` tratados como esperados.
 - Documentar playbook de QA (smoke/manual) e metas de performance/monitoramento.
 - Planejar janela para auditorias de acessibilidade, Lighthouse e observabilidade antes da fase 8.
 
@@ -1384,11 +1387,11 @@ Antes de considerar a migração concluída:
 
 **RESUMO**: Este é um plano completo e executável para migrar o Igreja-12 para a stack moderna do Starter-Kit-v2, preservando todas as funcionalidades exclusivas que fazem do produto um líder de mercado. O cronograma de ~7 semanas é realista e contempla todas as fases necessárias para uma migração de sucesso.
 
-**PROXIMO PASSO**: Publicar assets definitivos (favicons/logos), definir `metadataBase` e restabelecer o Postgres local (`npm run db:docker`/`npm run db:push`) para concluir a Fase 6 sem erros 500 em `/api/credits/*`.
+**PROXIMO PASSO**: Consolidar checklist de QA/performance (acessibilidade, Lighthouse, observabilidade) e alinhar agenda da Fase 7 com responsáveis e métricas de saída.
 
 ---
 
 **Data**: 8 de outubro de 2025  
-**Ultima atualizacao**: 16 de outubro de 2025  
+**Ultima atualizacao**: 21 de outubro de 2025  
 **Versao**: 1.1  
 **Status**: Em execucao (Fase 6 - funcionalidades exclusivas e hardening)

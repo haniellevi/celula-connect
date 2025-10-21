@@ -29,7 +29,7 @@ export default async function LandingPage() {
         <section id="features" className="container mx-auto mt-24 px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Por que líderes confiam no Celula Connect</h2>
-            <p className="mt-3 text-muted-foreground">
+            <p className="mt-3 text-foreground/90">
               Destaques configuráveis direto do painel para comunicar o valor da plataforma.
             </p>
           </div>
@@ -37,11 +37,11 @@ export default async function LandingPage() {
             {featureHighlights.map((feature, index) => (
               <div
                 key={`feature-${index}`}
-                className="group relative overflow-hidden rounded-xl border bg-card/70 p-6 shadow-sm transition duration-300 hover:-translate-y-1"
+                className="group relative overflow-hidden rounded-xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900"
               >
                 <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                <h3 className="text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{feature.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-900 dark:text-slate-100">{feature.description}</p>
               </div>
             ))}
           </div>
@@ -75,7 +75,7 @@ export default async function LandingPage() {
         <section className="container mx-auto mt-24 px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Experiências de quem já está usando</h2>
-            <p className="mt-3 text-muted-foreground">
+            <p className="mt-3 text-foreground/90">
               Pastores e equipes compartilham como o Celula Connect fortalece suas redes de células.
             </p>
           </div>
@@ -83,11 +83,11 @@ export default async function LandingPage() {
             {testimonials.map((testimonial, index) => (
               <figure
                 key={`testimonial-${index}`}
-                className="group relative overflow-hidden rounded-xl border bg-background p-6 shadow-sm transition duration-300 hover:-translate-y-1"
+                className="group relative overflow-hidden rounded-xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 dark:border-white/10 dark:bg-slate-900"
               >
                 <blockquote className="text-sm leading-relaxed">“{testimonial.quote}”</blockquote>
-                <figcaption className="mt-4 text-sm text-muted-foreground">
-                  <span className="font-medium text-foreground">{testimonial.name}</span>
+                <figcaption className="mt-4 text-sm text-foreground/85">
+                  <span className="font-medium text-slate-900 dark:text-slate-50">{testimonial.name}</span>
                   {testimonial.role ? ` · ${testimonial.role}` : ''}
                 </figcaption>
                 <div className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

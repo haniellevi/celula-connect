@@ -73,7 +73,7 @@ export function PageHeader({ className }: PageHeaderProps) {
       {(metadata.title || metadata.description) && (
         <div>
           {metadata.title && (
-            <h1 className="text-3xl font-bold">{metadata.title}</h1>
+            <h1 className="text-3xl font-bold text-foreground">{metadata.title}</h1>
           )}
           {metadata.description && (
             <p className="text-muted-foreground mt-2">{metadata.description}</p>

@@ -8,7 +8,7 @@ export function PublicFooter() {
         <p>
           © {new Date().getFullYear()} {site.name}. Todos os direitos reservados. Feito por <Link className="hover:text-foreground" href="https://aicoders.academy">AI Coders Academy</Link>
         </p>
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-6" aria-label="Links complementares do site">
           <Link className="hover:text-foreground" href="#features">Funcionalidades</Link>
           <Link className="hover:text-foreground" href="#pricing">Preços</Link>
           <Link className="hover:text-foreground" href="#faq">FAQ</Link>

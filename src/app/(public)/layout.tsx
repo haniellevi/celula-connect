@@ -10,7 +10,7 @@ export default function PublicLayout({
   return (
     <div className="min-h-dvh w-full bg-background text-foreground">
       <PublicHeader />
-      <main>{children}</main>
+      <main role="main">{children}</main>
       <PublicFooter />
       <CookieConsent />
     </div>

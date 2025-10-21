@@ -28,13 +28,13 @@ export function FAQ() {
         {faqs.map((f) => (
           <div
             key={f.q}
-            className="group relative overflow-hidden rounded-xl border border-gray-100/80 bg-white p-6 transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:border-white/10 dark:bg-black"
+            className="group relative overflow-hidden rounded-xl border bg-card p-6 transition-all duration-300 will-change-transform hover:-translate-y-0.5 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] dark:border-white/10 dark:bg-black"
           >
             <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[length:4px_4px] dark:bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.02)_1px,transparent_1px)]" />
             </div>
-            <h3 className="relative text-base font-semibold">{f.q}</h3>
-            <p className="relative mt-2 text-sm text-muted-foreground">{f.a}</p>
+            <h3 className="relative text-base font-semibold text-slate-900 dark:text-slate-100">{f.q}</h3>
+            <p className="relative mt-2 text-sm text-slate-700 dark:text-slate-300">{f.a}</p>
             <div className="absolute inset-0 -z-10 rounded-xl p-px opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-transparent via-gray-100/50 to-transparent dark:via-white/10" />
           </div>
         ))}

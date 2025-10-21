@@ -6,6 +6,7 @@ Centralized brand settings live in `src/lib/brand-config.ts`. Update this file t
 - name/shortName: Display name used in headers/footers and metadata
 - description/keywords/author: SEO-friendly defaults used for page metadata
 - url: Public base URL (from `NEXT_PUBLIC_APP_URL`)
+- metadataBase: Canonical base URL derived from `url` for Next.js metadata
 - logo/icons: Paths to assets under `/public`
 - ogImage: Social sharing image path under `/public`
 - socials/support: Contact and social handles
@@ -27,10 +28,14 @@ Add these to `.env.local` (see `.env.example`):
 Place files under `/public` and update the paths in `brand-config.ts`:
 - `logo.light` – e.g. `/logo-light.svg`
 - `logo.dark` – e.g. `/logo-dark.svg`
-- `icons.favicon` – e.g. `/favicon.ico`
+- `icons.default` – e.g. `/favicon.ico`
+- `icons.svg` – e.g. `/favicon.svg`
+- `icons.png16` – e.g. `/favicon-16x16.png`
+- `icons.png32` – e.g. `/favicon-32x32.png`
+- `icons.shortcut` – e.g. `/favicon-16x16.png`
 - `icons.apple` – e.g. `/apple-touch-icon.png`
+- `manifest` – e.g. `/site.webmanifest`
 - `ogImage` – e.g. `/og-image.png`
 
 ## Extending
 You can safely add new fields (e.g. `pricing`, `legal`, `productHunt`) to the `site` object and consume them across your app via `import { site } from '@/lib/brand-config'`.
-

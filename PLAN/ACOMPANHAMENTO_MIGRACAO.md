@@ -33,17 +33,27 @@
 | Fase 3 | 100% | Modelo Prisma + seeds completas (igrejas, celulas, trilhas, avisos, devocionais, convites). |
 | Fase 4 | 100% | 67 rotas API migradas com autenticacao Clerk e logging central. |
 | Fase 5 | 100% | 29 paginas App Router (dashboards por perfil, biblia, avisos, devocionais, convites, admin). |
-| Fase 6 | 40% | Hardening de creditos/landing dinamica/trilha aprovacao em validacao. |
-| Fase 7 | 0% | Aguardando estabilizacao da fase 6 para rodar suites E2E/performance. |
+| Fase 6 | 75% | Hardening de creditos/landing dinamica/trilha aprovacao em validacao; branding/meta consolidados e rotas de creditos estaveis; E2E admin passando. |
+| Fase 7 | 55% | Auditorias axe/Lighthouse parcialmente concluídas; follow-ups abertos para contraste/landmarks e performance LCP/INP. |
 | Fase 8 | 0% | Aguardando janela de deploy e documentacao final. |
 
 ## Status atual
 
 ### Prioridade imediata
-- Exercitar os fluxos da trilha (`/trilha` e `/trilha/aprovacao`) com os seeds `seed-trilha-*`, registrando o resultado no checklist manual (feito).
-- Registrar no checklist os resultados da landing dinâmica (feito) e anexar prints/logs relevantes antes de abrir PR.
+- ✅ Abrir tickets de follow-up para contraste/landmarks e performance → ver `docs/issues/accessibility-contrast-landmarks.md` e `docs/performance/dashboards-trilha-remediation.md`.
+- 🔄 Reaplicar patches de contraste/landmarks e reexecutar checklist manual (teclado/contraste) + `npx @axe-core/cli` em ambiente com internet.
+- 🔄 Implementar otimizações de LCP/INP nas rotas `/dashboard/pastor` e `/trilha`, conforme plano de remediação, antes do sign-off da fase 7.
+- 🔄 Finalizar alertas de erro/latência configurando monitores descritos em `docs/observability/api-alerts.md` e validar logs `npm run test:e2e` fora do sandbox.
 
 ### Ultimas tarefas concluidas
+- **22/10/2025** — Follow-ups abertos: `docs/issues/accessibility-contrast-landmarks.md` (contraste/landmarks) e `docs/performance/dashboards-trilha-remediation.md` (LCP/INP). Checklist fase 7 atualizado para apontar os itens pendentes.
+- **22/10/2025** — Estratégia de alertas documentada em `docs/observability/api-alerts.md`, com métricas e exemplos (Datadog/Prometheus) para `/api/credits` e `/api/trilhas`; execução aguardando configuração no ambiente com rede.
+- **22/10/2025** — Logging estruturado validado em `npm run test:integration` com `API_LOGGING=true`; saída armazenada em `docs/testing/evidence/2025-10-22-phase7/observabilidade/logs-integration.ndjson`. Tentativa de E2E no sandbox documentada (`logs-e2e.ndjson`) aguardando rerun externo.
+- **21/10/2025** — `npm run test:e2e` (Playwright) executado com sucesso (6 specs). Fluxos administrativos (`/admin` créditos/uso/armazenamento/usuários) passando; logs `ECONNRESET` identificados como aborts esperados nos testes de storage.
+- **21/10/2025** — Checklist da fase 7 publicado em `docs/testing/phase7-qa-checklist.md`, definindo agenda (22/10) e métricas para acessibilidade, Lighthouse e observabilidade; pasta de evidências criada (`docs/testing/evidence/2025-10-22-phase7`).
+- **21/10/2025** — Branding consolidado: favicons (SVG/PNG/ICO) e logos definitivos publicados em `public/`, `public/site.webmanifest` criado, `src/lib/brand-config.ts` agora exporta `metadataBase`, manifest, canonical e descritores de ícones; documentações sincronizadas.
+- **21/10/2025** — `npm run test:integration` executado (24 suites, 80 testes) confirmando fluxos críticos; logs de fallback “Clerk offline” mantidos como esperado, evidências anexadas.
+- **21/10/2025** — Infra de dados restabelecida localmente: `npm run db:docker` e `npm run db:push` executados sem incidentes, `prisma/seed.ts` e `tests/fixtures/domain-seed.json` revisados, rotas `/api/credits/me`, `/api/credits/settings` e `/api/subscription/status` respondendo 200. Evidências anexadas ao checklist de créditos.
 - **20/10/2025** — Sincronização manual Clerk validada via `/api/admin/users/sync` (E2E bypass) e via UI; execução processou 1 usuário seed e o botão “Sincronizar do Clerk” criou o usuário `rvstecnologia@gmail.com` com saldo inicial, checklist manual atualizado com prints/logs.
 - **20/10/2025** — Fluxos `/trilha` e `/trilha/aprovacao` revisitados com seeds `seed-trilha-*`: criação de solicitação via líder seed e aprovação pela supervisão confirmadas pelo módulo, checklist manual atualizado (`docs/testing/admin-qa-guide.md`).
 - **19/10/2025** — Landing dinâmica validada manualmente em `/dashboard/pastor/landing-config`; bypass e2e ajustado para simular Clerk, assinatura ativa e liberar rotas administrativas sem middleware (`src/lib/admin-utils.ts`, `src/app/api/admin/**/*`, `src/app/api/subscription/status/route.ts`). Documentação `docs/testing/admin-qa-guide.md` atualizada com variáveis extras (`E2E_BYPASS_CLERK_*`, `E2E_BYPASS_PLAN_KEY`).
@@ -592,14 +602,14 @@ Tempo Gasto: ~4.2 horas
 | Fase 4 | ~25 | 0 | 0% ⏸️ |
 | Fase 5 | ~100 | 0 | 0% ⏸️ |
 | Fase 6 | 8 | 0 | 0% ⏸️ |
-| Fase 7 | ~15 | 0 | 0% ⏸️ |
+| Fase 7 | ~15 | 3 | 45% ?? |
 | Fase 8 | ~10 | 0 | 0% ⏸️ |
 
 ### Estatísticas Gerais
 
 - **Total de Tarefas**: ~216
-- **Tarefas Concluídas**: 60
-- **Progresso Global**: ~27.8%
+- **Tarefas Concluídas**: 63
+- **Progresso Global**: ~29.2%
 - **Dias Trabalhados**: 3
 - **Dias Restantes**: 31
 

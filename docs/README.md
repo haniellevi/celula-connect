@@ -30,6 +30,7 @@ If you're new to this project, start here:
 ### Best Practices
 - **[Development Guidelines](./development-guidelines.md)** - Code standards, testing, and workflow practices
 - **[Observability](./observability.md)** - Logging toggles, request tracing, and telemetry roadmap
+- **[Alertas de API – Créditos & Trilhas](./observability/api-alerts.md)** - Configuração de monitores de erro/latência
 
 ### Testing & QA
 - **[Migration Pipeline Checklist](./testing/migration-pipeline-checklist.md)** - Passo a passo para validar a importação de dados legados
@@ -37,7 +38,12 @@ If you're new to this project, start here:
 - **[Trilha – Checklist de Validação](./testing/trilha-api-validation.md)** - Regras de payload/query para solicitações de trilha
 - **[Clerk Webhook Scenarios](./testing/clerk-webhook-scenarios.md)** - Como exercitar eventos de assinatura/créditos localmente
 - **[Smoke QA – Fase 4](./testing/fase4-smoke-checklist.md)** - Passo a passo rápido para validar as rotas de backend
+- **[Fase 7 – QA / Acessibilidade / Observabilidade](./testing/phase7-qa-checklist.md)** - Agenda, métricas e evidências para a fase final de testes
 - **[Controle de Mutação de Domínio](./migration/domain-mutations.md)** - Como habilitar/desabilitar `ENABLE_DOMAIN_MUTATIONS` e seus impactos
+
+### Performance & Accessibility
+- **[Performance Remediation – Dashboards & Trilha](./performance/dashboards-trilha-remediation.md)** - Plano de otimização (LCP/INP) para telas de dashboards e trilha
+- **[Acessibilidade – Follow-up (Contraste & Landmarks)](./issues/accessibility-contrast-landmarks.md)** - Ações corretivas para blockers WCAG AA identificados na fase 7  
 
 ## Technology Stack
 

@@ -1,0 +1,145 @@
+
+> celula-connect@1.0.0 test:integration
+> jest --runInBand --testPathPattern=tests/integration
+
+PASS tests/integration/api/trilhas-solicitacoes-route.test.ts (10.515 s)
+PASS tests/integration/api/webhooks-clerk-route.test.ts (5.597 s)
+  ● Console
+
+    console.log
+      Webhook with and ID of sub_123 and type of subscription.updated
+
+      at log (src/app/api/webhooks/clerk/route.ts:53:11)
+
+    console.log
+      Webhook body: {}
+
+      at log (src/app/api/webhooks/clerk/route.ts:54:11)
+
+    console.log
+      Subscription updated event: {
+        id: 'sub_123',
+        user_id: 'user_123',
+        status: 'active',
+        plan_id: 'cplan_pro',
+        updated_at: 1760973362651
+      }
+
+      at log (src/app/api/webhooks/clerk/route.ts:220:13)
+
+    console.log
+      Subscription updated: User user_123 refreshed with 250 credits for plan cplan_pro
+
+      at log (src/app/api/webhooks/clerk/route.ts:249:21)
+
+    console.log
+      Webhook with and ID of undefined and type of invoice.payment_succeeded
+
+      at log (src/app/api/webhooks/clerk/route.ts:53:11)
+
+    console.log
+      Webhook body: {}
+
+      at log (src/app/api/webhooks/clerk/route.ts:54:11)
+
+    console.log
+      Payment succeeded event: {
+        customer_id: 'user_987',
+        lines: [ { price_id: 'price_small_pack' } ]
+      }
+
+      at log (src/app/api/webhooks/clerk/route.ts:338:13)
+
+    console.log
+      Added 100 credits to user user_987 from invoice
+
+      at log (src/app/api/webhooks/clerk/route.ts:375:17)
+
+PASS tests/integration/api/biblia-metas-crud-route.test.ts
+PASS tests/integration/api/biblia-leituras-usuario-route.test.ts
+PASS tests/integration/api/avisos-route.test.ts
+PASS tests/integration/api/feature-flags-route.test.ts
+PASS tests/integration/api/convites-token-route.test.ts
+PASS tests/integration/api/landing-config-admin-route.test.ts
+PASS tests/integration/api/biblia-metas-usuario-route.test.ts
+PASS tests/integration/api/biblia-leituras-post-route.test.ts
+PASS tests/integration/api/convites-route.test.ts
+PASS tests/integration/api/biblia-metas-route.test.ts
+PASS tests/integration/api/landing-config-public-route.test.ts
+PASS tests/integration/api/biblia-livros-route.test.ts
+PASS tests/integration/api/igrejas-route.test.ts
+PASS tests/integration/api/celulas-route.test.ts
+PASS tests/integration/api/devocionais-route.test.ts
+PASS tests/integration/api/dashboard-perfil-route.test.ts
+PASS tests/integration/api/system-config-admin-route.test.ts
+PASS tests/integration/api/admin-user-credits-route.test.ts
+  ● Console
+
+    console.error
+      Failed to sync Clerk credits metadata for admin user adjustment Error: Clerk offline
+          at Object.<anonymous> (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/tests/integration/api/admin-user-credits-route.test.ts:114:64)
+          at Promise.then.completed (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:316:40)
+          at _runTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:121:9)
+          at run (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-runner/build/runTest.js:444:34)
+
+      52 |     } catch (error) {
+      53 |       metadataSynced = false
+    > 54 |       console.error('Failed to sync Clerk credits metadata for admin user adjustment', error)
+         |               ^
+      55 |     }
+      56 |
+      57 |     if (delta !== 0) {
+
+      at error (src/app/api/admin/users/[id]/credits/route.ts:54:15)
+      at src/lib/api/params.ts:21:12
+      at Object.<anonymous> (tests/integration/api/admin-user-credits-route.test.ts:117:22)
+
+PASS tests/integration/api/admin-credits-route.test.ts
+  ● Console
+
+    console.error
+      Failed to sync Clerk credits metadata for admin adjustment Error: Clerk offline
+          at Object.<anonymous> (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/tests/integration/api/admin-credits-route.test.ts:107:64)
+          at Promise.then.completed (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/utils.js:231:10)
+          at _callCircusTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:316:40)
+          at _runTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:252:3)
+          at _runTestsForDescribeBlock (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:126:9)
+          at _runTestsForDescribeBlock (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:121:9)
+          at run (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/run.js:71:3)
+          at runAndTransformResultsToJestFormat (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+          at jestAdapter (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+          at runTestInternal (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-runner/build/runTest.js:367:16)
+          at runTest (/mnt/c/Users/hanie/OneDrive/Documentos/workspace/Celula-Connect/node_modules/jest-runner/build/runTest.js:444:34)
+
+      50 |     } catch (error) {
+      51 |       metadataSynced = false
+    > 52 |       console.error('Failed to sync Clerk credits metadata for admin adjustment', error)
+         |               ^
+      53 |     }
+      54 |
+      55 |     if (adjustment !== 0) {
+
+      at error (src/app/api/admin/credits/[id]/route.ts:52:15)
+      at src/lib/api/params.ts:21:12
+      at Object.<anonymous> (tests/integration/api/admin-credits-route.test.ts:109:22)
+
+PASS tests/integration/api/landing-preview-route.test.ts
+PASS tests/integration/api/admin-dashboard-route.test.ts
+PASS tests/integration/api/credits-me-route.test.ts
+
+Test Suites: 24 passed, 24 total
+Tests:       80 passed, 80 total
+Snapshots:   0 total
+Time:        59.992 s
+Ran all test suites matching /tests\/integration/i.

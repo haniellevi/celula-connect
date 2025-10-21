@@ -92,6 +92,7 @@ export default function ProtectedLayout({
           <div className="flex min-h-dvh flex-1 flex-col p-4">
             <Topbar onToggleSidebar={toggleCollapse} sidebarCollapsed={collapsed} />
             <main
+              role="main"
               className={cn(
                 "container mx-auto w-full max-w-[1400px] pb-10 pt-6"
               )}

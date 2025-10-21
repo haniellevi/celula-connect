@@ -36,7 +36,11 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
   return (
     <>
       {/* Header é renderizado globalmente via PublicLayout */}
-      <main className="overflow-hidden">
+      <section
+        id="hero"
+        aria-labelledby="hero-heading"
+        aria-describedby="hero-summary"
+        className="overflow-hidden">
         <div
           aria-hidden
           className="z-[2] absolute inset-0 pointer-events-none isolate opacity-50 contain-strict hidden lg:block">
@@ -104,11 +108,13 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
                   </Link>
 
                   <h1
+                    id="hero-heading"
                     className="mt-8 max-w-4xl mx-auto text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]">
                     {headline ?? "Crie seu microsaas com I.A. em um dia"}
                   </h1>
                   <p
-                    className="mx-auto mt-8 max-w-2xl text-balance text-lg">
+                    id="hero-summary"
+                    className="mx-auto mt-8 max-w-2xl text-balance text-lg text-foreground">
                     Autenticação (Clerk), PostgreSQL + Prisma, pagamentos (Stripe) e sistema de créditos — com UI em Tailwind + Radix. Lance mais rápido com TypeScript do frontend ao backend.
                   </p>
                 </AnimatedGroup>
@@ -278,7 +284,7 @@ export function Hero({ headline, ctaLabel, badgeText }: HeroProps = {}) {
         </div>
       </div>
     </section>
-      </main>
+      </section>
     </>
   )
 }
