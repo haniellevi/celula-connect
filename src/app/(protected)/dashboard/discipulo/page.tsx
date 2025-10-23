@@ -7,11 +7,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCelulas } from '@/hooks/use-celulas'
+import type { CelulaWithRelations } from '@/hooks/use-celulas'
 import { useBibliaLeiturasUsuario, useBibliaMetasUsuario } from '@/hooks/use-biblia'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useAvisosFeed } from '@/hooks/use-avisos'
 import { useDevocionais } from '@/hooks/use-devocionais'
 import { useDomainUser } from '@/hooks/use-domain-user'
+
+type CelulaMember = CelulaWithRelations['membros'][number]
 
 export default function DashboardDiscipuloPage() {
   const { user } = useUser()
@@ -52,7 +55,7 @@ export default function DashboardDiscipuloPage() {
     if (!user?.id) return []
     return (
       celulasQuery.data?.data.filter((celula) =>
-        celula.membros?.some((membro) => membro.usuario?.clerkUserId === user.id),
+        celula.membros?.some((membro: CelulaMember) => membro.usuario?.clerkUserId === user.id),
       ) ?? []
     )
   }, [celulasQuery.data?.data, user?.id])

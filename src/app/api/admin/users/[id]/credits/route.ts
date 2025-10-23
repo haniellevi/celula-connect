@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { OperationType } from "@/lib/prisma-types"
+import { OperationType } from "@/lib/prisma-client"
 import { syncClerkCreditsMetadata } from "@/lib/clerk/credit-metadata"
 import { requireAdminAccess } from "@/lib/admin-utils"
 import { withApiLogging } from "@/lib/logging/api"
@@ -9,7 +9,7 @@ import { adaptRouteWithParams } from "@/lib/api/params"
 async function handleAdminUserCredits(
   request: Request,
   params: { id: string }
-) {
+): Promise<NextResponse> {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response

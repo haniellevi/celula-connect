@@ -10,7 +10,7 @@ import { Menu } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { CreditStatus } from "@/components/credits/credit-status";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose, SheetFooter } from "@/components/ui/sheet";
-import { navigationItems } from "@/components/app/sidebar";
+import { navigationItems } from "@/config/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
 

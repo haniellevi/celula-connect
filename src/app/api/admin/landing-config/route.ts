@@ -52,7 +52,7 @@ async function ensureAuthorized() {
   return { user }
 }
 
-async function handleGet(request: Request) {
+async function handleGet(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 
@@ -70,7 +70,7 @@ async function handleGet(request: Request) {
   return NextResponse.json({ data: entries, meta: { count: entries.length } })
 }
 
-async function handlePut(request: Request) {
+async function handlePut(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 
@@ -96,7 +96,7 @@ async function handlePut(request: Request) {
   return NextResponse.json({ success: true, data: entry })
 }
 
-async function handleDelete(request: Request) {
+async function handleDelete(request: Request): Promise<NextResponse> {
   const auth = await ensureAuthorized()
   if ('response' in auth) return auth.response
 

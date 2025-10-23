@@ -3,7 +3,7 @@ import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 
-async function handleAdminStorageGet(req: Request) {
+async function handleAdminStorageGet(req: Request): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const { searchParams } = new URL(req.url)

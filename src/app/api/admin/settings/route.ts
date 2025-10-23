@@ -5,7 +5,8 @@ import { getEffectiveFeatureCosts, getEffectivePlanCredits, upsertAdminSettings 
 import { db } from '@/lib/db'
 import { withApiLogging } from '@/lib/logging/api'
 
-async function handleAdminSettingsGet() {
+async function handleAdminSettingsGet(_request: Request): Promise<NextResponse> {
+  void _request
   const access = await requireAdminAccess()
   if (access.response) return access.response
 
@@ -21,7 +22,7 @@ async function handleAdminSettingsGet() {
   return NextResponse.json({ featureCosts, planCredits, billingPlans })
 }
 
-async function handleAdminSettingsPut(req: Request) {
+async function handleAdminSettingsPut(req: Request): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
 

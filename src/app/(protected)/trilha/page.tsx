@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { GraduationCap, Users, Timer, BarChart2, Search, Layers, CalendarClock } from 'lucide-react'
 import { useTrilhas } from '@/hooks/use-trilhas'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
+import type { SolicitacaoTrilhaWithRelations } from '@/hooks/use-trilha-solicitacoes'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,8 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { StatusSolicitacao } from '@/lib/prisma-client'
+import type { TrilhaWithRelations } from '@/hooks/use-trilhas'
 
 type StatusFilter = 'ativas' | 'inativas' | 'todas'
+type TrilhaAreaStage = TrilhaWithRelations['etapasArea'][number]
+type TrilhaParticipation = TrilhaWithRelations['usuariosTrilha'][number]
 
 interface TrilhaEtapa {
   ordem?: number
@@ -33,7 +37,7 @@ function parseConteudo(conteudo: unknown): TrilhaConteudo {
   const value = conteudo as Record<string, unknown>
   const etapasRaw = value.etapas
   if (!Array.isArray(etapasRaw)) return {}
-  const etapas: TrilhaEtapa[] = etapasRaw.map((item) => {
+  const etapas: TrilhaEtapa[] = etapasRaw.map((item: unknown) => {
     if (!item || typeof item !== 'object') return {}
     const etapa = item as Record<string, unknown>
     return {
@@ -56,6 +60,22 @@ const STATUS_LABEL: Record<StatusSolicitacao, string> = {
   [StatusSolicitacao.PENDENTE]: 'Pendente',
   [StatusSolicitacao.APROVADA]: 'Aprovada',
   [StatusSolicitacao.REJEITADA]: 'Rejeitada',
+}
+
+const STATUS_LABEL_DEFAULT = STATUS_LABEL[StatusSolicitacao.PENDENTE]
+const STATUS_BADGE_DEFAULT = STATUS_BADGE_STYLES[StatusSolicitacao.PENDENTE]
+
+function getStatusBadge(status: StatusSolicitacao | null | undefined) {
+  if (status && Object.prototype.hasOwnProperty.call(STATUS_BADGE_STYLES, status)) {
+    return {
+      className: STATUS_BADGE_STYLES[status as StatusSolicitacao],
+      label: STATUS_LABEL[status as StatusSolicitacao],
+    }
+  }
+  return {
+    className: STATUS_BADGE_DEFAULT,
+    label: STATUS_LABEL_DEFAULT,
+  }
 }
 
 function formatDateTime(value?: string | Date | null) {
@@ -88,9 +108,9 @@ export default function TrilhaPage() {
     take: 100,
   })
 
-  const trilhas = useMemo(() => trilhasQuery.data?.data ?? [], [trilhasQuery.data])
+  const trilhas = useMemo<TrilhaWithRelations[]>(() => trilhasQuery.data?.data ?? [], [trilhasQuery.data])
 
-  const filteredTrilhas = useMemo(() => {
+  const filteredTrilhas = useMemo<TrilhaWithRelations[]>(() => {
     const normalized = searchTerm.trim().toLowerCase()
     return trilhas.filter((trilha) => {
       const matchesStatus =
@@ -107,7 +127,7 @@ export default function TrilhaPage() {
     })
   }, [trilhas, statusFilter, searchTerm])
 
-  const selectedTrilha = useMemo(
+  const selectedTrilha = useMemo<TrilhaWithRelations | undefined>(
     () => filteredTrilhas.find((trilha) => trilha.id === selectedTrilhaId) ?? filteredTrilhas[0],
     [filteredTrilhas, selectedTrilhaId],
   )
@@ -126,7 +146,7 @@ export default function TrilhaPage() {
     enabled: Boolean(selectedTrilhaKey),
   })
 
-  const solicitacoesHistorico = useMemo(
+  const solicitacoesHistorico = useMemo<SolicitacaoTrilhaWithRelations[]>(
     () => solicitacoesHistoricoQuery.data?.data ?? [],
     [solicitacoesHistoricoQuery.data],
   )
@@ -264,7 +284,7 @@ export default function TrilhaPage() {
               {trilhasQuery.isLoading ? (
                 <div className="p-4 text-sm text-muted-foreground">Carregando trilhas...</div>
               ) : filteredTrilhas.length ? (
-                filteredTrilhas.map((trilha) => {
+                filteredTrilhas.map((trilha: TrilhaWithRelations) => {
                   const participantes = trilha.usuariosTrilha?.length ?? 0
                   const etapas = parseConteudo(trilha.conteudo).etapas?.length ?? 0
                   const isSelected = selectedTrilha?.id === trilha.id
@@ -350,7 +370,7 @@ export default function TrilhaPage() {
                     </TabsList>
                     <TabsContent value="estrutura" className="mt-4 space-y-3">
                       {parseConteudo(selectedTrilha.conteudo).etapas?.length ? (
-                        parseConteudo(selectedTrilha.conteudo).etapas!.map((etapa, index) => (
+                        parseConteudo(selectedTrilha.conteudo).etapas!.map((etapa: TrilhaEtapa, index) => (
                           <div
                             key={`${etapa.ordem ?? index}-${etapa.titulo ?? 'etapa'}`}
                             className="rounded-lg border border-border/50 bg-accent/5 p-4"
@@ -378,7 +398,7 @@ export default function TrilhaPage() {
                     </TabsContent>
                     <TabsContent value="areas" className="mt-4 space-y-3">
                       {selectedTrilha.etapasArea?.length ? (
-                        selectedTrilha.etapasArea.map((etapa) => (
+                        selectedTrilha.etapasArea.map((etapa: TrilhaAreaStage) => (
                           <div
                             key={`${etapa.trilhaId}-${etapa.areaId}`}
                             className="flex items-center justify-between rounded-lg border border-border/50 bg-accent/5 p-4"
@@ -412,7 +432,7 @@ export default function TrilhaPage() {
                   </div>
                   {selectedTrilha.usuariosTrilha?.length ? (
                     <div className="grid gap-3 md:grid-cols-2">
-                      {selectedTrilha.usuariosTrilha.map((registro) => (
+                      {selectedTrilha.usuariosTrilha.map((registro: TrilhaParticipation) => (
                         <div
                           key={registro.id}
                           className="rounded-lg border border-border/40 bg-background/40 p-4"
@@ -474,7 +494,7 @@ export default function TrilhaPage() {
                     <p className="text-sm text-muted-foreground">Carregando solicitações...</p>
                   ) : solicitacoesHistorico.length ? (
                     <div className="space-y-3">
-                      {solicitacoesHistorico.map((item) => (
+                      {solicitacoesHistorico.map((item: SolicitacaoTrilhaWithRelations) => (
                         <div
                           key={item.id}
                           className="rounded-lg border border-border/40 bg-background/40 p-4"
@@ -490,9 +510,9 @@ export default function TrilhaPage() {
                             </div>
                             <Badge
                               variant="outline"
-                              className={STATUS_BADGE_STYLES[item.status]}
+                              className={getStatusBadge(item.status).className}
                             >
-                              {STATUS_LABEL[item.status]}
+                              {getStatusBadge(item.status).label}
                             </Badge>
                           </div>
                           <p className="mt-2 text-xs text-muted-foreground">

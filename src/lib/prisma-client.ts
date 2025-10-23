@@ -1,5 +1,9 @@
 import * as PrismaGenerated from '../../prisma/generated/client'
 
+/**
+ * Centralised surface for the generated Prisma client.
+ * Import enums and types from here to avoid deep relative paths.
+ */
 export const PrismaClient = PrismaGenerated.PrismaClient
 export const Prisma = PrismaGenerated.Prisma
 
@@ -14,6 +18,17 @@ export const TipoMeta = PrismaGenerated.TipoMeta
 export const UnidadeTempo = PrismaGenerated.UnidadeTempo
 export const CargoCelula = PrismaGenerated.CargoCelula
 
-export type { Prisma } from '../../prisma/generated/client'
+export type Prisma = typeof PrismaGenerated.Prisma
+export type PrismaClientInstance = PrismaGenerated.PrismaClient
+export type OperationType = PrismaGenerated.OperationType
+export type PerfilUsuario = PrismaGenerated.PerfilUsuario
+export type StatusSolicitacao = PrismaGenerated.StatusSolicitacao
+export type StatusAssinatura = PrismaGenerated.StatusAssinatura
+export type TipoAviso = PrismaGenerated.TipoAviso
+export type PrioridadeAviso = PrismaGenerated.PrioridadeAviso
+export type Testamento = PrismaGenerated.Testamento
+export type TipoMeta = PrismaGenerated.TipoMeta
+export type UnidadeTempo = PrismaGenerated.UnidadeTempo
+export type CargoCelula = PrismaGenerated.CargoCelula
 
-export default PrismaGenerated
+export { PrismaGenerated }

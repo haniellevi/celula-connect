@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { Prisma } from '@/lib/prisma-client'
+import { Prisma } from '../../../../../../prisma/generated/client'
 import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
 import { fetchCommercePlans } from '@/lib/clerk/commerce-plans'

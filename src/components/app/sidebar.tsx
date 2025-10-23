@@ -3,20 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Home,
-  CreditCard,
-  User,
-  Users,
-  Settings,
-  Bot,
-  Map,
-  Book,
-  GraduationCap,
-  MapPin,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,24 +14,12 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-react";
 import { useDomainFeatureFlags } from '@/hooks/use-domain-feature-flags'
+import { navigationItems } from '@/config/navigation'
 
 type SidebarProps = {
   collapsed: boolean;
   onToggle: () => void;
 };
-
-export const navigationItems = [
-  { name: "Painel", href: "/dashboard", icon: Home },
-  { name: "Chat com IA", href: "/ai-chat", icon: Bot },
-  { name: "Cobrança", href: "/billing", icon: CreditCard },
-  { name: "Discípulo", href: "/dashboard/discipulo", icon: User },
-  { name: "Líder", href: "/dashboard/lider", icon: Users },
-  { name: "Supervisor", href: "/dashboard/supervisor", icon: Map },
-  { name: "Pastor", href: "/dashboard/pastor", icon: Settings },
-  { name: "Células", href: "/celulas", icon: MapPin },
-  { name: "Trilha", href: "/trilha", icon: GraduationCap },
-  { name: "Bíblia", href: "/biblia/leitor", icon: Book },
- ];
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();

@@ -5,9 +5,9 @@ import { withApiLogging } from "@/lib/logging/api"
 import { adaptRouteWithParams } from "@/lib/api/params"
 
 async function handleAdminUserActivate(
-  request: Request,
+  _request: Request,
   params: { id: string }
-) {
+): Promise<NextResponse> {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response

@@ -24,16 +24,16 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api-client'
-import { TipoMeta, UnidadeTempo } from '@/lib/prisma-client'
+import { TipoMeta, UnidadeTempo } from '../../../../../prisma/generated/client'
 
 type MetaFormValues = {
   titulo: string
   descricao?: string | null
   igrejaId: string
   celulaId: string
-  tipoMeta: TipoMeta
+  tipoMeta: typeof TipoMeta[keyof typeof TipoMeta]
   valorMeta: number
-  unidade: UnidadeTempo
+  unidade: typeof UnidadeTempo[keyof typeof UnidadeTempo]
   periodo: string
   dataInicio: string
   dataFim: string
@@ -128,7 +128,12 @@ export default function BibliaMetasPage() {
     const participantes = metas.reduce((acc, meta) => acc + (meta.usuarios?.length ?? 0), 0)
     const participantesAtivos = metas.reduce((acc, meta) => {
       if (!meta.usuarios) return acc
-      return acc + meta.usuarios.filter((usuario) => usuario.ativa).length
+      return (
+        acc +
+        meta.usuarios.filter(
+          (usuario: MetaLeituraWithRelations['usuarios'][number]) => usuario.ativa,
+        ).length
+      )
     }, 0)
     const leituras = metas.reduce((acc, meta) => acc + (meta.leituras?.length ?? 0), 0)
 
@@ -653,7 +658,12 @@ export default function BibliaMetasPage() {
               <div className="space-y-4 pr-4">
                 {metasQuery.data.data.map((meta) => {
                   const participantes = meta.usuarios?.length ?? 0
-                  const progressoTotal = meta.usuarios?.reduce((acc, usuario) => acc + usuario.progressoAtual, 0) ?? 0
+                  const progressoTotal =
+                    meta.usuarios?.reduce<number>(
+                      (acc: number, usuario: MetaLeituraWithRelations['usuarios'][number]) =>
+                        acc + usuario.progressoAtual,
+                      0,
+                    ) ?? 0
                   const metaGlobal = meta.valorMeta ?? 0
                   const progressoMedio =
                     participantes && metaGlobal
@@ -713,7 +723,7 @@ export default function BibliaMetasPage() {
                         <div className="mt-4 space-y-2">
                           <p className="text-xs font-semibold uppercase text-muted-foreground">Participantes</p>
                           <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                            {meta.usuarios.map((metaUsuario) => (
+                            {meta.usuarios.map((metaUsuario: MetaLeituraWithRelations['usuarios'][number]) => (
                               <div
                                 key={metaUsuario.id}
                                 className="rounded-md border border-border/30 bg-muted/30 p-3"

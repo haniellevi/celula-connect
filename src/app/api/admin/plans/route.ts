@@ -1,13 +1,40 @@
 import { NextResponse } from 'next/server'
 import { requireAdminAccess } from '@/lib/admin-utils'
 import { db } from '@/lib/db'
-import { Prisma } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import { adaptRouteWithParams } from '@/lib/api/params'
 import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
+import { Prisma } from '@/lib/prisma-client'
 
+type PlanRecord = Awaited<ReturnType<typeof db.plan.findMany>>[number]
+type NormalizedFeature = {
+  name: string
+  description: string | null
+  included: boolean
+}
 
-function normalizeFeatures(features: unknown) {
+const serializePlan = (plan: PlanRecord) => ({
+  id: plan.id,
+  clerkId: plan.clerkId,
+  name: plan.name,
+  credits: plan.credits,
+  active: plan.active,
+  sortOrder: plan.sortOrder ?? 0,
+  clerkName: plan.clerkName || null,
+  currency: plan.currency || null,
+  priceMonthlyCents: plan.priceMonthlyCents ?? null,
+  priceYearlyCents: plan.priceYearlyCents ?? null,
+  description: plan.description ?? null,
+  features: plan.features ?? null,
+  badge: plan.badge ?? null,
+  highlight: plan.highlight ?? null,
+  ctaType: plan.ctaType ?? null,
+  ctaLabel: plan.ctaLabel ?? null,
+  ctaUrl: plan.ctaUrl ?? null,
+  billingSource: plan.billingSource ?? 'clerk',
+})
+
+function normalizeFeatures(features: unknown): NormalizedFeature[] | null {
   if (!Array.isArray(features)) return null
   const cleaned = features
     .map((item) => {
@@ -21,7 +48,7 @@ function normalizeFeatures(features: unknown) {
         included: Boolean(typedItem.included ?? true),
       }
     })
-    .filter(Boolean)
+    .filter((value): value is NormalizedFeature => value !== null)
   return cleaned.length > 0 ? cleaned : null
 }
 
@@ -50,31 +77,13 @@ function toCents(value: unknown) {
   return null
 }
 
-async function handleAdminPlansGet() {
+async function handleAdminPlansGet(_request: Request): Promise<NextResponse> {
+  void _request
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const plans = await db.plan.findMany({ orderBy: { createdAt: 'asc' } })
   return NextResponse.json({
-    plans: plans.map(p => ({
-      id: p.id,
-      clerkId: p.clerkId,
-      name: p.name,
-      credits: p.credits,
-      active: p.active,
-      sortOrder: p.sortOrder ?? 0,
-      clerkName: p.clerkName || null,
-      currency: p.currency || null,
-      priceMonthlyCents: p.priceMonthlyCents ?? null,
-      priceYearlyCents: p.priceYearlyCents ?? null,
-      description: p.description ?? null,
-      features: p.features ?? null,
-      badge: p.badge ?? null,
-      highlight: p.highlight ?? null,
-      ctaType: p.ctaType ?? null,
-      ctaLabel: p.ctaLabel ?? null,
-      ctaUrl: p.ctaUrl ?? null,
-      billingSource: p.billingSource ?? 'clerk',
-    })),
+    plans: plans.map(serializePlan),
   })
 }
 
@@ -83,7 +92,7 @@ function isValidClerkPlanId(clerkId: string) {
   return /^c?plan_/.test(clerkId)
 }
 
-async function handleAdminPlansPost(req: Request) {
+async function handleAdminPlansPost(req: Request): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   try {
@@ -184,7 +193,7 @@ async function findPlanByIdentifier(identifier: string) {
   return db.plan.findUnique({ where: { clerkId: identifier } })
 }
 
-async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }) {
+async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
@@ -259,7 +268,7 @@ async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }) 
   }
 }
 
-async function handleAdminPlansDelete(_req: Request, params: { clerkId?: string }) {
+async function handleAdminPlansDelete(_req: Request, params: { clerkId?: string }): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
@@ -275,23 +284,17 @@ async function handleAdminPlansDelete(_req: Request, params: { clerkId?: string 
   }
 }
 
-export const GET = withApiLogging(
-  adaptRouteWithParams<Record<string, never>>(async () => handleAdminPlansGet()),
-  {
-    method: 'GET',
-    route: '/api/admin/plans',
-    feature: 'admin_plans',
-  },
-)
+export const GET = withApiLogging(handleAdminPlansGet, {
+  method: 'GET',
+  route: '/api/admin/plans',
+  feature: 'admin_plans',
+})
 
-export const POST = withApiLogging(
-  adaptRouteWithParams<Record<string, never>>(({ request }) => handleAdminPlansPost(request)),
-  {
-    method: 'POST',
-    route: '/api/admin/plans',
-    feature: 'admin_plans',
-  },
-)
+export const POST = withApiLogging(handleAdminPlansPost, {
+  method: 'POST',
+  route: '/api/admin/plans',
+  feature: 'admin_plans',
+})
 
 export const PUT = withApiLogging(
   adaptRouteWithParams<{ clerkId?: string }>(({ request, params }) =>

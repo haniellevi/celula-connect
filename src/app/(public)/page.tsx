@@ -8,6 +8,51 @@ import { AIStarter } from '@/components/marketing/ai-starter'
 import { listLandingPageConfig } from '@/lib/queries/settings'
 import { extractFeatures, extractHeroContent, extractTestimonials } from '@/lib/landing-config/parsers'
 
+type PlanRecord = Awaited<ReturnType<typeof getActivePlansSorted>>[number]
+
+type PlanFeatureConfig = {
+  name?: string | null
+  description?: string | null
+  included?: boolean | null
+}
+
+const isPlanFeatureConfig = (value: unknown): value is PlanFeatureConfig => {
+  if (typeof value !== 'object' || value === null) return false
+  const record = value as Record<string, unknown>
+  if ('name' in record && record.name !== undefined && record.name !== null && typeof record.name !== 'string') {
+    return false
+  }
+  if (
+    'description' in record &&
+    record.description !== undefined &&
+    record.description !== null &&
+    typeof record.description !== 'string'
+  ) {
+    return false
+  }
+  if ('included' in record && record.included !== undefined && typeof record.included !== 'boolean') {
+    return false
+  }
+  return true
+}
+
+const isPlanFeatureArray = (value: unknown): value is PlanFeatureConfig[] =>
+  Array.isArray(value) && value.every(isPlanFeatureConfig)
+
+const mapPlanFeatures = (features: PlanRecord['features']) => {
+  if (!isPlanFeatureArray(features)) {
+    return null
+  }
+
+  const parsed = features.map((feature) => ({
+    name: feature.name ?? '',
+    description: feature.description ?? null,
+    included: feature.included ?? true,
+  }))
+
+  return parsed.length > 0 ? parsed : null
+}
+
 export default async function LandingPage() {
   const [plans, heroConfig, featuresConfig, testimonialsConfig] = await Promise.all([
     getActivePlansSorted(),
@@ -49,27 +94,28 @@ export default async function LandingPage() {
       )}
       <AIStarter />
       <Pricing
-        plans={plans.map((p) => ({
-          id: p.id,
-          clerkId: p.clerkId ?? null,
-          name: p.name,
-          credits: p.credits,
-          currency: p.currency ?? null,
-          priceMonthlyCents: p.priceMonthlyCents ?? null,
-          priceYearlyCents: p.priceYearlyCents ?? null,
-          description: p.description ?? null,
-          features: Array.isArray(p.features) ? p.features.map((f: unknown) => ({
-            name: (f as { name?: string }).name || '',
-            description: (f as { description?: string }).description || null,
-            included: (f as { included?: boolean }).included ?? true
-          })) : null,
-          badge: p.badge ?? null,
-          highlight: p.highlight ?? false,
-          ctaType: (p.ctaType === 'checkout' || p.ctaType === 'contact') ? p.ctaType : null,
-          ctaLabel: p.ctaLabel ?? null,
-          ctaUrl: p.ctaUrl ?? null,
-          billingSource: p.billingSource as 'clerk' | 'manual' | null,
-        }))}
+        plans={plans.map((plan: PlanRecord) => {
+          const billingSource =
+            plan.billingSource === 'clerk' || plan.billingSource === 'manual' ? plan.billingSource : null
+
+          return {
+            id: plan.id,
+            clerkId: plan.clerkId ?? null,
+            name: plan.name,
+            credits: plan.credits,
+            currency: plan.currency ?? null,
+            priceMonthlyCents: plan.priceMonthlyCents ?? null,
+            priceYearlyCents: plan.priceYearlyCents ?? null,
+            description: plan.description ?? null,
+            features: mapPlanFeatures(plan.features),
+            badge: plan.badge ?? null,
+            highlight: plan.highlight ?? false,
+            ctaType: plan.ctaType === 'checkout' || plan.ctaType === 'contact' ? plan.ctaType : null,
+            ctaLabel: plan.ctaLabel ?? null,
+            ctaUrl: plan.ctaUrl ?? null,
+            billingSource,
+          }
+        })}
       />
       {testimonials.length > 0 && (
         <section className="container mx-auto mt-24 px-4">

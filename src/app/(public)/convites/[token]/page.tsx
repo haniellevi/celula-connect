@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { getConviteByToken, registerConviteView } from '@/lib/queries/convites'
 import { getCelulaById } from '@/lib/queries/celulas'
-import { CargoCelula } from '@/lib/prisma-client'
+import { CargoCelula } from '../../../../../prisma/generated/client'
 
 type InvitationStatus =
   | { status: 'not_found' }

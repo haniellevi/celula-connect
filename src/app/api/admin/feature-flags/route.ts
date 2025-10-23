@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { PerfilUsuario } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import { requireDomainUser, hasRole, unauthorizedResponse } from '@/lib/domain-auth'
 import {
   listConfiguracoesSistema,
   upsertConfiguracaoSistemaEntry,
 } from '@/lib/queries/settings'
+import { PerfilUsuario } from '@/lib/prisma-client'
+
+type ConfiguracaoSistemaEntry = Awaited<ReturnType<typeof listConfiguracoesSistema>>[number]
+
+const toFeatureFlagRecord = (flags: ConfiguracaoSistemaEntry[]) =>
+  Object.fromEntries(flags.map((flag) => [flag.chave, flag.valor === 'true']))
 
 const upsertSchema = z.object({
   key: z.string().trim().min(1),
@@ -47,9 +52,7 @@ async function handleGet(request: Request) {
   if ('response' in result) return result.response
 
   const flags = await listConfiguracoesSistema('feature_flag')
-  const data = Object.fromEntries(
-    flags.map((flag) => [flag.chave, flag.valor === 'true']),
-  )
+  const data = toFeatureFlagRecord(flags)
 
   return NextResponse.json({ data, meta: { count: Object.keys(data).length } })
 }
@@ -77,7 +80,7 @@ async function handlePut(request: Request) {
   })
 
   const flags = await listConfiguracoesSistema('feature_flag')
-  const data = Object.fromEntries(flags.map((flag) => [flag.chave, flag.valor === 'true']))
+  const data = toFeatureFlagRecord(flags)
 
   return NextResponse.json({ success: true, data })
 }

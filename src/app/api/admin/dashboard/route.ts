@@ -23,7 +23,7 @@ function buildMonthlyBuckets(monthsBack: number): { label: string; start: Date; 
   return buckets
 }
 
-async function handleAdminDashboard() {
+async function handleAdminDashboard(): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
 
@@ -87,12 +87,12 @@ async function handleAdminDashboard() {
       const key = leitura.dataLeitura.toISOString().slice(0, 10)
       acc.set(key, (acc.get(key) ?? 0) + 1)
       return acc
-    }, new Map())
+    }, new Map<string, number>())
 
     const activity = Array.from(leiturasPorDia.entries())
       .sort((a, b) => (a[0] < b[0] ? 1 : -1))
       .slice(0, 10)
-      .map(([date, value]) => ({ label: date, value }))
+      .map(([label, value]) => ({ label, value }))
 
     return NextResponse.json({
       totalUsuarios,

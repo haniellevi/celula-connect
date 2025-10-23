@@ -20,6 +20,7 @@ import { DataTable } from '@/components/ui/data-table'
 import type { CelulaWithRelations } from '@/hooks/use-celulas'
 
 type StatusFilter = 'ativas' | 'inativas' | 'todas'
+type CelulaMember = CelulaWithRelations['membros'][number]
 
 function formatDate(date?: string | Date | null) {
   if (!date) return 'Sem agenda'
@@ -64,7 +65,7 @@ export default function CelulasPage() {
     const total = celulas.length
     const ativas = celulas.filter((celula) => celula.ativa).length
     const membrosAtivos = celulas.reduce(
-      (acc, celula) => acc + (celula.membros?.filter((m) => m.ativo).length ?? 0),
+      (acc, celula) => acc + (celula.membros?.filter((m: CelulaMember) => m.ativo).length ?? 0),
       0,
     )
     const proximasReunioes = celulas
@@ -139,7 +140,8 @@ export default function CelulasPage() {
       header: 'Participantes',
       render: (celula: CelulaWithRelations) => {
         const total = celula.membros?.length ?? 0
-        const ativos = celula.membros?.filter((membro) => membro.ativo).length ?? 0
+        const ativos =
+          celula.membros?.filter((membro: CelulaMember) => membro.ativo).length ?? 0
         return (
           <div className="flex flex-col text-sm">
             <span className="font-medium">{ativos} ativos</span>

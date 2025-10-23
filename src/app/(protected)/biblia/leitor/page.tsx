@@ -245,14 +245,16 @@ export default function BibliaLeitorPage() {
                     {capituloSelecionado ? (
                       <ScrollArea className="h-[320px] pr-4">
                         <article className="space-y-3">
-                          {capituloSelecionado.versiculosBiblia?.map((versiculo) => (
+                          {capituloSelecionado.versiculosBiblia?.map(
+                            (versiculo: CapituloComVersiculos['versiculosBiblia'][number]) => (
                             <p key={versiculo.id} className="text-sm leading-relaxed">
                               <span className="mr-2 font-semibold text-muted-foreground">
                                 {capituloSelecionado.numero}:{versiculo.numero}
                               </span>
                               {versiculo.texto}
                             </p>
-                          ))}
+                            ),
+                          )}
                         </article>
                       </ScrollArea>
                     ) : (

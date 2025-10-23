@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { useCelulas } from '@/hooks/use-celulas'
+import type { CelulaWithRelations } from '@/hooks/use-celulas'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
 import { useBibliaMetas, type MetaLeituraWithRelations } from '@/hooks/use-biblia'
 import { useTrilhaSolicitacoes } from '@/hooks/use-trilha-solicitacoes'
@@ -16,6 +17,9 @@ import { useAvisosFeed } from '@/hooks/use-avisos'
 import { useConvites } from '@/hooks/use-convites'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { InvitationShareDialog } from '@/components/invitations/invitation-share-dialog'
+
+type CelulaMember = CelulaWithRelations['membros'][number]
+type MetaUsuario = MetaLeituraWithRelations['usuarios'][number]
 
 export default function DashboardLiderPage() {
   const { user } = useUser()
@@ -110,7 +114,8 @@ export default function DashboardLiderPage() {
   const membrosAtivosSummary =
     summaryStats.membrosAtivos ??
     celulasParaExibir.reduce(
-      (acc, celula) => acc + (celula.membros?.filter((membro) => membro.ativo).length ?? 0),
+      (acc, celula) =>
+        acc + (celula.membros?.filter((membro: CelulaMember) => membro.ativo).length ?? 0),
       0,
     )
   const convitesPendentesSummary = summaryStats.convitesPendentes ?? convitesPendentes.length
@@ -384,7 +389,7 @@ export default function DashboardLiderPage() {
       </div>
 
       {celulasParaExibir.map((celula) => {
-        const membrosAtivos = celula.membros?.filter((m) => m.ativo) ?? []
+        const membrosAtivos = celula.membros?.filter((m: CelulaMember) => m.ativo) ?? []
         const visitantesPrevistos = celula.reunioes?.slice(-1)[0]?.visitantes ?? 0
         const metaMembros = celula.metaMembros ?? 12
         const progressoMeta = metaMembros > 0
@@ -446,8 +451,10 @@ export default function DashboardLiderPage() {
                       const tipoMeta = meta.tipoMeta?.toLowerCase?.() ?? 'meta'
                       const progressoMedio = meta.usuarios?.length
                         ? Math.round(
-                            meta.usuarios.reduce((acc, usuario) => acc + usuario.progressoAtual, 0) /
-                              meta.usuarios.length,
+                            meta.usuarios.reduce(
+                              (acc: number, usuario: MetaUsuario) => acc + usuario.progressoAtual,
+                              0,
+                            ) / meta.usuarios.length,
                           )
                         : 0
                       return (

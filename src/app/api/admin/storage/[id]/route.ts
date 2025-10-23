@@ -6,9 +6,9 @@ import { withApiLogging } from '@/lib/logging/api'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 async function handleAdminStorageDelete(
-  _: Request,
+  _request: Request,
   params: { id: string },
-) {
+): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const { id } = params

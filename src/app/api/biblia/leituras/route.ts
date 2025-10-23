@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { withApiLogging } from '@/lib/logging/api'
 import { requireDomainUser } from '@/lib/domain-auth'
 import { db } from '@/lib/db'
+import type { Prisma } from '@/lib/prisma-client'
 
 const bodySchema = z.object({
   livroCodigo: z.string().trim().min(1, 'Código do livro é obrigatório'),
@@ -63,7 +64,7 @@ async function handlePost(request: Request) {
     )
   }
 
-  const outcome = await db.$transaction(async (tx) => {
+  const outcome = await db.$transaction(async (tx: Prisma.TransactionClient) => {
     const leitura = await tx.leituraRegistro.create({
       data: {
         usuarioId: user.id,

@@ -4,7 +4,7 @@ import { requireAdminAccess } from "@/lib/admin-utils"
 import type { Prisma } from "@/lib/prisma-client"
 import { withApiLogging } from "@/lib/logging/api"
 
-async function handleAdminCreditsGet(request: Request) {
+async function handleAdminCreditsGet(request: Request): Promise<NextResponse> {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response

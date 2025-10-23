@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdminAccess } from "@/lib/admin-utils";
-import { OperationType } from "@/lib/prisma-types";
+import { OperationType } from "@/lib/prisma-client";
 import type { Prisma } from "@/lib/prisma-client";
 import { withApiLogging } from "@/lib/logging/api";
 
-async function handleAdminUsageGet(request: Request) {
+const OPERATION_TYPES = new Set<OperationType>(Object.values(OperationType));
+
+const isOperationType = (value: string): value is OperationType => OPERATION_TYPES.has(value as OperationType);
+
+async function handleAdminUsageGet(request: Request): Promise<NextResponse> {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response;
@@ -18,8 +22,8 @@ async function handleAdminUsageGet(request: Request) {
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") || 25)));
 
     const filters: Prisma.UsageHistoryWhereInput[] = [];
-    if (type !== "all") {
-      filters.push({ operationType: type as OperationType });
+    if (type !== "all" && isOperationType(type)) {
+      filters.push({ operationType: type });
     }
 
     if (range !== "all") {

@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react'
-import {
-  PerfilUsuario,
-  StatusSolicitacao,
-} from '@/lib/prisma-client'
+import { PerfilUsuario, StatusSolicitacao } from '@/lib/prisma-client'
 import { useTrilhaSolicitacoes, useUpdateSolicitacaoTrilha } from '@/hooks/use-trilha-solicitacoes'
 import { useDomainUser } from '@/hooks/use-domain-user'
 import { useSetPageMetadata } from '@/contexts/page-metadata'
@@ -64,6 +61,19 @@ const STATUS_TABS: Array<{ value: StatusFilterValue; label: string }> = [
   { value: StatusSolicitacao.APROVADA, label: 'Aprovadas' },
   { value: StatusSolicitacao.REJEITADA, label: 'Rejeitadas' },
 ]
+
+const STATUS_DEFAULT_META = {
+  label: 'Status desconhecido',
+  className: 'border-slate-200 bg-slate-100 text-slate-700',
+  description: 'Status ainda não mapeado',
+}
+
+function getStatusMeta(status: StatusSolicitacao | null | undefined) {
+  if (status && Object.prototype.hasOwnProperty.call(STATUS_LABELS, status)) {
+    return STATUS_LABELS[status as StatusSolicitacao]
+  }
+  return STATUS_DEFAULT_META
+}
 
 function getInitials(nome?: string | null) {
   if (!nome) return '??'
@@ -130,7 +140,7 @@ export default function TrilhaAprovacaoPage() {
     enabled: Boolean(domainUser),
   })
 
-  const solicitacoes = useMemo(
+  const solicitacoes = useMemo<SolicitacaoTrilhaWithRelations[]>(
     () => solicitacoesQuery.data?.data ?? [],
     [solicitacoesQuery.data],
   )
@@ -175,6 +185,7 @@ export default function TrilhaAprovacaoPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [supervisorNotes, setSupervisorNotes] = useState('')
   const updateSolicitacao = useUpdateSolicitacaoTrilha()
+  const selectedStatusMeta = getStatusMeta(selectedSolicitacao?.status ?? null)
 
   useEffect(() => {
     if (!dialogOpen) {
@@ -265,17 +276,22 @@ export default function TrilhaAprovacaoPage() {
             {latestSolicitacoes.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhuma solicitação registrada ainda.</p>
             ) : (
-              latestSolicitacoes.map((solicitacao) => (
-                <div key={solicitacao.id} className="flex items-center justify-between text-sm">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{solicitacao.usuario?.nome ?? 'Usuário não identificado'}</span>
-                    <span className="text-muted-foreground">{solicitacao.trilha?.titulo ?? 'Trilha não informada'}</span>
+              latestSolicitacoes.map((solicitacao) => {
+                const statusMeta = getStatusMeta(solicitacao.status)
+                return (
+                  <div key={solicitacao.id} className="flex items-center justify-between text-sm">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{solicitacao.usuario?.nome ?? 'Usuário não identificado'}</span>
+                      <span className="text-muted-foreground">
+                        {solicitacao.trilha?.titulo ?? 'Trilha não informada'}
+                      </span>
+                    </div>
+                    <Badge variant="outline" className={statusMeta.className}>
+                      {statusMeta.label}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className={STATUS_LABELS[solicitacao.status].className}>
-                    {STATUS_LABELS[solicitacao.status].label}
-                  </Badge>
-                </div>
-              ))
+                )
+              })
             )}
           </CardContent>
         </Card>
@@ -365,11 +381,14 @@ export default function TrilhaAprovacaoPage() {
               {
                 key: 'status',
                 header: 'Status',
-                render: (item) => (
-                  <Badge variant="outline" className={STATUS_LABELS[item.status].className}>
-                    {STATUS_LABELS[item.status].label}
-                  </Badge>
-                ),
+                render: (item) => {
+                  const statusMeta = getStatusMeta(item.status)
+                  return (
+                    <Badge variant="outline" className={statusMeta.className}>
+                      {statusMeta.label}
+                    </Badge>
+                  )
+                },
               },
               {
                 key: 'actions',
@@ -437,8 +456,8 @@ export default function TrilhaAprovacaoPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">Status atual</p>
-                  <Badge variant="outline" className={STATUS_LABELS[selectedSolicitacao.status].className}>
-                    {STATUS_LABELS[selectedSolicitacao.status].label}
+                  <Badge variant="outline" className={selectedStatusMeta.className}>
+                    {selectedStatusMeta.label}
                   </Badge>
                   {selectedSolicitacao.dataResposta && (
                     <p className="text-xs text-muted-foreground">

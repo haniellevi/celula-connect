@@ -63,7 +63,7 @@ function isValidClerkPlanId(value: string) {
 async function handleAdminPlanUpdate(
   _req: Request,
   params: { clerkId: string },
-) {
+): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
@@ -136,7 +136,7 @@ async function handleAdminPlanUpdate(
 async function handleAdminPlanDelete(
   _req: Request,
   params: { clerkId: string },
-) {
+): Promise<NextResponse> {
   const access = await requireAdminAccess()
   if (access.response) return access.response
   const identifier = decodeURIComponent(params.clerkId || '')
