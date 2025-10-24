@@ -84,17 +84,17 @@ function serializeError(error: unknown) {
   }
 }
 
-export function withApiLogging<THandler extends (request: Request, ...rest: unknown[]) => HandlerResult>(
-  handler: THandler,
+export function withApiLogging<TArgs extends any[], TResult extends HandlerResult>(
+  handler: (request: Request, ...rest: TArgs) => TResult,
   options: LoggingOptions = {},
-): (...args: Parameters<THandler>) => Promise<Awaited<ReturnType<THandler>>> {
+): (...args: [Request, ...TArgs]) => Promise<Awaited<TResult>> {
   if (!isApiLoggingEnabled()) {
-    return (async (...args: Parameters<THandler>) => await handler(...args)) as (
-      ...args: Parameters<THandler>
-    ) => Promise<Awaited<ReturnType<THandler>>>
+    return (async (...args: [Request, ...TArgs]) => await handler(...args)) as (
+      ...args: [Request, ...TArgs]
+    ) => Promise<Awaited<TResult>>
   }
 
-  const wrapped = async (...args: Parameters<THandler>): Promise<Awaited<ReturnType<THandler>>> => {
+  const wrapped = async (...args: [Request, ...TArgs]): Promise<Awaited<TResult>> => {
     const [requestMaybe, ...rest] = args
     const request = requestMaybe as Request | undefined
     const contextCandidate = rest.length > 0 ? rest[0] : undefined
@@ -113,7 +113,7 @@ export function withApiLogging<THandler extends (request: Request, ...rest: unkn
       restForHandler = [normalizedContext, ...rest.slice(1)]
     }
 
-    const handlerArgs = [requestMaybe, ...restForHandler] as unknown as Parameters<THandler>
+    const handlerArgs = [requestMaybe, ...restForHandler] as unknown as [Request, ...TArgs]
 
     const route = options.route || resolvePath(request)
     const method = options.method || request?.method || 'UNKNOWN'
@@ -132,7 +132,7 @@ export function withApiLogging<THandler extends (request: Request, ...rest: unkn
     try {
       const response = await handler(...handlerArgs)
       if (!response) {
-        return response as Awaited<ReturnType<THandler>>
+        return response as Awaited<TResult>
       }
 
       const status = response.status
@@ -184,7 +184,7 @@ export function withApiLogging<THandler extends (request: Request, ...rest: unkn
         // ignore header mutation failures (immutable response bodies)
       }
 
-      return response as Awaited<ReturnType<THandler>>
+      return response as Awaited<TResult>
     } catch (error) {
       const durationMs = Date.now() - startedAt
       logError('API handler threw an error', {

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Building2, Flag, Sparkles, UserCheck } from 'lucide-react'
 import type { PlanDisplay, PlanFeatureDisplay } from './plan-types'
 
 export type PlanFeature = {
@@ -41,6 +41,21 @@ const DEFAULT_METADATA: PlanMetadata = {
 }
 
 const PLAN_METADATA: Record<string, PlanMetadata> = {
+  'teste-gratuito-líder': {
+    description: '',
+    features: [],
+    icon: <Flag className="h-5 w-5" />,
+  },
+  'plano-líder-de-célula': {
+    description: '',
+    features: [],
+    icon: <UserCheck className="h-5 w-5" />,
+  },
+  'plano-igreja': {
+    description: '',
+    features: [],
+    icon: <Building2 className="h-5 w-5" />,
+  },
 }
 
 function normalizeName(name: string) {

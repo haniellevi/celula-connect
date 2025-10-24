@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { OperationType } from "@/lib/prisma-types";
 import { getUserFromClerkId } from '@/lib/auth-utils';
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag';
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray
 type JsonObject = { [key: string]: JsonValue }
@@ -19,6 +20,11 @@ export async function trackUsage({
   creditsUsed,
   details,
 }: TrackUsageParams): Promise<void> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'trackUsage', clerkUserId, operationType, creditsUsed })
+    return
+  }
+
   try {
     const user = await getUserFromClerkId(clerkUserId);
     
@@ -69,6 +75,11 @@ export async function getUserUsageHistory(
   limit = 50,
   offset = 0
 ) {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getUserUsageHistory', userId, limit, offset })
+    return []
+  }
+
   const usageHistory = await db.usageHistory.findMany({
     where: { userId },
     orderBy: {
@@ -82,6 +93,15 @@ export async function getUserUsageHistory(
 }
 
 export async function getUserUsageSummary(userId: string) {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getUserUsageSummary', userId })
+    return {
+      totalUsed: 0,
+      byOperation: {},
+      lastUsage: null,
+    }
+  }
+
   const creditBalance = await db.creditBalance.findUnique({
     where: { userId },
   });
@@ -129,6 +149,11 @@ export async function syncCreditBalance(
   clerkUserId: string,
   creditsRemaining: number
 ): Promise<void> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'syncCreditBalance', userId, clerkUserId, creditsRemaining })
+    return
+  }
+
   await db.creditBalance.upsert({
     where: { userId },
     update: {

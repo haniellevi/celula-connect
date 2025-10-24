@@ -7,6 +7,7 @@ import {
   upsertConfiguracaoSistemaEntry,
 } from '@/lib/queries/settings'
 import { PerfilUsuario } from '@/lib/prisma-client'
+import type { DomainUser } from '@/lib/domain-auth'
 
 type ConfiguracaoSistemaEntry = Awaited<ReturnType<typeof listConfiguracoesSistema>>[number]
 
@@ -27,7 +28,10 @@ const PUBLIC_ROLES: PerfilUsuario[] = [
   PerfilUsuario.PASTOR,
 ]
 
-async function ensureAccess({ allowPublic = false } = {}) {
+async function ensureAccess({ allowPublic = false } = {}): Promise<
+  | { response: NextResponse }
+  | { user: DomainUser }
+> {
   const auth = await requireDomainUser()
   if (!auth.user) {
     return { response: auth.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }
@@ -44,7 +48,7 @@ async function ensureAccess({ allowPublic = false } = {}) {
   return { user: auth.user }
 }
 
-async function handleGet(request: Request) {
+async function handleGet(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url)
   const scope = searchParams.get('scope')
 
@@ -57,7 +61,7 @@ async function handleGet(request: Request) {
   return NextResponse.json({ data, meta: { count: Object.keys(data).length } })
 }
 
-async function handlePut(request: Request) {
+async function handlePut(request: Request): Promise<NextResponse> {
   const result = await ensureAccess()
   if ('response' in result) return result.response
 

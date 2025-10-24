@@ -5,12 +5,21 @@ import { syncClerkCreditsMetadata } from "@/lib/clerk/credit-metadata";
 import { requireAdminAccess } from "@/lib/admin-utils";
 import { withApiLogging } from "@/lib/logging/api";
 import { adaptRouteWithParams } from "@/lib/api/params";
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag';
 
 async function handleAdminCreditUpdate(request: Request, id: string) {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response;
     const adminUserId = access.userId;
+
+    if (!areCreditsEnabled()) {
+      logCreditsDisabled({ action: 'admin.credits.update', creditBalanceId: id, adminUserId })
+      return NextResponse.json(
+        { creditsDisabled: true, message: 'Credits module is currently disabled' },
+        { status: 200 }
+      )
+    }
 
     const { adjustment } = await request.json();
 
@@ -80,9 +89,9 @@ async function handleAdminCreditUpdate(request: Request, id: string) {
 }
 
 export const PUT = withApiLogging(
-  adaptRouteWithParams<{ id: string }>(async ({ request, params }) =>
-    handleAdminCreditUpdate(request, params.id)
-  ),
+  adaptRouteWithParams<{ id: string }>(({ request, params }) =>
+    handleAdminCreditUpdate(request, params.id),
+  ) as (request: Request, ...rest: unknown[]) => Promise<Response>,
   {
     method: "PUT",
     route: "/api/admin/credits/[id]",

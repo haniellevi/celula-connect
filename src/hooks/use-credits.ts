@@ -29,11 +29,13 @@ export interface CreditData {
   percentage: number;
   isLow: boolean;
   isEmpty: boolean;
+  unlimited: boolean;
 }
 
 export function useCredits(): {
   credits: CreditData | null;
   isLoading: boolean;
+  creditsEnabled: boolean;
   canPerformOperation: (operation: OperationType) => boolean;
   getCost: (operation: OperationType) => number;
   refresh: () => void;
@@ -42,18 +44,29 @@ export function useCredits(): {
   const queryClient = useQueryClient();
 
   // Fetch dynamic settings
-  const { data: settings } = useQuery<{ featureCosts?: Record<string, number>; planCredits?: Record<string, number> } | null>({
+  const { data: settings } = useQuery<{
+    featureCosts?: Record<string, number>;
+    planCredits?: Record<string, number> | null;
+    creditsEnabled?: boolean;
+  } | null>({
     queryKey: ['credit-settings'],
     queryFn: () => api.get('/api/credits/settings'),
     staleTime: 60_000,
     gcTime: 5 * 60_000,
   });
 
-  const { data, isLoading: loadingServer } = useQuery<{ creditsRemaining: number } | null>({
+  const creditsEnabled = settings?.creditsEnabled !== false
+  const shouldFetchCredits = creditsEnabled && isLoaded && !!user
+
+  const { data, isLoading: loadingServer } = useQuery<{
+    creditsRemaining: number | null;
+    creditsEnabled?: boolean;
+    unlimited?: boolean;
+  } | null>({
     queryKey: ['credits', user?.id],
-    enabled: isLoaded && !!user,
-    refetchOnWindowFocus: true,
-    refetchInterval: 30000,
+    enabled: shouldFetchCredits,
+    refetchOnWindowFocus: creditsEnabled,
+    refetchInterval: creditsEnabled ? 30000 : false,
     queryFn: () => api.get('/api/credits/me'),
   });
 
@@ -65,6 +78,19 @@ export function useCredits(): {
   } | undefined;
 
   const credits = useMemo(() => {
+    if (!creditsEnabled) {
+      return {
+        plan: 'unlimited',
+        creditsRemaining: 0,
+        creditsTotal: 0,
+        billingPeriodEnd: null,
+        percentage: 100,
+        isLow: false,
+        isEmpty: false,
+        unlimited: true,
+      }
+    }
+
     if (!isLoaded || !user) {
       return null;
     }
@@ -85,8 +111,9 @@ export function useCredits(): {
       percentage,
       isLow: percentage < 20,
       isEmpty: creditsRemaining === 0,
+      unlimited: false,
     };
-  }, [isLoaded, user, publicMetadata, data]);
+  }, [creditsEnabled, isLoaded, user, publicMetadata, data]);
 
   // Map backend feature keys to UI operation keys
   const getDynamicCosts = (): Record<OperationType, number> => {
@@ -99,6 +126,7 @@ export function useCredits(): {
   };
 
   const canPerformOperation = (operation: OperationType) => {
+    if (!creditsEnabled) return true;
     if (!credits) return false;
     const costs = getDynamicCosts();
     const cost = costs[operation];
@@ -106,18 +134,20 @@ export function useCredits(): {
   };
 
   const getCost = (operation: OperationType) => {
+    if (!creditsEnabled) return 0;
     const costs = getDynamicCosts();
     return costs[operation];
   };
 
   const refresh = () => {
-    if (user?.id) queryClient.invalidateQueries({ queryKey: ['credits', user.id] });
+    if (creditsEnabled && user?.id) queryClient.invalidateQueries({ queryKey: ['credits', user.id] });
   };
 
   if (!isLoaded) {
     return {
       credits: null,
       isLoading: true,
+      creditsEnabled,
       canPerformOperation: () => false,
       getCost: (operation) => DEFAULT_UI_CREDIT_COSTS[operation],
       refresh,
@@ -126,7 +156,8 @@ export function useCredits(): {
 
   return {
     credits,
-    isLoading: loadingServer,
+    isLoading: creditsEnabled ? loadingServer : false,
+    creditsEnabled,
     canPerformOperation,
     getCost,
     refresh,

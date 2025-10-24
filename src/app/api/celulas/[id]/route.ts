@@ -7,7 +7,7 @@ import {
   unauthorizedResponse,
   assertDomainMutationsEnabled,
 } from '@/lib/domain-auth'
-import { Prisma, PerfilUsuario } from '@/lib/prisma-client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import { adaptRouteWithParams } from '@/lib/api/params'
 
 const updateSchema = z.object({
@@ -67,7 +67,7 @@ async function handlePut(request: Request, params: { id: string }) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.CelulaUncheckedUpdateInput = {
+  const data: Parameters<typeof updateCelula>[1] = {
     ...(payload.nome !== undefined ? { nome: payload.nome } : {}),
     ...(payload.diaSemana !== undefined ? { diaSemana: payload.diaSemana } : {}),
     ...(payload.horario !== undefined ? { horario: payload.horario } : {}),

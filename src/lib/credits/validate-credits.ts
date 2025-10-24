@@ -4,6 +4,7 @@ import { FeatureKey } from "@/lib/credits/feature-config";
 import { syncClerkCreditsMetadata } from '@/lib/clerk/credit-metadata';
 import { getFeatureCost } from "@/lib/credits/settings";
 import { InsufficientCreditsError } from "@/lib/credits/errors";
+import { areCreditsEnabled, logCreditsDisabled, UNLIMITED_CREDITS } from '@/lib/credits/feature-flag';
 
 // Get user's credit data from database
 export async function getUserCredits(clerkUserId: string) {
@@ -37,6 +38,11 @@ export async function validateCredits(
   clerkUserId: string,
   feature: FeatureKey
 ): Promise<{ creditsRemaining: number; creditsRequired: number }> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'validateCredits', clerkUserId, feature })
+    return { creditsRemaining: UNLIMITED_CREDITS, creditsRequired: 0 }
+  }
+
   const creditsRequired = await getFeatureCost(feature);
   const { creditsRemaining } = await getUserCredits(clerkUserId);
 
@@ -58,6 +64,11 @@ export async function deductCredits(
   clerkUserId: string,
   feature: FeatureKey
 ): Promise<number> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'deductCredits', clerkUserId, feature })
+    return UNLIMITED_CREDITS
+  }
+
   const creditsToDeduct = await getFeatureCost(feature);
   const { creditBalance } = await getUserCredits(clerkUserId);
   
@@ -88,6 +99,11 @@ export async function refreshUserCredits(
   newCredits: number,
   options: RefreshCreditsOptions = {},
 ): Promise<void> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'refreshUserCredits', clerkUserId, newCredits, options })
+    return
+  }
+
   const { user } = await getUserCredits(clerkUserId)
   const normalizedCredits = Math.max(0, Math.floor(newCredits))
   const lastSyncedAt = options.lastSyncedAt ?? new Date()
@@ -127,6 +143,11 @@ export async function addUserCredits(
   clerkUserId: string,
   amount: number
 ): Promise<number> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'addUserCredits', clerkUserId, amount })
+    return UNLIMITED_CREDITS
+  }
+
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('addUserCredits: amount must be a positive number')
   }

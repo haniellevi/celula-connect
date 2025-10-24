@@ -13,7 +13,7 @@ type BillingPeriodToggleProps = {
 export function BillingPeriodToggle({ value, onChange, className }: BillingPeriodToggleProps) {
   return (
     <div className={cn(
-      "inline-flex items-center p-1.5 bg-white dark:bg-zinc-800/50 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-sm",
+      "inline-flex items-center p-1 bg-white dark:bg-zinc-800/50 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-sm",
       className
     )}>
       {(['monthly', 'yearly'] as const).map((period) => (
@@ -22,7 +22,8 @@ export function BillingPeriodToggle({ value, onChange, className }: BillingPerio
           type="button"
           onClick={() => onChange(period)}
           className={cn(
-            'px-8 py-2.5 text-sm font-medium rounded-full transition-all duration-300 capitalize',
+            // Mobile mais compacto; amplia em telas maiores
+            'px-4 py-2 sm:px-6 sm:py-2.5 text-sm font-medium rounded-full transition-all duration-300 capitalize',
             period === value
               ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-lg'
               : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'

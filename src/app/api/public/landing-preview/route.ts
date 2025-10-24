@@ -19,7 +19,7 @@ async function handleGet() {
   const features = extractFeatures(featuresConfig)
   const testimonials = extractTestimonials(testimonialsConfig)
 
-  const plansPayload: LandingPreviewPlan[] = plans.map((plan) => ({
+  const plansPayload: LandingPreviewPlan[] = plans.map((plan: Awaited<ReturnType<typeof getActivePlansSorted>>[number]) => ({
     id: plan.id,
     clerkId: plan.clerkId ?? null,
     name: plan.name,
@@ -37,7 +37,7 @@ async function handleGet() {
     },
     billingSource: plan.billingSource ?? null,
     features: Array.isArray(plan.features)
-      ? plan.features.map((feature) => {
+      ? plan.features.map((feature: unknown) => {
           if (feature && typeof feature === 'object') {
             const record = feature as { name?: string; description?: string; included?: boolean }
             return {

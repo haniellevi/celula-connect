@@ -77,6 +77,7 @@ describe('/api/webhooks/clerk', () => {
     Webhook.mockImplementation(() => ({
       verify: verifyMock,
     }))
+    process.env.CREDITS_ENABLED = '1'
 
     headers.mockResolvedValue({
       get: (key: string) =>
@@ -153,5 +154,35 @@ describe('/api/webhooks/clerk', () => {
 
     expect(response.status).toBe(200)
     expect(addUserCredits).toHaveBeenCalledWith('user_987', 100)
+  })
+
+  it('não toca em saldo quando créditos estão desativados', async () => {
+    process.env.CREDITS_ENABLED = '0'
+
+    const event: WebhookEvent = {
+      type: 'subscription.updated',
+      data: {
+        id: 'sub_disabled',
+        user_id: 'user_disabled',
+        status: 'active',
+        plan_id: 'cplan_disabled',
+        updated_at: Date.now(),
+      },
+    } as unknown as WebhookEvent
+
+    verifyMock.mockReturnValue(event)
+
+    const response = await POST(
+      new Request('http://localhost/api/webhooks/clerk', {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    expect(response.status).toBe(200)
+    expect(getPlanCredits).not.toHaveBeenCalled()
+    expect(refreshUserCredits).not.toHaveBeenCalled()
+    expect(addUserCredits).not.toHaveBeenCalled()
   })
 })

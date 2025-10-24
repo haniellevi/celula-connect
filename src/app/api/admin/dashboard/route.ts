@@ -83,14 +83,17 @@ async function handleAdminDashboard(): Promise<NextResponse> {
       }),
     )
 
-    const leiturasPorDia = leiturasRecentes.reduce<Map<string, number>>((acc, leitura) => {
-      const key = leitura.dataLeitura.toISOString().slice(0, 10)
-      acc.set(key, (acc.get(key) ?? 0) + 1)
-      return acc
-    }, new Map<string, number>())
+    const leiturasPorDia = leiturasRecentes.reduce<Map<string, number>>(
+      (acc: Map<string, number>, leitura: { dataLeitura: Date }) => {
+        const key = leitura.dataLeitura.toISOString().slice(0, 10)
+        acc.set(key, (acc.get(key) ?? 0) + 1)
+        return acc
+      },
+      new Map<string, number>(),
+    )
 
-    const activity = Array.from(leiturasPorDia.entries())
-      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+    const activity = (Array.from(leiturasPorDia.entries()) as Array<[string, number]>)
+      .sort((a: [string, number], b: [string, number]) => (a[0] < b[0] ? 1 : -1))
       .slice(0, 10)
       .map(([label, value]) => ({ label, value }))
 

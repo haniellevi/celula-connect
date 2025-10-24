@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import {
-  PerfilUsuario,
-  StatusSolicitacao,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario, StatusSolicitacao } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import {
   requireDomainUser,
@@ -69,7 +65,7 @@ async function handlePatch(request: Request, params: { id: string }) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.SolicitacaoAvancoTrilhaUncheckedUpdateInput = {}
+  const data: Parameters<typeof updateSolicitacaoTrilha>[1] = {}
 
   if (payload.status) {
     data.status = payload.status

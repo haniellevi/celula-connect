@@ -6,10 +6,7 @@ import {
   listDevocionais,
   createDevocional,
 } from '@/lib/queries/devocionais'
-import {
-  PerfilUsuario,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -148,7 +145,7 @@ async function handlePost(request: Request) {
 
     return NextResponse.json({ success: true, data: created }, { status: 201 })
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if ((error as { code?: string })?.code === 'P2002') {
       return NextResponse.json(
         { error: 'Já existe um devocional para esta data' },
         { status: 409 },

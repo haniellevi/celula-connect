@@ -213,12 +213,15 @@ export function useAvisosFeed(
     includeUsuario: true,
   })
 
+  type SortMeta = { priorityRank: number; statusRank: number; scopeRank: number; timeRank: number }
+  type Intermediate = AvisoFeedItem & { sortMeta: SortMeta }
+
   const items = useMemo<AvisoFeedItem[]>(() => {
     const now = new Date()
     const avisos = query.data?.data ?? []
 
     return avisos
-      .map((aviso) => {
+      .map<Intermediate>((aviso) => {
         const dataInicio = new Date(aviso.dataInicio)
         const dataFim = aviso.dataFim ? new Date(aviso.dataFim) : null
         const ativo = aviso.ativo && dataInicio <= now && (!dataFim || dataFim >= now)
@@ -246,7 +249,7 @@ export function useAvisosFeed(
 
         return {
           aviso,
-          status: ativo ? 'ATIVO' : agendado ? 'AGENDADO' : 'EXPIRADO',
+          status: (ativo ? 'ATIVO' : agendado ? 'AGENDADO' : 'EXPIRADO') as 'ATIVO' | 'AGENDADO' | 'EXPIRADO',
           scope,
           scopeLabel,
           dataInicio,

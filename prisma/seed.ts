@@ -15,6 +15,120 @@ import {
 const prisma = new PrismaClient();
 
 async function main() {
+  const landingPlans = [
+    {
+      id: "plan-trial-lider",
+      name: "Teste gratuito Líder",
+      credits: 200,
+      sortOrder: 0,
+      currency: "BRL",
+      priceMonthlyCents: 0,
+      priceYearlyCents: null,
+      description: "Liberado por 30 dias para validar com sua célula.",
+      features: [
+        {
+          name: "30 dias de acesso completo",
+          description: "Organize reuniões, metas e membros sem custos iniciais.",
+          included: true,
+        },
+        {
+          name: "Onboarding guiado para líderes",
+          description: "Materiais e checklists ajudam a implantar a primeira célula.",
+          included: true,
+        },
+        {
+          name: "Migração simples para o plano Líder",
+          description: "Continue por apenas R$ 12/mês após o período de teste.",
+          included: true,
+        },
+      ],
+      badge: "Comece grátis",
+      highlight: false,
+      ctaType: "contact",
+      ctaLabel: "Começar teste",
+      ctaUrl: "/sign-up",
+      billingSource: "manual",
+      active: true,
+    },
+    {
+      id: "plan-lider-celula",
+      name: "Plano Líder de Célula",
+      credits: 500,
+      sortOrder: 1,
+      currency: "BRL",
+      priceMonthlyCents: 1200,
+      priceYearlyCents: null,
+      description: "Ideal para líderes que continuam após o teste gratuito.",
+      features: [
+        {
+          name: "R$ 12/mês depois de 30 dias grátis",
+          description: "Cobrança mensal simples para manter sua célula organizada.",
+          included: true,
+        },
+        {
+          name: "Gestão completa da célula",
+          description: "Controle de membros, reuniões, presença e trilhas de crescimento.",
+          included: true,
+        },
+        {
+          name: "Suporte por WhatsApp e e-mail",
+          description: "Fale com nossa equipe sempre que precisar de ajuda.",
+          included: true,
+        },
+      ],
+      badge: "Mais popular",
+      highlight: true,
+      ctaType: "contact",
+      ctaLabel: "Assinar plano Líder",
+      ctaUrl: "/sign-up",
+      billingSource: "manual",
+      active: true,
+    },
+    {
+      id: "plan-igreja",
+      name: "Plano Igreja",
+      credits: 2000,
+      sortOrder: 2,
+      currency: "BRL",
+      priceMonthlyCents: 9700,
+      priceYearlyCents: null,
+      description: "Para pastores que acompanham toda a rede de células.",
+      features: [
+        {
+          name: "Inclui até 9 células ativas",
+          description: "Monitore supervisores, relatórios e engajamento em um só painel.",
+          included: true,
+        },
+        {
+          name: "Células adicionais por R$ 3",
+          description: "Cobre apenas o que exceder o pacote inicial de 9 células.",
+          included: true,
+        },
+        {
+          name: "Suporte dedicado para a equipe pastoral",
+          description: "Onboarding assistido, treinamentos e acesso prioritário ao time.",
+          included: true,
+        },
+      ],
+      badge: "Para igrejas",
+      highlight: false,
+      ctaType: "contact",
+      ctaLabel: "Falar com o time",
+      ctaUrl: "mailto:contato@celulaconnect.com",
+      billingSource: "manual",
+      active: true,
+    },
+  ];
+
+  for (const plan of landingPlans) {
+    const { id, ...data } = plan;
+    await prisma.plan.upsert({
+      where: { id },
+      update: data,
+      create: { id, ...data },
+    });
+  }
+
   const planoBasico = await prisma.plano.upsert({
     where: { id: "seed-plano-basico" },
     update: {

@@ -18,7 +18,7 @@ export const TipoMeta = PrismaGenerated.TipoMeta
 export const UnidadeTempo = PrismaGenerated.UnidadeTempo
 export const CargoCelula = PrismaGenerated.CargoCelula
 
-export type Prisma = typeof PrismaGenerated.Prisma
+export type { Prisma } from '../../prisma/generated/client'
 export type PrismaClientInstance = PrismaGenerated.PrismaClient
 export type OperationType = PrismaGenerated.OperationType
 export type PerfilUsuario = PrismaGenerated.PerfilUsuario

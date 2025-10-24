@@ -249,21 +249,21 @@ export default function DashboardPastorPage() {
               <>
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    {new Date(destaqueDevocional.dataDevocional).toLocaleDateString('pt-BR', {
+                    {new Date(String(destaqueDevocional.dataDevocional)).toLocaleDateString('pt-BR', {
                       dateStyle: 'full',
                     })}
                   </p>
-                  <h3 className="text-xl font-semibold">{destaqueDevocional.titulo}</h3>
+                  <h3 className="text-xl font-semibold">{String(destaqueDevocional.titulo)}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {destaqueDevocional.versiculoReferencia}
+                    {String(destaqueDevocional.versiculoReferencia)}
                   </p>
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  {destaqueDevocional.conteudo.slice(0, 240)}
-                  {destaqueDevocional.conteudo.length > 240 ? 'ΓÇª' : ''}
+                  {String(destaqueDevocional.conteudo).slice(0, 240)}
+                  {String(destaqueDevocional.conteudo).length > 240 ? '…' : ''}
                 </p>
                 <p className="text-xs text-muted-foreground italic">
-                  {destaqueDevocional.versiculoTexto}
+                  {String(destaqueDevocional.versiculoTexto)}
                 </p>
               </>
             ) : (

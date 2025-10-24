@@ -3,6 +3,7 @@ import { getUserFromClerkId } from '@/lib/auth-utils'
 import { FeatureKey, toPrismaOperationType } from './feature-config'
 import { getFeatureCost, getPlanCredits } from '@/lib/credits/settings'
 import { InsufficientCreditsError } from './errors'
+import { areCreditsEnabled, logCreditsDisabled, UNLIMITED_CREDITS } from '@/lib/credits/feature-flag'
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonArray
 interface JsonObject { [key: string]: JsonValue }
@@ -20,6 +21,11 @@ export async function validateCreditsForFeature(
   feature: FeatureKey,
   quantity: number = 1
 ) {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'validateCreditsForFeature', clerkUserId, feature, quantity })
+    return { available: UNLIMITED_CREDITS, needed: 0 }
+  }
+
   try {
     const user = await getUserFromClerkId(clerkUserId)
     const balance = await db.creditBalance.findUnique({ where: { userId: user.id } })
@@ -42,6 +48,11 @@ export async function deductCreditsForFeature({
   details,
   quantity = 1,
 }: DeductParams): Promise<{ creditsRemaining: number }> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'deductCreditsForFeature', clerkUserId, feature, quantity, details })
+    return { creditsRemaining: UNLIMITED_CREDITS }
+  }
+
   try {
     const user = await getUserFromClerkId(clerkUserId)
     const creditsToUse = (await getFeatureCost(feature)) * Math.max(1, quantity)
@@ -124,6 +135,11 @@ export async function refundCreditsForFeature({
   reason?: string
   details?: JsonValue
 }): Promise<{ creditsRemaining: number } | null> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'refundCreditsForFeature', clerkUserId, feature, quantity, reason })
+    return { creditsRemaining: UNLIMITED_CREDITS }
+  }
+
   try {
     const user = await getUserFromClerkId(clerkUserId)
     const refundAmount = (await getFeatureCost(feature)) * Math.max(1, quantity)

@@ -29,6 +29,7 @@ const { db } = require('@/lib/db') as {
 describe('refreshUserCredits', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    process.env.CREDITS_ENABLED = '1'
     ;(getUserFromClerkId as jest.Mock).mockResolvedValue({
       id: 'user-1',
       clerkUserId: 'clerk_123',
@@ -143,5 +144,15 @@ describe('refreshUserCredits', () => {
     await expect(
       refreshUserCredits('clerk_789', 10, { lastSyncedAt: timestamp }),
     ).rejects.toThrow('Clerk indisponível')
+  })
+
+  it('ignora sincronização quando créditos estão desativados', async () => {
+    process.env.CREDITS_ENABLED = '0'
+
+    await refreshUserCredits('clerk_disabled', 999, {})
+
+    expect(db.creditBalance.findUnique).not.toHaveBeenCalled()
+    expect(db.creditBalance.upsert).not.toHaveBeenCalled()
+    expect(syncClerkCreditsMetadata).not.toHaveBeenCalled()
   })
 })

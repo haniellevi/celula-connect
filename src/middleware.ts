@@ -19,11 +19,14 @@ export default E2E_BYPASS
   : clerkMiddleware(async (auth, request) => {
   // Allow public routes
   if (isPublicRoute(request)) {
-    // Server-side redirect for authenticated users from "/" to "/dashboard"
     const authResult = await auth()
-    if (authResult.userId && request.nextUrl.pathname === "/") {
-      const url = new URL("/dashboard", request.url)
-      return NextResponse.redirect(url)
+    // Keep redirecting authenticated users away from auth pages, but let them access the landing normally
+    if (authResult.userId) {
+      const path = request.nextUrl.pathname
+      if (/^\/sign-(in|up)/.test(path)) {
+        const url = new URL("/dashboard", request.url)
+        return NextResponse.redirect(url)
+      }
     }
     return NextResponse.next()
   }

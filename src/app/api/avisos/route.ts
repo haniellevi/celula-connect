@@ -9,6 +9,7 @@ import {
   PerfilUsuario,
   Prisma,
 } from '@/lib/prisma-client'
+import { db } from '@/lib/db'
 import {
   requireDomainUser,
   hasRole,
@@ -216,7 +217,7 @@ async function handlePost(request: Request) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.AvisoUncheckedCreateInput = {
+  const data: Parameters<typeof db.aviso.create>[0]['data'] = {
     titulo: payload.titulo,
     conteudo: payload.conteudo,
     tipo: payload.tipo,

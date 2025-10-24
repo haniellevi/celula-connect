@@ -5,6 +5,7 @@ import { requireAdminAccess } from "@/lib/admin-utils"
 import { db } from "@/lib/db"
 import { getPlanCredits } from "@/lib/credits/settings"
 import { withApiLogging } from "@/lib/logging/api"
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 const InviteSchema = z.object({
   email: z.string().email(),
@@ -19,6 +20,10 @@ async function handleAdminInvitePost(request: Request) {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response
+    const creditsEnabled = areCreditsEnabled()
+    if (!creditsEnabled) {
+      logCreditsDisabled({ action: 'admin.users.invite' })
+    }
 
     const json = await request.json()
     const { email, name } = InviteSchema.parse(json)
@@ -44,13 +49,17 @@ async function handleAdminInvitePost(request: Request) {
             name: name || user.firstName || null,
           },
         })
-        await db.creditBalance.create({
-          data: {
-            userId: created.id,
-            clerkUserId: user.id,
-            creditsRemaining: await getPlanCredits('free'),
-          },
-        })
+        if (creditsEnabled) {
+          await db.creditBalance.create({
+            data: {
+              userId: created.id,
+              clerkUserId: user.id,
+              creditsRemaining: await getPlanCredits('free'),
+            },
+          })
+        } else {
+          logCreditsDisabled({ action: 'admin.users.invite.skipBalanceCreation', clerkUserId: user.id })
+        }
       }
 
       return NextResponse.json({ status: "exists", message: "Usuário já existe no Clerk", clerkUserId: user.id })

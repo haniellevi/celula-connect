@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdminAccess } from "@/lib/admin-utils";
 import { OperationType } from "@/lib/prisma-client";
-import type { Prisma } from "@/lib/prisma-client";
 import { withApiLogging } from "@/lib/logging/api";
 
 const OPERATION_TYPES = new Set<OperationType>(Object.values(OperationType));
@@ -21,7 +20,8 @@ async function handleAdminUsageGet(request: Request): Promise<NextResponse> {
     const page = Math.max(1, Number(searchParams.get("page") || 1));
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") || 25)));
 
-    const filters: Prisma.UsageHistoryWhereInput[] = [];
+    type UsageWhere = Parameters<typeof db.usageHistory.findMany>[0]['where']
+    const filters: UsageWhere[] = [];
     if (type !== "all" && isOperationType(type)) {
       filters.push({ operationType: type });
     }
@@ -56,7 +56,7 @@ async function handleAdminUsageGet(request: Request): Promise<NextResponse> {
       });
     }
 
-    const whereClause: Prisma.UsageHistoryWhereInput = filters.length ? { AND: filters } : {};
+    const whereClause: UsageWhere = filters.length ? { AND: filters } : {} as UsageWhere;
 
     const [total, usageHistory] = await Promise.all([
       db.usageHistory.count({ where: whereClause }),

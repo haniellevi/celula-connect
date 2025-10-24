@@ -5,6 +5,7 @@ import { validateCreditsForFeature, deductCreditsForFeature, refundCreditsForFea
 import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { type FeatureKey } from '@/lib/credits/feature-config'
 import { withApiLogging } from '@/lib/logging/api'
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 type ImageUrl = {
   type?: string
@@ -57,8 +58,10 @@ const BodySchema = z
   .strict()
 
 async function handleImageGeneration(req: Request) {
+  let userId: string | null = null
+  const creditsEnabled = areCreditsEnabled()
+  let creditsDeducted = false
   try {
-    let userId: string | null = null
     try {
       userId = await validateUserAuthentication()
     } catch (e: unknown) {
@@ -78,14 +81,32 @@ async function handleImageGeneration(req: Request) {
     // Charge credits before calling provider
     const feature: FeatureKey = 'ai_image_generation'
     const quantity = typeof count === 'number' ? count : 1
-    try {
-      await validateCreditsForFeature(userId!, feature, quantity)
-      await deductCreditsForFeature({ clerkUserId: userId!, feature, quantity, details: { model } })
-    } catch (e: unknown) {
-      if (e instanceof InsufficientCreditsError) {
-        return NextResponse.json({ error: 'insufficient_credits', required: e.required, available: e.available }, { status: 402 })
+
+    if (creditsEnabled) {
+      try {
+        await validateCreditsForFeature(userId!, feature, quantity)
+        await deductCreditsForFeature({ clerkUserId: userId!, feature, quantity, details: { model } })
+        creditsDeducted = true
+      } catch (e: unknown) {
+        if (e instanceof InsufficientCreditsError) {
+          return NextResponse.json({ error: 'insufficient_credits', required: e.required, available: e.available }, { status: 402 })
+        }
+        throw e
       }
-      throw e
+    } else {
+      logCreditsDisabled({ action: 'ai_image.skipCredits', clerkUserId: userId, feature, quantity, model })
+    }
+
+    const refundIfNeeded = async (reason: string, details?: Record<string, unknown>) => {
+      if (creditsEnabled && creditsDeducted) {
+        await refundCreditsForFeature({
+          clerkUserId: userId!,
+          feature,
+          quantity,
+          reason,
+          details: { model, ...(details || {}) },
+        })
+      }
     }
 
     // Map common vendorless ids when possible
@@ -200,7 +221,7 @@ async function handleImageGeneration(req: Request) {
         errorPayload.providerBody = providerBody?.slice(0, 1200)
       }
       // Refund since provider request failed
-      await refundCreditsForFeature({ clerkUserId: userId!, feature, quantity, reason: `http_${res.status}`, details: { model } })
+      await refundIfNeeded(`http_${res.status}`)
       return NextResponse.json(errorPayload, { status: res.status })
     }
 
@@ -212,7 +233,7 @@ async function handleImageGeneration(req: Request) {
           bodyPreview: body?.slice(0, 2000),
         })
       }
-      await refundCreditsForFeature({ clerkUserId: userId!, feature, quantity, reason: 'invalid_content_type', details: { model } })
+      await refundIfNeeded('invalid_content_type')
       return NextResponse.json({ error: 'Invalid provider response' }, { status: 502 })
     }
 
@@ -227,7 +248,7 @@ async function handleImageGeneration(req: Request) {
       if (DEBUG) {
         console.error('[img] invalid provider response (no json)', { elapsedMs: Date.now() - startedAt })
       }
-      await refundCreditsForFeature({ clerkUserId: userId!, feature, quantity, reason: 'json_parse_error', details: { model } })
+      await refundIfNeeded('json_parse_error')
       return NextResponse.json({ error: 'Invalid provider response' }, { status: 502 })
     }
 
@@ -240,7 +261,7 @@ async function handleImageGeneration(req: Request) {
       if (process.env.NODE_ENV !== 'production') {
         payload.provider = json
       }
-      await refundCreditsForFeature({ clerkUserId: userId!, feature, quantity, reason: 'provider_error', details: { model, message } })
+      await refundIfNeeded('provider_error', { message })
       return NextResponse.json(payload, { status: 502 })
     }
 
@@ -267,7 +288,7 @@ async function handleImageGeneration(req: Request) {
       if (DEBUG) {
         console.error('[img] empty images array (chat/completions)', { json })
       }
-      await refundCreditsForFeature({ clerkUserId: userId!, feature, quantity, reason: 'no_images', details: { model } })
+      await refundIfNeeded('no_images')
       return NextResponse.json({ error: 'No images returned' }, { status: 502 })
     }
 
@@ -284,7 +305,9 @@ async function handleImageGeneration(req: Request) {
     // Attempt refund on unexpected error path
     try {
       // best-effort: we don't have quantity here; default to 1
-      await refundCreditsForFeature({ clerkUserId: (await validateUserAuthentication().catch(()=>null)) || '', feature: 'ai_image_generation', quantity: 1, reason: 'unhandled_error' })
+      if (creditsEnabled && creditsDeducted && userId) {
+        await refundCreditsForFeature({ clerkUserId: userId, feature: 'ai_image_generation', quantity: 1, reason: 'unhandled_error' })
+      }
     } catch {}
     return NextResponse.json(payload, { status: 500 })
   }

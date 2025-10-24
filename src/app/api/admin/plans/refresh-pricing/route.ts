@@ -71,7 +71,7 @@ async function handlePlansRefresh() {
             priceMonthlyCents,
             priceYearlyCents,
             description: null,
-            features: Prisma.JsonNull,
+            features: null,
             badge: null,
             highlight: false,
             ctaType: 'checkout',

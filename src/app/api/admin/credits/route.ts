@@ -1,13 +1,30 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { requireAdminAccess } from "@/lib/admin-utils"
-import type { Prisma } from "@/lib/prisma-client"
+// Nota: evite usar o namespace Prisma diretamente aqui —
+// com isolatedModules o acesso `Prisma.*` pode causar conflitos.
+// Usamos a assinatura do client para obter o tipo de `where` abaixo.
 import { withApiLogging } from "@/lib/logging/api"
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 async function handleAdminCreditsGet(request: Request): Promise<NextResponse> {
   try {
     const access = await requireAdminAccess()
     if (access.response) return access.response
+
+    if (!areCreditsEnabled()) {
+      logCreditsDisabled({ action: 'admin.credits.list' })
+      return NextResponse.json({
+        creditBalances: [],
+        pagination: {
+          page: 1,
+          pageSize: 0,
+          total: 0,
+          pages: 0,
+        },
+        creditsDisabled: true,
+      })
+    }
 
     const { searchParams } = new URL(request.url)
     const page = Math.max(1, Number(searchParams.get("page") || 1))
@@ -17,7 +34,7 @@ async function handleAdminCreditsGet(request: Request): Promise<NextResponse> {
     const minCredits = searchParams.get("minCredits") ? Number(searchParams.get("minCredits")) : undefined
     const maxCredits = searchParams.get("maxCredits") ? Number(searchParams.get("maxCredits")) : undefined
 
-    const whereClause: Prisma.CreditBalanceWhereInput = {}
+    const whereClause: Parameters<typeof db.creditBalance.findMany>[0]['where'] = {}
 
     if (search) {
       whereClause.user = {

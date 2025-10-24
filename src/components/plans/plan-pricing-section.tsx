@@ -44,12 +44,17 @@ export function PlanPricingSection({
       className={cn(
         'relative bg-background text-foreground overflow-hidden',
         layout === 'compact'
-          ? 'py-6 px-0'
+          ? 'py-8 md:py-10'
           : 'py-12 px-4 md:py-24 lg:py-32',
         className
       )}
     >
-      <div className={cn('w-full mx-auto', layout === 'compact' ? 'max-w-full' : 'max-w-5xl')}>
+      <div
+        className={cn(
+          'w-full mx-auto',
+          layout === 'compact' ? 'max-w-6xl px-4 md:px-6' : 'max-w-5xl'
+        )}
+      >
         {showHeader && (
           <PricingHeader
             title={title}
@@ -59,8 +64,12 @@ export function PlanPricingSection({
             layout={layout}
           />
         )}
-
-        <div className={cn('grid grid-cols-1 gap-4 md:grid-cols-3', layout === 'compact' ? 'px-4' : undefined)}>
+        <div
+          className={cn(
+            // 1 coluna no mobile, 2 no tablet, 3 no desktop
+            'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr'
+          )}
+        >
           {tiers.map((tier) => (
             <PricingCard
               key={tier.key}

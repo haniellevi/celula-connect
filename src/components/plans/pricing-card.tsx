@@ -26,7 +26,7 @@ export function PricingCard({ tier, billingPeriod, renderAction }: PricingCardPr
   const isFeatured = Boolean(tier.highlight)
 
   return (
-    <div className="relative h-full rounded-3xl border-[0.75px] border-border p-2 md:rounded-3xl md:p-2">
+    <div className="relative h-full rounded-3xl border-[0.75px] border-border p-2 md:p-3 transition-transform duration-200 will-change-transform">
       <div
         className={cn(
           'relative group backdrop-blur-sm h-full',
@@ -35,7 +35,7 @@ export function PricingCard({ tier, billingPeriod, renderAction }: PricingCardPr
           isFeatured
             ? 'bg-gradient-to-b from-zinc-100/90 via-white to-transparent dark:from-zinc-300/20 dark:via-zinc-900/60'
             : 'bg-white dark:bg-zinc-800/50',
-          'border',
+          'border hover:shadow-lg hover:ring-1 hover:ring-zinc-200 dark:hover:ring-zinc-700'
         
         )}
       >
@@ -44,8 +44,7 @@ export function PricingCard({ tier, billingPeriod, renderAction }: PricingCardPr
             <Badge className={badgeStyles}>{tier.badge || 'Destaque'}</Badge>
           </div>
         )}
-
-        <div className="p-8 flex-1">
+        <div className="p-6 md:p-8 flex-1">
           <div className="flex items-center justify-between mb-4">
             <div
               className={cn(
@@ -57,7 +56,7 @@ export function PricingCard({ tier, billingPeriod, renderAction }: PricingCardPr
             >
               {tier.icon}
             </div>
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-lg md:text-xl font-semibold text-zinc-900 dark:text-zinc-100">
               {tier.plan.name}
             </h3>
           </div>
@@ -72,7 +71,7 @@ export function PricingCard({ tier, billingPeriod, renderAction }: PricingCardPr
           <FeatureList features={tier.features} />
         </div>
 
-        <div className="p-8 pt-0 mt-auto">
+        <div className="p-6 md:p-8 pt-0 mt-auto">
           {renderAction ? (
             renderAction({
               tier,

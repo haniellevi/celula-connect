@@ -153,21 +153,21 @@ export default function DashboardDiscipuloPage() {
               <>
                 <div>
                   <p className="text-xs uppercase text-muted-foreground">
-                    {new Date(destaqueDevocional.dataDevocional).toLocaleDateString('pt-BR', {
+                    {new Date(String(destaqueDevocional.dataDevocional)).toLocaleDateString('pt-BR', {
                       dateStyle: 'full',
                     })}
                   </p>
-                  <h3 className="text-lg font-semibold">{destaqueDevocional.titulo}</h3>
+                  <h3 className="text-lg font-semibold">{String(destaqueDevocional.titulo)}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {destaqueDevocional.versiculoReferencia}
+                    {String(destaqueDevocional.versiculoReferencia)}
                   </p>
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">
-                  {destaqueDevocional.conteudo.slice(0, 220)}
-                  {destaqueDevocional.conteudo.length > 220 ? '…' : ''}
+                  {String(destaqueDevocional.conteudo).slice(0, 220)}
+                  {String(destaqueDevocional.conteudo).length > 220 ? '…' : ''}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  “{destaqueDevocional.versiculoTexto}”
+                  “{String(destaqueDevocional.versiculoTexto)}”
                 </p>
               </>
             ) : (

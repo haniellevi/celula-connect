@@ -46,7 +46,7 @@ async function handleGet(request: Request) {
   })
 
   return NextResponse.json({
-    data: livros.map((livro) => ({
+    data: livros.map((livro: { id: string; nome: string; abreviacao: string; testamento: typeof Testamento[keyof typeof Testamento]; ordem: number }) => ({
       id: livro.id,
       nome: livro.nome,
       abreviacao: livro.abreviacao,

@@ -7,11 +7,7 @@ import {
   deleteConvite,
 } from '@/lib/queries/convites'
 import { getCelulaById } from '@/lib/queries/celulas'
-import {
-  PerfilUsuario,
-  CargoCelula,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario, CargoCelula } from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -146,7 +142,7 @@ async function handlePatch(request: Request, params: { token: string }) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.ConviteUncheckedUpdateInput = {}
+  const data: Parameters<typeof updateConvite>[1] = {}
 
   if (payload.nomeConvidado !== undefined) data.nomeConvidado = payload.nomeConvidado
   if (payload.emailConvidado !== undefined) data.emailConvidado = payload.emailConvidado

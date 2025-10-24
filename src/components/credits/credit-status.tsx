@@ -21,13 +21,28 @@ interface CreditStatusProps {
 
 export function CreditStatus({ className, showUpgradeButton = true }: CreditStatusProps) {
   const { user, isLoaded } = useUser();
-  const { credits, isLoading } = useCredits();
+  const { credits, isLoading, creditsEnabled } = useCredits();
 
   if (!isLoaded || isLoading) {
     return <Skeleton className={cn("h-8 w-24", className)} />;
   }
 
-  if (!user || !credits) {
+  if (!user) {
+    return null;
+  }
+
+  if (!creditsEnabled || credits?.unlimited) {
+    return (
+      <div className={cn("flex items-center gap-2", className)}>
+        <Coins className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium text-muted-foreground">
+          Créditos ilimitados
+        </span>
+      </div>
+    );
+  }
+
+  if (!credits) {
     return null;
   }
 

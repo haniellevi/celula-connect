@@ -54,12 +54,14 @@ async function getLiderStats(userId: string) {
   ])
 
   const totalCelulas = celulas.length
-  const membrosAtivos = celulas.reduce(
-    (acc, celula) => acc + celula.membros.filter((membro) => membro.ativo).length,
+  const membrosAtivos = celulas.reduce<number>(
+    (acc: number, celula: { membros: { ativo: boolean }[] }) =>
+      acc + celula.membros.filter((membro: { ativo: boolean }) => membro.ativo).length,
     0,
   )
-  const convitesPendentes = celulas.reduce(
-    (acc, celula) => acc + celula.convites.filter((convite) => !convite.usado).length,
+  const convitesPendentes = celulas.reduce<number>(
+    (acc: number, celula: { convites: { usado: boolean }[] }) =>
+      acc + celula.convites.filter((convite: { usado: boolean }) => !convite.usado).length,
     0,
   )
 
@@ -99,13 +101,19 @@ async function getSupervisorStats(userId: string) {
   ])
 
   const totalCelulas = celulas.length
-  const membrosAtivos = celulas.reduce(
-    (acc, celula) => acc + celula.membros.filter((membro) => membro.ativo).length,
+  const membrosAtivos = celulas.reduce<number>(
+    (acc: number, celula: { membros: { ativo: boolean }[] }) =>
+      acc + celula.membros.filter((membro: { ativo: boolean }) => membro.ativo).length,
     0,
   )
-  const reunioes = celulas.flatMap((celula) => celula.reunioes)
+  const reunioes = celulas.flatMap((celula: { reunioes: { presentes: number | null }[] }) => celula.reunioes)
   const mediaPresenca = reunioes.length
-    ? Math.round(reunioes.reduce((acc, reuniao) => acc + (reuniao.presentes ?? 0), 0) / reunioes.length)
+    ? Math.round(
+        reunioes.reduce<number>(
+          (acc: number, reuniao: { presentes: number | null }) => acc + (reuniao.presentes ?? 0),
+          0,
+        ) / reunioes.length,
+      )
     : 0
 
   return {

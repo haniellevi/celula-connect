@@ -64,7 +64,7 @@ async function handlePost(request: Request) {
     )
   }
 
-  const outcome = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+  const outcome = await db.$transaction(async (tx: any) => {
     const leitura = await tx.leituraRegistro.create({
       data: {
         usuarioId: user.id,

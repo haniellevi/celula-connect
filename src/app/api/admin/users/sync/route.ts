@@ -4,6 +4,7 @@ import { requireAdminAccess } from "@/lib/admin-utils"
 import { db } from "@/lib/db"
 import { refreshUserCredits } from "@/lib/credits/validate-credits"
 import { withApiLogging } from "@/lib/logging/api"
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 interface ClerkEmailAddress {
   id?: string | null
@@ -186,6 +187,11 @@ async function handleAdminUsersSync(request: Request) {
     const rawBody = await request.json().catch(() => null) as unknown
     const body = isPlainObject(rawBody) ? rawBody : {}
 
+    const creditsEnabled = areCreditsEnabled()
+    if (!creditsEnabled) {
+      logCreditsDisabled({ action: 'admin.users.sync' })
+    }
+
     const pageSizeInput = readNumber(body.pageSize)
     const maxPagesInput = readNumber(body.maxPages)
     const debugInput = readBoolean(body.debug)
@@ -290,17 +296,21 @@ async function handleAdminUsersSync(request: Request) {
                 await db.user.update({ where: { id: dbUser.id }, data: { email, name } })
               }
               if (dbUser) {
-                const balance = await db.creditBalance.findUnique({ where: { userId: dbUser.id } })
-                if (!balance) {
-                  await db.creditBalance.create({
-                    data: {
-                      userId: dbUser.id,
-                      clerkUserId: clerkId,
-                      creditsRemaining: 0,
-                    },
-                  })
-                  createdBalances++
-                  dlog('created credit balance', { clerkId, userId: dbUser.id })
+                if (creditsEnabled) {
+                  const balance = await db.creditBalance.findUnique({ where: { userId: dbUser.id } })
+                  if (!balance) {
+                    await db.creditBalance.create({
+                      data: {
+                        userId: dbUser.id,
+                        clerkUserId: clerkId,
+                        creditsRemaining: 0,
+                      },
+                    })
+                    createdBalances++
+                    dlog('created credit balance', { clerkId, userId: dbUser.id })
+                  }
+                } else {
+                  logCreditsDisabled({ action: 'admin.sync.skipBalanceCreation', clerkUserId: clerkId })
                 }
               }
             }
@@ -320,13 +330,17 @@ async function handleAdminUsersSync(request: Request) {
                   if (plan) {
                     activeSubscriptions++
                     if (setCredits) {
-                      const credits = overrideAmount != null ? overrideAmount : Math.max(0, Math.floor(plan.credits))
-                      await refreshUserCredits(clerkId, credits, {
-                        creditsTotal: credits,
-                        planId: plan.clerkId ?? undefined,
-                      })
-                      creditsRefreshed++
-                      dlog('refreshed credits', { clerkId, planId, credits, override: overrideAmount != null })
+                      if (creditsEnabled) {
+                        const credits = overrideAmount != null ? overrideAmount : Math.max(0, Math.floor(plan.credits))
+                        await refreshUserCredits(clerkId, credits, {
+                          creditsTotal: credits,
+                          planId: plan.clerkId ?? undefined,
+                        })
+                        creditsRefreshed++
+                        dlog('refreshed credits', { clerkId, planId, credits, override: overrideAmount != null })
+                      } else {
+                        logCreditsDisabled({ action: 'admin.sync.skipPlanRefresh', clerkUserId: clerkId, planId, override: overrideAmount })
+                      }
                     } else {
                       dlog('setCredits disabled; skipping credit update', { clerkId, planId })
                     }

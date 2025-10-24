@@ -100,8 +100,8 @@ export default function AIChatPage() {
   const deferredMessages = useDeferredValue(messages)
 
   // Credits hook
-  const { credits, canPerformOperation, getCost, refresh } = useCredits()
-  const headerCredits = credits ? { creditsRemaining: credits.creditsRemaining } : undefined
+  const { credits, canPerformOperation, getCost, refresh, creditsEnabled } = useCredits()
+  const headerCredits = creditsEnabled && credits ? { creditsRemaining: credits.creditsRemaining } : undefined
 
   // Helper functions
   const appendAssistantMessage = useCallback(
@@ -246,6 +246,7 @@ export default function AIChatPage() {
   // Credits transition effect
   const prevCreditsRef = useRef<number | null>(null)
   useEffect(() => {
+    if (!creditsEnabled) return
     const current = credits?.creditsRemaining ?? null
     const prev = prevCreditsRef.current
     prevCreditsRef.current = current
@@ -257,7 +258,7 @@ export default function AIChatPage() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [credits?.creditsRemaining])
+  }, [creditsEnabled, credits?.creditsRemaining])
 
   // Submit handler
   const handleSubmit = mode === 'image' ? handleSubmitImage : handleSubmitText

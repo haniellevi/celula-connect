@@ -6,10 +6,7 @@ import {
   updateDevocional,
   deleteDevocional,
 } from '@/lib/queries/devocionais'
-import {
-  PerfilUsuario,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario } from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -67,7 +64,7 @@ async function handlePatch(request: Request, params: { id: string }) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.DevocionalUncheckedUpdateInput = {}
+  const data: Parameters<typeof updateDevocional>[1] = {}
 
   if (payload.titulo !== undefined) data.titulo = payload.titulo
   if (payload.versiculoReferencia !== undefined) data.versiculoReferencia = payload.versiculoReferencia
@@ -80,7 +77,7 @@ async function handlePatch(request: Request, params: { id: string }) {
     const updated = await updateDevocional(existing.id, data)
     return NextResponse.json({ success: true, data: updated })
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if ((error as { code?: string })?.code === 'P2002') {
       return NextResponse.json(
         { error: 'Já existe um devocional para esta data' },
         { status: 409 },

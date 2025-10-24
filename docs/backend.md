@@ -440,6 +440,8 @@ export async function POST(request: Request) {
 
 ### Billing & Credits
 
+> ⚠️ **Modo hibernação**: defina `CREDITS_ENABLED=0` para suspender toda a cobrança de créditos. Todos os helpers em `src/lib/credits/*`, webhooks e rotas admin farão early-return com logs (`Credits module disabled — …`) e nenhum `402` será emitido enquanto o flag estiver desligado. Reative removendo a flag ou definindo `1`.
+
 The template supports two ways to manage credits:
 
 - Subscriptions: Monthly allowances are set via Clerk subscription events. Handled in `src/app/api/webhooks/clerk/route.ts` using `refreshUserCredits(...)` on `subscription.created/updated/deleted`.

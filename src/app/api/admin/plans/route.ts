@@ -128,7 +128,7 @@ async function handleAdminPlansPost(req: Request): Promise<NextResponse> {
     try {
       const normalizedFeatures = normalizeFeatures(body.features)
       const ctaType = normalizeCtaType(body.ctaType)
-      const data: Prisma.PlanCreateInput = {
+      const data = {
         clerkId,
         name,
         credits,
@@ -144,12 +144,8 @@ async function handleAdminPlansPost(req: Request): Promise<NextResponse> {
         ctaLabel: body.ctaLabel != null ? String(body.ctaLabel).trim() || null : null,
         ctaUrl: body.ctaUrl != null ? String(body.ctaUrl).trim() || null : null,
         billingSource,
-      }
-      if (normalizedFeatures) {
-        data.features = normalizedFeatures as Prisma.InputJsonValue
-      } else {
-        data.features = Prisma.JsonNull
-      }
+        features: normalizedFeatures ? (normalizedFeatures as unknown) : null,
+      } as unknown as Parameters<typeof db.plan.create>[0]['data']
       const created = await db.plan.create({ data })
       await revalidateMarketingSnapshots()
       return NextResponse.json({ plan: {
@@ -220,7 +216,7 @@ async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }):
     }
     const current = await findPlanByIdentifier(body.planId ?? identifier)
     if (!current) return NextResponse.json({ error: 'Plano não encontrado' }, { status: 404 })
-    const data: Prisma.PlanUpdateInput = {}
+    const data: Parameters<typeof db.plan.update>[0]['data'] = {}
     if (body.billingSource !== undefined) data.billingSource = normalizeBillingSource(body.billingSource)
     if (body.newClerkId != null) {
       const newId = String(body.newClerkId).trim()
@@ -240,7 +236,7 @@ async function handleAdminPlansPut(_req: Request, params: { clerkId?: string }):
     if (body.description !== undefined) data.description = body.description === null ? null : (String(body.description).trim() || null)
     if (body.features !== undefined) {
       const normalized = normalizeFeatures(body.features)
-      data.features = normalized === null ? Prisma.JsonNull : (normalized as Prisma.InputJsonValue)
+      data.features = normalized === null ? null : (normalized as unknown)
     }
     if (body.badge !== undefined) data.badge = body.badge === null ? null : (String(body.badge).trim() || null)
     if (body.highlight !== undefined) data.highlight = Boolean(body.highlight)

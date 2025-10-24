@@ -1,11 +1,17 @@
 import { db } from '@/lib/db'
 import { FEATURE_CREDIT_COSTS, FeatureKey } from '@/lib/credits/feature-config'
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 export type AdminSettingsPayload = {
   featureCosts?: Partial<Record<FeatureKey, number>>
 }
 
 export async function getRawAdminSettings() {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getRawAdminSettings' })
+    return null
+  }
+
   try {
     const row = await db.adminSettings.findUnique({ where: { id: 'singleton' } })
     return row || null
@@ -16,6 +22,15 @@ export async function getRawAdminSettings() {
 }
 
 export async function getEffectiveFeatureCosts(): Promise<Record<FeatureKey, number>> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getEffectiveFeatureCosts' })
+    const zeroed = {} as Record<FeatureKey, number>
+    for (const key of Object.keys(FEATURE_CREDIT_COSTS) as FeatureKey[]) {
+      zeroed[key] = 0
+    }
+    return zeroed
+  }
+
   const row = await getRawAdminSettings()
   const overrides = (row?.featureCosts || {}) as Partial<Record<FeatureKey, number>>
   const merged: Record<FeatureKey, number> = { ...FEATURE_CREDIT_COSTS }
@@ -27,11 +42,21 @@ export async function getEffectiveFeatureCosts(): Promise<Record<FeatureKey, num
 }
 
 export async function getFeatureCost(feature: FeatureKey): Promise<number> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getFeatureCost', feature })
+    return 0
+  }
+
   const costs = await getEffectiveFeatureCosts()
   return costs[feature]
 }
 
 export async function getEffectivePlanCredits(): Promise<Record<string, number>> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getEffectivePlanCredits' })
+    return {}
+  }
+
   const plans = await db.plan.findMany({ where: { active: true } })
   const out: Record<string, number> = {}
   for (const p of plans) {
@@ -42,6 +67,11 @@ export async function getEffectivePlanCredits(): Promise<Record<string, number>>
 }
 
 export async function getPlanCredits(planId: string): Promise<number> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getPlanCredits', planId })
+    return 0
+  }
+
   const plan = await db.plan.findUnique({ where: { clerkId: planId } })
   return plan ? Math.max(0, Math.floor(plan.credits)) : 0
 }
@@ -49,6 +79,11 @@ export async function getPlanCredits(planId: string): Promise<number> {
 export type PlanOption = { id: string; label: string }
 
 export async function getPlanOptions(): Promise<PlanOption[]> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getPlanOptions' })
+    return []
+  }
+
   const plans = await db.plan.findMany({ where: { active: true }, orderBy: { createdAt: 'asc' } })
   return plans
     .filter((p) => p.clerkId)
@@ -56,6 +91,11 @@ export async function getPlanOptions(): Promise<PlanOption[]> {
 }
 
 export async function getBasePlanCredits(): Promise<Record<string, number>> {
+  if (!areCreditsEnabled()) {
+    logCreditsDisabled({ action: 'getBasePlanCredits' })
+    return {}
+  }
+
   const plans = await db.plan.findMany({ where: { active: true } })
   const base: Record<string, number> = {}
   for (const p of plans) {

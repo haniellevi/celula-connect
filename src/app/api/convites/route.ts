@@ -8,11 +8,7 @@ import {
   getConviteByToken,
 } from '@/lib/queries/convites'
 import { getCelulaById } from '@/lib/queries/celulas'
-import {
-  PerfilUsuario,
-  CargoCelula,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario, CargoCelula } from '@/lib/prisma-client'
 import {
   requireDomainUser,
   hasRole,
@@ -228,7 +224,7 @@ async function handlePost(request: Request) {
 
     return NextResponse.json({ success: true, data: convite }, { status: 201 })
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    if ((error as { code?: string })?.code === 'P2002') {
       return NextResponse.json(
         { error: 'Já existe um convite gerado com este token' },
         { status: 409 },

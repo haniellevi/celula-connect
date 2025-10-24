@@ -8,6 +8,7 @@ import { InsufficientCreditsError } from '@/lib/credits/errors'
 import { validateCreditsForFeature, deductCreditsForFeature, refundCreditsForFeature } from '@/lib/credits/deduct'
 import { type FeatureKey } from '@/lib/credits/feature-config'
 import { withApiLogging } from '@/lib/logging/api'
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag'
 
 // OpenRouter is OpenAI-compatible
 const PROVIDER = createOpenRouter({
@@ -82,21 +83,29 @@ async function handleChatPost(req: Request) {
 
       // Credits: 1 credit per LLM request
       const feature: FeatureKey = 'ai_text_chat'
-      try {
-        await validateCreditsForFeature(userId, feature)
-        await deductCreditsForFeature({
-          clerkUserId: userId,
-          feature,
-          details: { provider: 'openrouter', model },
-        })
-      } catch (err: unknown) {
-        if (err instanceof InsufficientCreditsError) {
-          return NextResponse.json(
-            { error: 'insufficient_credits', required: err.required, available: err.available },
-            { status: 402 }
-          )
+      const creditsEnabled = areCreditsEnabled()
+      let creditsDeducted = false
+
+      if (creditsEnabled) {
+        try {
+          await validateCreditsForFeature(userId, feature)
+          await deductCreditsForFeature({
+            clerkUserId: userId,
+            feature,
+            details: { provider: 'openrouter', model },
+          })
+          creditsDeducted = true
+        } catch (err: unknown) {
+          if (err instanceof InsufficientCreditsError) {
+            return NextResponse.json(
+              { error: 'insufficient_credits', required: err.required, available: err.available },
+              { status: 402 }
+            )
+          }
+          throw err
         }
-        throw err
+      } else {
+        logCreditsDisabled({ action: 'ai_chat.skipCredits', clerkUserId: userId, feature, model })
       }
 
       try {
@@ -108,13 +117,15 @@ async function handleChatPost(req: Request) {
         return result.toUIMessageStreamResponse({ originalMessages: messages as UIMessage[] })
       } catch (providerErr: unknown) {
         // Provider call failed after deduction — reimburse user
-        await refundCreditsForFeature({
-          clerkUserId: userId,
-          feature,
-          quantity: 1,
-          reason: (providerErr as { message?: string })?.message || 'chat_provider_error',
-          details: { provider: 'openrouter', model },
-        })
+        if (creditsDeducted) {
+          await refundCreditsForFeature({
+            clerkUserId: userId,
+            feature,
+            quantity: 1,
+            reason: (providerErr as { message?: string })?.message || 'chat_provider_error',
+            details: { provider: 'openrouter', model },
+          })
+        }
         return NextResponse.json({ error: 'Erro do provedor' }, { status: 502 })
       }
     } catch (e: unknown) {

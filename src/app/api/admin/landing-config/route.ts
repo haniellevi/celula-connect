@@ -12,6 +12,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/domain-auth'
 import { PerfilUsuario } from '@/lib/prisma-client'
+import type { DomainUser } from '@/lib/domain-auth'
 import { revalidateMarketingSnapshots } from '@/lib/cache/revalidate-marketing'
 
 const querySchema = z.object({
@@ -38,7 +39,7 @@ const MANAGE_LANDING_CONFIG_ROLES: PerfilUsuario[] = [
   PerfilUsuario.SUPERVISOR,
 ]
 
-async function ensureAuthorized() {
+async function ensureAuthorized(): Promise<{ response: NextResponse } | { user: DomainUser }> {
   const authResult = await requireDomainUser()
   if (!authResult.user) {
     return { response: authResult.response ?? NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) }

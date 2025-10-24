@@ -28,7 +28,7 @@ async function handleGet(_request: Request, params: { id: string }) {
             testamento: capitulo.livro.testamento,
           }
         : null,
-      versiculos: capitulo.versiculosBiblia?.map((versiculo) => ({
+      versiculos: capitulo.versiculosBiblia?.map((versiculo: { id: string; numero: number; texto: string }) => ({
         id: versiculo.id,
         numero: versiculo.numero,
         texto: versiculo.texto,

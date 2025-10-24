@@ -13,7 +13,7 @@ import { CreditCard } from "lucide-react";
 
 export default function BillingPage() {
   const { user, isLoaded } = useUser();
-  const { credits, isLoading } = useCredits();
+  const { credits, isLoading, creditsEnabled } = useCredits();
   const { data: plansData, isLoading: isLoadingPlans } = usePublicPlans();
 
   useSetPageMetadata({
@@ -25,7 +25,7 @@ export default function BillingPage() {
     ]
   });
 
-  if (!isLoaded || !user || isLoading || isLoadingPlans) {
+  if (!isLoaded || !user || (isLoading && creditsEnabled) || isLoadingPlans) {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
@@ -70,9 +70,17 @@ export default function BillingPage() {
               <CardTitle>Status dos Créditos</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <CreditStatus showUpgradeButton={credits?.isLow} />
+              <CreditStatus showUpgradeButton={creditsEnabled && credits?.isLow} />
+
+              {!creditsEnabled && (
+                <div className="bg-muted/40 dark:bg-muted/10 p-3 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    O sistema de créditos está temporariamente desativado. As funcionalidades de IA estão liberadas sem custo.
+                  </p>
+                </div>
+              )}
               
-              {credits?.isLow && (
+              {creditsEnabled && credits?.isLow && (
                 <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-lg">
                   <p className="text-sm text-orange-800 dark:text-orange-200">
                     <strong>Atenção:</strong> Seus créditos estão acabando. 
@@ -81,7 +89,7 @@ export default function BillingPage() {
                 </div>
               )}
 
-              {credits?.isEmpty && (
+              {creditsEnabled && credits?.isEmpty && (
                 <div className="bg-red-50 dark:bg-red-950/20 p-3 rounded-lg">
                   <p className="text-sm text-red-800 dark:text-red-200">
                     <strong>Sem créditos:</strong> Você não pode realizar novas operações. 

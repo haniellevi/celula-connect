@@ -14,7 +14,7 @@ async function handleGetPublicPlans() {
       ] 
     })
     return NextResponse.json({
-      plans: plans.map(p => ({
+      plans: plans.map((p: Awaited<typeof plans>[number]) => ({
         id: p.id,
         clerkId: p.clerkId,
         name: p.name,

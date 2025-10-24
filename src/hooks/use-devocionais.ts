@@ -3,10 +3,17 @@
 import { useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api-client'
-import type { Prisma } from '@/lib/prisma-client'
 import { useToast } from '@/hooks/use-toast'
 
-export type Devocional = Prisma.Devocional
+export type Devocional = {
+  id: string
+  titulo: string
+  versiculoReferencia: string
+  versiculoTexto: string
+  conteudo: string
+  dataDevocional: string | Date
+  ativo: boolean
+} & Record<string, unknown>
 
 export interface UseDevocionaisOptions {
   ativos?: boolean

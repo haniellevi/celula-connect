@@ -3,6 +3,7 @@
 Formato baseado em Conventional Commits.
 
 ## [Unreleased]
+- feat(credits): adiciona flag `CREDITS_ENABLED` para hibernar módulo sem debitar usuários e ajusta APIs/UI/testes
 - feat(prisma): adiciona modelos de trilha, avisos, convites, configurações e seeds relacionadas
 - feat(queries): disponibiliza helpers para trilhas, avisos, devocionais, convites e landing page
 - chore(api): ajusta rotas dinâmicas ao contrato tipado do Next 15 e adiciona utilitário `adaptRouteWithParams`

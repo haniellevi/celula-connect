@@ -13,6 +13,7 @@ import {
   TipoAviso,
   Prisma,
 } from '@/lib/prisma-client'
+import { db } from '@/lib/db'
 import {
   requireDomainUser,
   hasRole,
@@ -115,7 +116,7 @@ async function handlePatch(request: Request, params: { id: string }) {
   }
 
   const payload = parseResult.data
-  const data: Prisma.AvisoUncheckedUpdateInput = {}
+  const data: Parameters<typeof db.aviso.update>[0]['data'] = {}
 
   if (payload.titulo !== undefined) data.titulo = payload.titulo
   if (payload.conteudo !== undefined) data.conteudo = payload.conteudo

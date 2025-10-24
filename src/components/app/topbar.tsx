@@ -122,7 +122,7 @@ export function Topbar({ onToggleSidebar }: TopbarProps) {
           <ThemeToggle />
           
           <SignedIn>
-            <UserButton />
+            <UserButton afterSignOutUrl="/" />
           </SignedIn>
           
           <SignedOut>

@@ -30,7 +30,7 @@ export default function SubscribePage() {
   return (
     <div className="min-h-dvh w-full">
       <SimpleTopbar />
-      <main className="container mx-auto max-w-3xl px-4 py-10">
+      <main className="container mx-auto max-w-6xl px-4 py-10">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

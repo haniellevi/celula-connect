@@ -229,29 +229,7 @@ export const api = {
 };
 ```
 
-```tsx
-// hooks/use-credits.ts - Query hook with API client
-import { api } from '@/lib/api-client';
-
-export function useCredits() {
-  return useQuery({
-    queryKey: ['credits'],
-    queryFn: () => api.get('/api/credits/me'),
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-  });
-}
-
-// Usage in component
-function CreditDisplay() {
-  const { data, isLoading, error } = useCredits();
-
-  if (isLoading) return <Skeleton />;
-  if (error) return <Error message={error.message} />;
-
-  return <div>{data.creditsRemaining} credits</div>;
-}
-```
+> ℹ️ A implementação real (`src/hooks/use-credits.ts`) já lida com o flag `CREDITS_ENABLED`. Quando a variável está desligada, o hook retorna `credits.unlimited = true`, evita polling em `/api/credits/*` e `canPerformOperation()` passa sempre `true`.
 
 ### Mutation Hooks
 

@@ -8,6 +8,7 @@ import { SUBSCRIPTION_PLANS } from "@/lib/clerk/subscription-utils";
 import { getPlanCredits } from "@/lib/credits/settings";
 import { getCreditsForPrice } from "@/lib/clerk/credit-packs";
 import { withApiLogging } from '@/lib/logging/api';
+import { areCreditsEnabled, logCreditsDisabled } from '@/lib/credits/feature-flag';
 
 async function handleClerkWebhook(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET;
@@ -53,6 +54,11 @@ async function handleClerkWebhook(req: Request) {
   console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
   console.log('Webhook body:', body);
 
+  const creditsEnabled = areCreditsEnabled()
+  if (!creditsEnabled) {
+    logCreditsDisabled({ action: 'clerk.webhook', eventType })
+  }
+
   if (eventType === 'user.created') {
     const { id, email_addresses, first_name, last_name } = evt.data;
     
@@ -85,16 +91,20 @@ async function handleClerkWebhook(req: Request) {
         },
       });
 
-      // Initialize credit balance in database (free tier credits)
-      await db.creditBalance.create({
-        data: {
-          userId: user.id,
-          clerkUserId: id,
-          creditsRemaining: 0,
-        },
-      });
+      if (creditsEnabled) {
+        await db.creditBalance.create({
+          data: {
+            userId: user.id,
+            clerkUserId: id,
+            creditsRemaining: 0,
+          },
+        });
+        console.log('User and credits created successfully');
+      } else {
+        logCreditsDisabled({ action: 'clerk.user_created.skipCreditBalance', clerkUserId: id })
+      }
 
-      console.log('User and credits created successfully');
+      console.log('User created successfully');
     } catch (error) {
       console.error('Error creating user:', error);
       return new Response('Error creating user', { status: 500 });
@@ -132,24 +142,28 @@ async function handleClerkWebhook(req: Request) {
           credits: publicMetadata.creditsRemaining
         });
         
-        // Update credit balance in our database
-        const dbUser = await db.user.findUnique({
-          where: { clerkId: id }
-        });
-        
-        if (dbUser) {
-          // If credits are explicitly set, use those; otherwise calculate from plan
-          let newCredits = publicMetadata.creditsRemaining;
-          if (newCredits === undefined && publicMetadata.subscriptionPlan) {
-            const planId = publicMetadata.subscriptionPlan as string
-            const plan = SUBSCRIPTION_PLANS[planId];
-            newCredits = plan ? await getPlanCredits(planId) : 0;
-          }
+        if (creditsEnabled) {
+          const dbUser = await db.user.findUnique({
+            where: { clerkId: id }
+          });
           
-          if (newCredits !== undefined) {
-            await refreshUserCredits(id, newCredits as number, { skipClerkUpdate: true });
-            console.log(`Updated ${id} credits to ${newCredits}`);
+          if (dbUser) {
+            let newCredits = publicMetadata.creditsRemaining;
+            if (newCredits === undefined && publicMetadata.subscriptionPlan) {
+              const planId = publicMetadata.subscriptionPlan as string
+              const plan = SUBSCRIPTION_PLANS[planId];
+              if (plan) {
+                newCredits = await getPlanCredits(planId);
+              }
+            }
+            
+            if (newCredits !== undefined) {
+              await refreshUserCredits(id, newCredits as number, { skipClerkUpdate: true });
+              console.log(`Updated ${id} credits to ${newCredits}`);
+            }
           }
+        } else {
+          logCreditsDisabled({ action: 'clerk.user_updated.skipCreditRefresh', clerkUserId: id })
         }
       }
 
@@ -194,7 +208,7 @@ async function handleClerkWebhook(req: Request) {
               eventType: 'subscription.created',
               planKey: planKey ?? undefined,
               occurredAt: new Date((subscription.created_at as string | number) || Date.now()),
-              metadata: subscription as unknown as Prisma.JsonObject,
+              metadata: subscription as unknown as Record<string, unknown>,
               userId: (await db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }))?.id || null,
             }
           })
@@ -204,9 +218,13 @@ async function handleClerkWebhook(req: Request) {
         // Map Clerk plan IDs (cplan_*) and use Clerk plan for credits when present
         const planIdentifier = subscription.plan_id as string
         if (planIdentifier) {
-          const credits = await getPlanCredits(planIdentifier)
-          await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
-          console.log(`Subscription created: User ${userId} set to ${planIdentifier} with ${credits} credits`)
+          if (creditsEnabled) {
+            const credits = await getPlanCredits(planIdentifier)
+            await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
+            console.log(`Subscription created: User ${userId} set to ${planIdentifier} with ${credits} credits`)
+          } else {
+            logCreditsDisabled({ action: 'clerk.subscription_created.skipCreditRefresh', clerkUserId: userId, planIdentifier })
+          }
         } else {
           console.log(`Subscription created: missing plan_id for user ${userId}; skipping credit refresh`)
         }
@@ -233,7 +251,7 @@ async function handleClerkWebhook(req: Request) {
               eventType: 'subscription.updated',
               planKey: planKey ?? undefined,
               occurredAt: new Date((subscription.updated_at as string | number) || Date.now()),
-              metadata: subscription as unknown as Prisma.JsonObject,
+              metadata: subscription as unknown as Record<string, unknown>,
               userId: (await db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }))?.id || null,
             }
           })
@@ -244,16 +262,24 @@ async function handleClerkWebhook(req: Request) {
           // Handle plan changes or renewals
           const planIdentifier = subscription.plan_id as string
           if (planIdentifier) {
-            const credits = await getPlanCredits(planIdentifier)
-            await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
-            console.log(`Subscription updated: User ${userId} refreshed with ${credits} credits for plan ${planIdentifier}`)
+            if (creditsEnabled) {
+              const credits = await getPlanCredits(planIdentifier)
+              await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
+              console.log(`Subscription updated: User ${userId} refreshed with ${credits} credits for plan ${planIdentifier}`)
+            } else {
+              logCreditsDisabled({ action: 'clerk.subscription_updated.skipCreditRefresh', clerkUserId: userId, planIdentifier })
+            }
           } else {
             console.log(`Subscription updated: missing plan_id for user ${userId}; skipping credit refresh`)
           }
         } else if (subscription.status as string === 'canceled' || subscription.status as string === 'past_due') {
           // Handle cancellation or payment failure — set to 0 if no free tier configured
-          await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
-          console.log(`Subscription ${subscription.status as string}: User ${userId} set to 0 credits (no active plan)`);
+          if (creditsEnabled) {
+            await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
+            console.log(`Subscription ${subscription.status as string}: User ${userId} set to 0 credits (no active plan)`);
+          } else {
+            logCreditsDisabled({ action: 'clerk.subscription_updated.skipZeroing', clerkUserId: userId, status: subscription.status })
+          }
         }
       } catch (error) {
         console.error('Error handling subscription update:', error);
@@ -279,16 +305,19 @@ async function handleClerkWebhook(req: Request) {
               eventType: 'subscription.deleted',
               planKey: planKey ?? undefined,
               occurredAt: new Date((subscription.deleted_at as string | number) || Date.now()),
-              metadata: subscription as unknown as Prisma.JsonObject,
+              metadata: subscription as unknown as Record<string, unknown>,
               userId: (await db.user.findUnique({ where: { clerkId: userId }, select: { id: true } }))?.id || null,
             }
           })
         } catch (err) {
           console.error('Failed to persist subscription.deleted event', err)
         }
-        // No active plan → set to 0 unless admin configured otherwise externally
-        await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
-        console.log(`Subscription deleted: User ${userId} set to 0 credits (no active plan)`);
+        if (creditsEnabled) {
+          await refreshUserCredits(userId, 0, { skipClerkUpdate: true });
+          console.log(`Subscription deleted: User ${userId} set to 0 credits (no active plan)`);
+        } else {
+          logCreditsDisabled({ action: 'clerk.subscription_deleted.skipZeroing', clerkUserId: userId })
+        }
       } catch (error) {
         console.error('Error handling subscription deletion:', error);
       }
@@ -313,7 +342,7 @@ async function handleClerkWebhook(req: Request) {
               eventType,
               planKey: planIdentifier ?? undefined,
               occurredAt: new Date((item.updated_at as string | number) || (item.created_at as string | number) || Date.now()),
-              metadata: item as unknown as Prisma.JsonObject,
+              metadata: item as unknown as Record<string, unknown>,
               userId: (await db.user.findUnique({ where: { clerkId: userId as string }, select: { id: true } }))?.id || null,
             }
           })
@@ -321,9 +350,13 @@ async function handleClerkWebhook(req: Request) {
           console.error('Failed to persist subscriptionItem event', err)
         }
         if (planIdentifier) {
-          const credits = await getPlanCredits(planIdentifier)
-          await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
-          console.log(`Subscription item ${eventType}: User ${userId} set to ${planIdentifier} with ${credits} credits`)
+          if (creditsEnabled) {
+            const credits = await getPlanCredits(planIdentifier)
+            await refreshUserCredits(userId, credits, { skipClerkUpdate: true })
+            console.log(`Subscription item ${eventType}: User ${userId} set to ${planIdentifier} with ${credits} credits`)
+          } else {
+            logCreditsDisabled({ action: 'clerk.subscriptionItem.skipCreditRefresh', clerkUserId: userId, planIdentifier, eventType })
+          }
         } else {
           console.log(`Subscription item ${eventType}: missing plan id for user ${userId}; skipping credit refresh`)
         }
@@ -370,11 +403,15 @@ async function handleClerkWebhook(req: Request) {
     }, 0)
 
     if (userId && creditsToAdd > 0) {
-      try {
-        await addUserCredits(userId as string, creditsToAdd)
-        console.log(`Added ${creditsToAdd} credits to user ${userId} from invoice`)
-      } catch (error) {
-        console.error('Error adding credits from invoice:', error)
+      if (creditsEnabled) {
+        try {
+          await addUserCredits(userId as string, creditsToAdd)
+          console.log(`Added ${creditsToAdd} credits to user ${userId} from invoice`)
+        } catch (error) {
+          console.error('Error adding credits from invoice:', error)
+        }
+      } else {
+        logCreditsDisabled({ action: 'clerk.invoice_payment_succeeded.skipCreditPack', clerkUserId: userId, creditsToAdd })
       }
     } else if (userId) {
       // No matching credit-pack prices detected; likely a subscription renewal.

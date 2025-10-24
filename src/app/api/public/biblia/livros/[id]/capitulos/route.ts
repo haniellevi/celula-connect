@@ -45,12 +45,12 @@ async function handleGet(request: Request, params: { id: string }) {
   })
 
   return NextResponse.json({
-    data: capitulos.map((capitulo) => ({
+    data: capitulos.map((capitulo: { id: string; numero: number; livroId: string; versiculosBiblia?: { id: string; numero: number; texto: string }[] }) => ({
       id: capitulo.id,
       numero: capitulo.numero,
       livroId: capitulo.livroId,
       versiculos: includeVersiculos
-        ? capitulo.versiculosBiblia?.map((versiculo) => ({
+        ? capitulo.versiculosBiblia?.map((versiculo: { id: string; numero: number; texto: string }) => ({
             id: versiculo.id,
             numero: versiculo.numero,
             texto: versiculo.texto,

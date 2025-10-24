@@ -9,7 +9,6 @@ import {
   listCelulas,
   type CelulaOrderField,
 } from '@/lib/queries/celulas'
-import type { Prisma } from '@/lib/prisma-client'
 
 const celulaOrderableFields = ['nome', 'createdAt', 'proximaReuniao', 'metaMembros'] as const
 
@@ -190,7 +189,7 @@ async function handlePost(request: Request) {
 
   const payload = parseResult.data
 
-  const data: Prisma.CelulaUncheckedCreateInput = {
+  const data: Parameters<typeof createCelula>[0] = {
     nome: payload.nome,
     igrejaId: payload.igrejaId,
     liderId: payload.liderId,

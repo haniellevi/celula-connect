@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import {
-  PerfilUsuario,
-  StatusSolicitacao,
-  Prisma,
-} from '@/lib/prisma-client'
+import { PerfilUsuario, StatusSolicitacao } from '@/lib/prisma-client'
 import { withApiLogging } from '@/lib/logging/api'
 import {
   requireDomainUser,
@@ -73,11 +69,11 @@ async function handlePost(request: Request, params: { trilhaId: string }) {
     }
   }
 
-  const data: Prisma.SolicitacaoAvancoTrilhaUncheckedCreateInput = {
+  const data: Parameters<typeof createSolicitacaoTrilha>[0] = {
     usuarioId,
     trilhaId,
     areaSupervisaoId: payload.areaSupervisaoId,
-    liderSolicitanteId,
+    liderSolicitanteId: liderSolicitanteId!,
     motivo: payload.motivo,
     observacoesLider: payload.observacoesLider ?? null,
     status: StatusSolicitacao.PENDENTE,
